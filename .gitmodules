@@ -4,3 +4,6 @@
 [submodule "lib/FreeRTOS/freertos-plus-tcp"]
 	path = lib/FreeRTOS/freertos-plus-tcp
 	url = git@github.com:FreeRTOS/FreeRTOS-Plus-TCP.git
+[submodule "lib/FreeRTOS/freertos-plus-mqtt/coreMQTT"]
+	path = lib/FreeRTOS/freertos-plus-mqtt/coreMQTT
+	url = git@github.com:FreeRTOS/coreMQTT.git

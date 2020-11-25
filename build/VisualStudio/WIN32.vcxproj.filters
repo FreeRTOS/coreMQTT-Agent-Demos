@@ -64,6 +64,27 @@
     <Filter Include="Lib\ThirdParty">
       <UniqueIdentifier>{e9175352-aed6-4693-b338-871170ced3eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT">
+      <UniqueIdentifier>{66bf4baa-05c1-4a72-8b8f-bbec377d4dbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT">
+      <UniqueIdentifier>{ce7e35db-3f23-43b7-9c0b-751054fc339d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include">
+      <UniqueIdentifier>{fb6ca934-b0e4-4fea-9ae2-c06d2836c0f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\interface">
+      <UniqueIdentifier>{677c8d90-d358-45c8-ac35-f0a2504169d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Network-Transport">
+      <UniqueIdentifier>{c70d6c8f-7bde-45c0-8665-5cf338f263a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP">
+      <UniqueIdentifier>{54436ae9-c1ec-4e14-91b0-567756f57b02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-Plaintext">
+      <UniqueIdentifier>{0fc4bf16-fbae-4870-8cbe-ec8fe2670538}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c">
@@ -128,6 +149,21 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\NetworkInterface\WinPCap\NetworkInterface.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\WinPCap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt_serializer.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt_state.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.c">
+      <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.c">
+      <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-Plaintext</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +277,27 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging_stack.h">
       <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_config_defaults.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_serializer.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_state.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\interface\transport_interface.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.h">
+      <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.h">
+      <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-Plaintext</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
