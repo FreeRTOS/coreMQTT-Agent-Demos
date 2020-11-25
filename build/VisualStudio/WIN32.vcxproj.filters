@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="FreeRTOS+\FreeRTOS IoT Libraries\platform\transport">
+      <UniqueIdentifier>{6a35782c-bc09-42d5-a850-98bcb668a4dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Configuration Files">
+      <UniqueIdentifier>{b2dd7538-e560-496b-ad75-832260d2a11e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{8f6927cb-3ffc-4289-9bb4-cf339bd22b91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{53e4c1a1-268d-4f1f-82ad-f4252fafd936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS">
+      <UniqueIdentifier>{cb008ac4-30f7-44e2-a49f-07da35771c0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel">
+      <UniqueIdentifier>{b975cd99-05cf-4257-97a7-e9f888b39657}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable">
+      <UniqueIdentifier>{33ea3ef7-cee1-4ef7-9a78-beaaac1441e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang">
+      <UniqueIdentifier>{5283c930-fc40-4087-9aca-abf32f22c3ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang\MSVC-MingW">
+      <UniqueIdentifier>{46bb81fc-68bc-48a5-a8c6-d578ea8db98e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP">
+      <UniqueIdentifier>{c5f84545-b323-4582-b039-4ca4f5dcc089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable">
+      <UniqueIdentifier>{7be06631-75ab-49a5-bf3b-a64815e5d338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\BufferManagement">
+      <UniqueIdentifier>{40f02e18-aa9a-44ed-b24c-3023d92ac835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface">
+      <UniqueIdentifier>{46d56e70-b87d-462a-a4b1-acf06d11aead}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\WinPCap">
+      <UniqueIdentifier>{6f9bdb2a-1367-4aa3-8dcf-54b160fac35c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler">
+      <UniqueIdentifier>{e728b45e-b3b2-4dea-b7df-581b9b08fb5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\MSVC">
+      <UniqueIdentifier>{909910b9-a728-43b2-9962-66de509cf8a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\include">
+      <UniqueIdentifier>{8c0beedd-c52c-4e7c-ad48-50cd1d41d29f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\include">
+      <UniqueIdentifier>{0e9de8e4-d5bb-4845-9e27-a1bf0fe676d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Utilities">
+      <UniqueIdentifier>{d4391c0b-8983-4b8d-a77c-ab0be9e87631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Utilities\Logging">
+      <UniqueIdentifier>{f8fbc949-d7fb-46cb-b54c-66f10a00ac60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\ThirdParty">
+      <UniqueIdentifier>{e9175352-aed6-4693-b338-871170ced3eb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\list.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\queue.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\stream_buffer.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\tasks.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\timers.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MemMang\heap_4.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\port.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang\MSVC-MingW</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\main.c">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Logging_WinSim.c">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_ARP.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_DHCP.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_DNS.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_IP.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_Sockets.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_Stream_Buffer.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_TCP_IP.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_TCP_WIN.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_UDP_IP.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\BufferManagement\BufferAllocation_2.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\BufferManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\NetworkInterface\WinPCap\NetworkInterface.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\WinPCap</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\croutine.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\deprecated_definitions.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\FreeRTOS.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\list.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\message_buffer.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\mpu_prototypes.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\mpu_wrappers.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\portable.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\projdefs.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\queue.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\semphr.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\StackMacros.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\stack_macros.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\stream_buffer.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\task.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\timers.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang\MSVC-MingW</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\FreeRTOSConfig.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_end.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\MSVC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_start.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\MSVC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_ARP.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_DHCP.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_DNS.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_errno_TCP.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_IP.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_Sockets.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_TCP_IP.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_TCP_WIN.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_UDP_IP.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOSIPConfigDefaults.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\NetworkBufferManagement.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\NetworkInterface.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging.h">
+      <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging_levels.h">
+      <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging_stack.h">
+      <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\lib\ThirdParty\WinPCap\wpcap.lib">
+      <Filter>Lib\ThirdParty</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
