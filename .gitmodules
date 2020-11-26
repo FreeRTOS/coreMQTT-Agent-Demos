@@ -7,3 +7,6 @@
 [submodule "lib/FreeRTOS/freertos-plus-mqtt/coreMQTT"]
 	path = lib/FreeRTOS/freertos-plus-mqtt/coreMQTT
 	url = git@github.com:FreeRTOS/coreMQTT.git
+[submodule "lib/ThirdParty/mbedtls"]
+	path = lib/ThirdParty/mbedtls
+	url = https://github.com/ARMmbed/mbedtls.git
