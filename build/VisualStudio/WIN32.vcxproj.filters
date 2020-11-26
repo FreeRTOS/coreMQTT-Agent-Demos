@@ -52,9 +52,6 @@
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\include">
       <UniqueIdentifier>{8c0beedd-c52c-4e7c-ad48-50cd1d41d29f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\include">
-      <UniqueIdentifier>{0e9de8e4-d5bb-4845-9e27-a1bf0fe676d5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Lib\FreeRTOS\Utilities">
       <UniqueIdentifier>{d4391c0b-8983-4b8d-a77c-ab0be9e87631}</UniqueIdentifier>
     </Filter>
@@ -93,6 +90,12 @@
     </Filter>
     <Filter Include="Lib\ThirdParty\mbedTLS">
       <UniqueIdentifier>{1e54f6f3-4b5b-4c17-94c8-e1062cc8cb64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\include">
+      <UniqueIdentifier>{294c455c-37f8-4049-879f-a5db60b9d280}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Utilities\Exponential-Backoff">
+      <UniqueIdentifier>{2ac7fe18-2c51-438a-b05b-739a9641c787}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +182,15 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\mbedtls_freertos_port.c">
       <Filter>Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\MultitaskMQTTExample.c">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.c">
+      <Filter>Lib\FreeRTOS\Utilities\Exponential-Backoff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -319,6 +331,24 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\threading_alt.h">
       <Filter>Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\core_mqtt_config.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\demo_config.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\FreeRTOSIPConfig.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.h">
+      <Filter>Lib\FreeRTOS\Utilities\Exponential-Backoff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

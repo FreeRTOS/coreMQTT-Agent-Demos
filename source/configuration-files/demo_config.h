@@ -133,6 +133,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigROOT_CA_PEM    "...insert here..."
  */
+#define democonfigROOT_CA_PEM "_RB_Dummy"
+
 
 /**
  * @brief Client certificate.
@@ -150,6 +152,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
  */
+#define democonfigCLIENT_CERTIFICATE_PEM "_RB_ Dummy"
+
 
 /**
  * @brief Client's private key.
@@ -175,6 +179,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
  */
+#define democonfigCLIENT_PRIVATE_KEY_PEM "_RB_Dummy"
 
 /**
  * @brief An option to disable Server Name Indication.

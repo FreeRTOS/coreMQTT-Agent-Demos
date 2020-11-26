@@ -157,7 +157,7 @@ void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
             /* Demos that use the network are created after the network is
              * up. */
             LogInfo( ( "---------STARTING DEMO---------\r\n" ) );
-//            vStartSimpleMQTTDemo();
+            vStartSimpleMQTTDemo();
             xTasksAlreadyCreated = pdTRUE;
         }
 
