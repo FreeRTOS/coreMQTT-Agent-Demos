@@ -37,12 +37,15 @@
 
 /* TLS transport header. */
 #include "using_mbedtls.h"
+#include "mbedtls_config.h"
+#include "mbedtls/debug.h"
 
 /* FreeRTOS Socket wrapper include. */
 #include "sockets_wrapper.h"
 
 /* mbedTLS util includes. */
 #include "mbedtls_error.h"
+
 
 /*-----------------------------------------------------------*/
 
@@ -197,6 +200,11 @@ static TlsTransportStatus_t tlsHandshake( NetworkContext_t * pNetworkContext,
 static TlsTransportStatus_t initMbedtls( mbedtls_entropy_context * pEntropyContext,
                                          mbedtls_ctr_drbg_context * pCtrDrgbContext );
 
+#ifdef MBEDTLS_DEBUG_C
+    /* Used to print mbedTLS log output. */
+    static void vTLSDebugPrint( void *ctx, int level, const char *file, int line, const char *str );
+#endif
+
 /*-----------------------------------------------------------*/
 
 static void sslContextInit( SSLContext_t * pSslContext )
@@ -208,6 +216,12 @@ static void sslContextInit( SSLContext_t * pSslContext )
     mbedtls_pk_init( &( pSslContext->privKey ) );
     mbedtls_x509_crt_init( &( pSslContext->clientCert ) );
     mbedtls_ssl_init( &( pSslContext->context ) );
+
+#ifdef MBEDTLS_DEBUG_C
+    mbedtls_ssl_conf_dbg( &( pSslContext->config ), vTLSDebugPrint, NULL );
+    mbedtls_debug_set_threshold( MBEDTLS_DEBUG_THRESHOLD );
+#endif
+
 }
 /*-----------------------------------------------------------*/
 
@@ -716,10 +730,12 @@ void TLS_FreeRTOS_Disconnect( NetworkContext_t * pNetworkContext )
         else
         {
             /* WANT_READ and WANT_WRITE can be ignored. Logging for debugging purposes. */
+#ifdef _RB_
             LogInfo( ( "(Network connection %p) TLS close-notify sent; ",
                        "received %s as the TLS status can be ignored for close-notify."
                        ( tlsStatus == MBEDTLS_ERR_SSL_WANT_READ ) ? "WANT_READ" : "WANT_WRITE",
                        pNetworkContext ) );
+#endif
         }
 
         /* Call socket shutdown function to close connection. */
@@ -809,3 +825,27 @@ int32_t TLS_FreeRTOS_send( NetworkContext_t * pNetworkContext,
     return tlsStatus;
 }
 /*-----------------------------------------------------------*/
+
+#ifdef MBEDTLS_DEBUG_C
+    static void vTLSDebugPrint( void *ctx, int level, const char *file, int line, const char *str )
+    {
+        const char *p, *basename;
+        (void) ctx;
+        ( void ) line;
+        ( void ) level;
+        ( void ) str;
+
+        /* Extract basename from file */
+        for( p = basename = file; *p != '\0'; p++ )
+        {
+            if( *p == '/' || *p == '\\')
+            {
+                basename = p + 1;
+            }
+        }
+
+        LogDebug( ( "%s:%04d: |%d| %s", basename, line, level, str ) );
+    }
+#endif
+
+

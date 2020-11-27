@@ -52,6 +52,9 @@
 /* FreeRTOS include. */
 #include "FreeRTOS.h"
 
+#define MBEDTLS_DEBUG_C
+#define MBEDTLS_DEBUG_THRESHOLD 5 /* 0 to 5. */
+
 /* Generate errors if deprecated functions are used. */
 #define MBEDTLS_DEPRECATED_REMOVED
 

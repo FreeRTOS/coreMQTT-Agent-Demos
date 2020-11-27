@@ -94,6 +94,7 @@
 /* Exponential backoff retry include. */
 #include "exponential_backoff.h"
 
+
 /* Transport interface include. */
 #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
     #include "using_mbedtls.h"
@@ -130,9 +131,10 @@
 #define mqttexampleKEEP_ALIVE_INTERVAL_SECONDS       ( 60U )
 
 /**
- * @brief Transport timeout in milliseconds for transport send and receive.
+ * @brief Transport timeout in milliseconds for transport send and receive.  Used
+ * while connecting.
  */
-#define mqttexampleTRANSPORT_SEND_RECV_TIMEOUT_MS    ( 200 )
+#define mqttexampleTRANSPORT_SEND_RECV_TIMEOUT_MS    ( 1000 )
 
 /**
  * @brief Milliseconds per second.
@@ -169,7 +171,7 @@
 /**
  * @brief Delay for the synchronous publisher task between publishes.
  */
-#define mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      0U
+#define mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      1000U
 
 /*-----------------------------------------------------------*/
 
@@ -867,3 +869,4 @@ static uint32_t prvGetTimeMs( void )
 }
 
 /*-----------------------------------------------------------*/
+

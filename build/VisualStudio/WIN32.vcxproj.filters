@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="FreeRTOS+\FreeRTOS IoT Libraries\platform\transport">
-      <UniqueIdentifier>{6a35782c-bc09-42d5-a850-98bcb668a4dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Configuration Files">
       <UniqueIdentifier>{b2dd7538-e560-496b-ad75-832260d2a11e}</UniqueIdentifier>
     </Filter>
@@ -96,6 +93,9 @@
     </Filter>
     <Filter Include="Lib\FreeRTOS\Utilities\Exponential-Backoff">
       <UniqueIdentifier>{2ac7fe18-2c51-438a-b05b-739a9641c787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS">
+      <UniqueIdentifier>{39644eee-1d73-4734-8fdd-21e1a05fc9c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +191,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.c">
       <Filter>Lib\FreeRTOS\Utilities\Exponential-Backoff</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c">
+      <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -349,6 +352,9 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.h">
       <Filter>Lib\FreeRTOS\Utilities\Exponential-Backoff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.h">
+      <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

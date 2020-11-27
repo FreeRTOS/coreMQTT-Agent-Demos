@@ -35,6 +35,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\BufferManagement\BufferAllocation_2.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\NetworkInterface\WinPCap\NetworkInterface.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\mbedtls_error.c" />
@@ -84,6 +85,7 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_end.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_start.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging.h" />
@@ -149,7 +151,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\lib\FreeRTOS\Utilities\exponential_backoff;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\freertos-plus-mqtt;..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\interface;..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\Utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\configuration-files;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\FreeRTOS\Utilities\mbedtls_freertos;..\..\lib\FreeRTOS\Utilities\exponential_backoff;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\freertos-plus-mqtt;..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\interface;..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\Utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\configuration-files;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MBEDTLS_CONFIG_FILE="mbedtls_config.h";WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0500;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
