@@ -50,7 +50,7 @@
 
 /* Demo Specific configs. */
 #include "demo_config.h"
-
+#include "iot_appversion32.h"
 
 /*
  * Prototypes for the demos that can be started from this project.  Note the
@@ -102,6 +102,18 @@ const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, configMAC_
 
 /* Use by the pseudo random number generator. */
 static UBaseType_t ulNextRand;
+
+#define APP_VERSION_MAJOR    0
+#define APP_VERSION_MINOR    9
+#define APP_VERSION_BUILD    2
+
+const AppVersion32_t xAppFirmwareVersion = 
+{
+	.u.x.ucMajor = APP_VERSION_MAJOR,
+	.u.x.ucMinor = APP_VERSION_MINOR,
+	.u.x.usBuild = APP_VERSION_BUILD,
+};
+
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -338,3 +350,4 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
 /*-----------------------------------------------------------*/
+
