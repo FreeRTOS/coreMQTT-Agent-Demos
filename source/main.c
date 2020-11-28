@@ -107,7 +107,7 @@ static UBaseType_t ulNextRand;
 #define APP_VERSION_MINOR    9
 #define APP_VERSION_BUILD    2
 
-const AppVersion32_t xAppFirmwareVersion = 
+const AppVersion32_t appFirmwareVersion =
 {
 	.u.x.ucMajor = APP_VERSION_MAJOR,
 	.u.x.ucMinor = APP_VERSION_MINOR,
