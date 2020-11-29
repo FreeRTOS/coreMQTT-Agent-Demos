@@ -94,7 +94,6 @@
 /* Exponential backoff retry include. */
 #include "exponential_backoff.h"
 
-
 /* Transport interface include. */
 #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
     #include "using_mbedtls.h"
@@ -131,7 +130,7 @@
 #define mqttexampleKEEP_ALIVE_INTERVAL_SECONDS       ( 60U )
 
 /**
- * @brief Transport timeout in milliseconds for transport send and receive.  Used
+ * @brief Transport timeout in milliseconds for transport send and receive. Used
  * while connecting.
  */
 #define mqttexampleTRANSPORT_SEND_RECV_TIMEOUT_MS    ( 1000 )
@@ -157,6 +156,25 @@
 #define mqttexamplePUBLISH_QUEUE_SIZE                5
 
 /**
+ * @brief Ticks to wait for task notifications.
+ */
+#define mqttexampleDEMO_TICKS_TO_WAIT                pdMS_TO_TICKS( 1000 )
+
+/**
+ * @brief Timeout for MQTT_ProcessLoop function in milliseconds.
+ *
+ * This demo uses no delay for the process loop, so each invocation will run
+ * one iteration, and will only receive a single packet. However, if there is
+ * no data available on the socket, the entire socket timeout value will elapse.
+ */
+#define mqttexamplePROCESS_LOOP_TIMEOUT_MS           ( 0U )
+
+/**
+ * @brief Size of statically allocated buffers for holding topic names and payloads.
+ */
+#define mqttexample_DEMO_BUFFER_SIZE                 100
+
+/**
  * @brief The maximum number of loop iterations to wait before declaring failure.
  *
  * Each `while` loop waiting for a task notification will wait for a total
@@ -171,7 +189,17 @@
 /**
  * @brief Delay for the synchronous publisher task between publishes.
  */
-#define mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      1000U
+#define mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      0U
+
+/**
+ * @brief Number of publishes done by each task in this demo.
+ */
+#define mqttexamplePUBLISH_COUNT                     16
+
+/**
+ * @brief The number of subscribe-publish tasks to create.
+ */
+#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       4
 
 /*-----------------------------------------------------------*/
 
@@ -188,6 +216,22 @@ struct CommandContext
     uint32_t ulNotificationValue;
     QueueHandle_t pxResponseQueue;
 };
+
+/**
+ * @brief An element for a task's response queue for received publishes.
+ *
+ * @note Since elements are copied to queues, this struct needs to hold
+ * buffers for the payload and topic of incoming publishes, as the original
+ * pointers are out of scope. When processing a publish from this struct,
+ * the `pcTopicNameBuf` and `pcPayloadBuf` pointers need to be set to point to the
+ * static buffers in this struct.
+ */
+typedef struct publishElement
+{
+    MQTTPublishInfo_t xPublishInfo;
+    uint8_t pcPayloadBuf[ mqttexample_DEMO_BUFFER_SIZE ];
+    uint8_t pcTopicNameBuf[ mqttexample_DEMO_BUFFER_SIZE ];
+} PublishElement_t;
 
 /*-----------------------------------------------------------*/
 
@@ -243,6 +287,15 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext );
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 
 /**
+ * @brief Copy an incoming publish to a response queue.
+ *
+ * @param[in] pxPublishInfo Info of incoming publish.
+ * @param[in] pxResponseQueue Queue to which the publish is copied.
+ */
+static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo,
+                                   void * pxResponseQueue );
+
+/**
  * @brief Common callback for commands in this demo.
  *
  * This callback marks the command as complete and notifies the calling task.
@@ -251,20 +304,6 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
  */
 static void prvCommandCallback( CommandContext_t * pxCommandContext,
                                 MQTTStatus_t xReturnStatus );
-
-/**
- * @brief Wait for a task notification in a loop.
- *
- * @param[in] pulNotification pointer holding notification value.
- * @param[in] ulExpectedBits Bits to wait for.
- * @param[in] xClearBits If bits should be cleared.
- *
- * @return `true` if notification received without exceeding the timeout,
- * else `false`.
- */
-static bool prvNotificationWaitLoop( uint32_t * pulNotification,
-                                     uint32_t ulExpectedBits,
-                                     bool xClearBits );
 
 /**
  * @brief Task used to run the MQTT agent.
@@ -593,15 +632,34 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;
 
-    configASSERT( xCommandQueue );
-
     /* A socket used by the MQTT task may need attention.  Send an event
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
-    if( uxQueueMessagesWaiting( xCommandQueue ) == ( UBaseType_t ) 0 )
+    if( MQTTAgent_GetNumWaiting() == 0U )
     {
         xResult = MQTTAgent_ProcessLoop( &globalMqttContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS, NULL, NULL );
         configASSERT( xResult == pdTRUE );
     }
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo,
+                                   void * pxResponseQueue )
+{
+    PublishElement_t xCopiedPublish;
+
+    memset( &xCopiedPublish, 0x00, sizeof( xCopiedPublish ) );
+    memcpy( &( xCopiedPublish.xPublishInfo ), pxPublishInfo, sizeof( MQTTPublishInfo_t ) );
+
+    /* Since adding an MQTTPublishInfo_t to a queue will not copy its string buffers,
+     * we need to add buffers to a struct and copy the entire structure. We don't
+     * need to set xCopiedPublish.xPublishInfo's pointers yet since the actual address
+     * will change after the struct is copied into the queue. */
+    memcpy( xCopiedPublish.pcTopicNameBuf, pxPublishInfo->pTopicName, pxPublishInfo->topicNameLength );
+    memcpy( xCopiedPublish.pcPayloadBuf, pxPublishInfo->pPayload, pxPublishInfo->payloadLength );
+
+    /* Add to response queue. */
+    ( void ) xQueueSendToBack( ( QueueHandle_t ) pxResponseQueue, ( void * ) &xCopiedPublish, mqttexampleDEMO_TICKS_TO_WAIT );
 }
 
 /*-----------------------------------------------------------*/
@@ -620,48 +678,25 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 
 /*-----------------------------------------------------------*/
 
-static bool prvNotificationWaitLoop( uint32_t * pulNotification,
-                                     uint32_t ulExpectedBits,
-                                     bool xClearBits )
-{
-    uint32_t ulWaitCounter = 0U;
-    bool ret = true;
-
-    configASSERT( pulNotification != NULL );
-
-    while( ( *pulNotification & ulExpectedBits ) != ulExpectedBits )
-    {
-        xTaskNotifyWait( 0,
-                         ( xClearBits ) ? ulExpectedBits : 0,
-                         pulNotification,
-                         mqttexampleDEMO_TICKS_TO_WAIT );
-
-        if( ++ulWaitCounter > mqttexampleMAX_WAIT_ITERATIONS )
-        {
-            LogError( ( "Loop exceeded maximum wait time.\n" ) );
-            ret = false;
-            break;
-        }
-    }
-
-    return ret;
-}
-
-/*-----------------------------------------------------------*/
-
 static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
                                        char * pcTopicFilter,
                                        uint32_t ulTaskNumber )
 {
     BaseType_t xCommandAdded;
-    static MQTTSubscribeInfo_t xSubscribeInfo[ 10 ]; /*_RB_ Need to get rid of statics.  Need them now as the context needs to persist. */
+    static MQTTSubscribeInfo_t xSubscribeInfo[ mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS ]; /*_RB_ Need to get rid of statics.  Need them now as the context needs to persist. */
 
     xSubscribeInfo[ ulTaskNumber ].pTopicFilter = pcTopicFilter;
     xSubscribeInfo[ ulTaskNumber ].topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
     xSubscribeInfo[ ulTaskNumber ].qos = xQoS;
 
     LogInfo( ( "Subscribing to topic filter: %s", pcTopicFilter ) );
-    xCommandAdded = MQTTAgent_Subscribe( &globalMqttContext, &( xSubscribeInfo[ ulTaskNumber ] ), 1, NULL, NULL, pxResponseQueues[ ulTaskNumber ] );
+    xCommandAdded = MQTTAgent_Subscribe( &globalMqttContext,
+                                         &( xSubscribeInfo[ ulTaskNumber ] ),
+                                         1,
+                                         prvCopyPublishToQueue,
+                                         pxResponseQueues[ ulTaskNumber ],
+                                         NULL,
+                                         NULL );
     configASSERT( xCommandAdded == true );
 
     return xCommandAdded;
@@ -671,9 +706,9 @@ static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
 static void prvSimpleSubscribePublishTask( void * pvParameters )
 {
     MQTTPublishInfo_t xPublishInfo = { 0 };
-    char payloadBuf[ mqttexampleDEMO_BUFFER_SIZE ];
-    char topicBuf[ mqttexampleDEMO_BUFFER_SIZE ];
-    char taskName[ mqttexampleDEMO_BUFFER_SIZE ];
+    char payloadBuf[ mqttexample_DEMO_BUFFER_SIZE ];
+    char topicBuf[ mqttexample_DEMO_BUFFER_SIZE ];
+    char taskName[ mqttexample_DEMO_BUFFER_SIZE ];
     CommandContext_t xCommandContext;
     uint32_t ulNotification = 0U, ulValueToNotify = 0UL;
     BaseType_t xCommandAdded = pdTRUE;
@@ -690,10 +725,10 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 
     /* Create a unique name for this task from the task number that is passed into
      * the task using the task's parameter. */
-    snprintf( taskName, mqttexampleDEMO_BUFFER_SIZE, "Publisher%d", ( int ) ulTaskNumber );
+    snprintf( taskName, mqttexample_DEMO_BUFFER_SIZE, "Publisher%d", ( int ) ulTaskNumber );
 
     /* Create a topic name for this task to publish to. */
-    snprintf( topicBuf, mqttexampleDEMO_BUFFER_SIZE, "/filter/%s", taskName );
+    snprintf( topicBuf, mqttexample_DEMO_BUFFER_SIZE, "/filter/%s", taskName );
 
     /* Subscribe to the same topic to which this task will publish.  That will
      * result in each published message being published from the server back to us. */
@@ -710,10 +745,10 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     memset( ( void * ) &xCommandContext, 0x00, sizeof( xCommandContext ) );
     xCommandContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
 
-    /* Synchronous publishes. In case mqttexamplePUBLISH_COUNT is odd, round up. */
-    for( ; ; )
+    /* Synchronous publishes. */
+    for( ulValueToNotify = 0UL; ulValueToNotify < mqttexamplePUBLISH_COUNT; ulValueToNotify++ )
     {
-        snprintf( payloadBuf, mqttexampleDEMO_BUFFER_SIZE, "%s publishing message %d", taskName, ( int ) ulValueToNotify );
+        snprintf( payloadBuf, mqttexample_DEMO_BUFFER_SIZE, "%s publishing message %d", taskName, ( int ) ulValueToNotify );
         xPublishInfo.payloadLength = ( uint16_t ) strlen( payloadBuf );
 
         xCommandContext.ulNotificationValue = ulValueToNotify;
@@ -730,14 +765,9 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 
         configASSERT( ulNotification == ulValueToNotify );
 
-        if( ulNotification != ulValueToNotify )
-        {
-            LogError( ( "\n\nTask %u expected notification %u, received %u\n\n", ulTaskNumber, ulValueToNotify, ulNotification ) );
-        }
-
         while( xQueueReceive( pxResponseQueues[ ulTaskNumber ], &xReceivedPublish, mqttexampleDEMO_TICKS_TO_WAIT ) != pdFALSE )
         {
-            static char cTerminatedTopicName[ mqttexampleDEMO_BUFFER_SIZE ]; /*_RB_ Max topic name length? */
+            static char cTerminatedTopicName[ mqttexample_DEMO_BUFFER_SIZE ]; /*_RB_ Max topic name length? */
             memset( ( void * ) cTerminatedTopicName, 0x00, sizeof( cTerminatedTopicName ) );
             pxReceivedPublish = &( xReceivedPublish.xPublishInfo );
             pxReceivedPublish->pTopicName = ( const char * ) xReceivedPublish.pcTopicNameBuf;
@@ -753,10 +783,16 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 
         LogInfo( ( "Publish operation complete. Sleeping for %d ms.\n", mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+    }
 
-        ulValueToNotify++;
+    /* Delete the task if it is not the main one. */
+    if( xTaskGetCurrentTaskHandle() != xMainTask )
+    {
+        vTaskDelete( NULL );
     }
 }
+
+/*-----------------------------------------------------------*/
 
 static void prvMQTTAgentTask( void * pvParameters )
 {
@@ -796,6 +832,7 @@ static void prvMQTTDemoTask( void * pvParameters )
     /* This context is used in the call to MQTTAgent_Register(). */
     CommandContext_t initializeContext;
     int32_t i = 0;
+    char pcTaskNameBuf[ 10 ];
 
     ( void ) pvParameters;
 
@@ -805,7 +842,7 @@ static void prvMQTTDemoTask( void * pvParameters )
     xResult = MQTTAgent_CreateCommandQueue( mqttexampleCOMMAND_QUEUE_SIZE );
 
     /* Create response queues for each task. */
-    for( i = 0; i < 4; i++ )
+    for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
     {
         pxResponseQueues[ i ] = xQueueCreate( mqttexamplePUBLISH_QUEUE_SIZE, sizeof( PublishElement_t ) );
     }
@@ -823,7 +860,7 @@ static void prvMQTTDemoTask( void * pvParameters )
 
     /* Register the MQTT context with the agent. */
     initializeContext.xTaskToNotify = NULL;
-    MQTTAgent_Register( &globalMqttContext, &xDefaultResponseQueue, &initializeContext, prvCommandCallback );
+    MQTTAgent_Register( &globalMqttContext, prvCopyPublishToQueue, xDefaultResponseQueue, &initializeContext, prvCommandCallback );
     /* Connect to the broker. */
     xNetworkStatus = prvSocketConnect( &xNetworkContext );
     configASSERT( xNetworkStatus == pdPASS );
@@ -839,13 +876,31 @@ static void prvMQTTDemoTask( void * pvParameters )
     configASSERT( globalMqttContext.connectStatus == MQTTConnected );
 
     /* Create a few instances of prvSimpleSubscribePublishTask(). */
-    xTaskCreate( prvSimpleSubscribePublishTask, "SubPub0", democonfigDEMO_STACKSIZE, ( void * ) 0, tskIDLE_PRIORITY + 1, NULL );
-    xTaskCreate( prvSimpleSubscribePublishTask, "SubPub1", democonfigDEMO_STACKSIZE, ( void * ) 1, tskIDLE_PRIORITY, NULL );
-    xTaskCreate( prvSimpleSubscribePublishTask, "SubPub2", democonfigDEMO_STACKSIZE, ( void * ) 2, tskIDLE_PRIORITY, NULL );
+    for( i = 0; i < ( mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS - 1 ); i++ )
+    {
+        memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
+        snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
+        xTaskCreate( prvSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
+    }
 
     /* Finally turn this task into an instance of prvSimpleSubscribePublishTask()
      * too. */
-    prvSimpleSubscribePublishTask( ( void * ) 3 );
+    prvSimpleSubscribePublishTask( ( void * ) i );
+
+    /* Wait for all queues to become empty.
+     * TODO: This may be a race condition, so using task notifications would be better. */
+    while( MQTTAgent_GetNumWaiting() != 0 )
+    {
+        vTaskDelay( mqttexampleDEMO_TICKS_TO_WAIT );
+    }
+
+    LogInfo( ( "Adding disconnect operation.\n" ) );
+    MQTTAgent_Disconnect( &globalMqttContext, NULL, NULL );
+    LogInfo( ( "Clearing stored MQTT connection information.\n" ) );
+    MQTTAgent_Free( &globalMqttContext, NULL, NULL );
+    LogInfo( ( "Terminating MQTT agent.\n" ) );
+    MQTTAgent_Terminate();
+    LogInfo( ( "Demo completed successfully.\r\n" ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -869,4 +924,3 @@ static uint32_t prvGetTimeMs( void )
 }
 
 /*-----------------------------------------------------------*/
-
