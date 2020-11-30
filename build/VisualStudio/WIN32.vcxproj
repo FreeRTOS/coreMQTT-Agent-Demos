@@ -61,6 +61,7 @@
     <ClCompile Include="..\..\source\Logging_WinSim.c" />
     <ClCompile Include="..\..\source\main.c" />
     <ClCompile Include="..\..\source\MultitaskMQTTExample.c" />
+    <ClCompile Include="..\..\source\ota_demo_core_mqtt.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h" />

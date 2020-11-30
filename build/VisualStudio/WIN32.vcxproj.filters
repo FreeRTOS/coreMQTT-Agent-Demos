@@ -282,6 +282,9 @@
     <ClCompile Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.c">
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ota_demo_core_mqtt.c">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">
