@@ -252,6 +252,8 @@ static uint8_t ucSharedBuffer[ otaexampleNETWORK_BUFFER_SIZE ];
  */
 static uint32_t ulGlobalEntryTimeMs;
 
+static const MQTTContextHandle_t xMQTTContextHandle = 0;
+
 /** @brief Static buffer used to hold MQTT messages being sent and received. */
 static MQTTFixedBuffer_t xBuffer =
 {
@@ -577,13 +579,14 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     LogInfo( ( "Subscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );
 
-    xCommandAdded = MQTTAgent_Subscribe( pxMQTTContext,
+    xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
                                          &( xSubscribeInfo[ iNext ] ),
                                          1,
                                          ( void * ) pCallback,
                                          NULL,
-                                         ( void * ) xTaskHandle,
-                                         prvCommandCallback );
+                                         prvCommandCallback,
+                                         ( void * ) xTaskHandle );
+
     configASSERT( xCommandAdded == true );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
@@ -677,7 +680,7 @@ static OtaErr_t mqttPublish( const char * const pacTopic,
     xTaskHandle = xTaskGetCurrentTaskHandle();
     xTaskNotifyStateClear( NULL );
 
-    xCommandAdded = MQTTAgent_Publish( pMqttContext, &publishInfo, ( void * ) xTaskHandle, prvCommandCallback );
+    xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &publishInfo, prvCommandCallback, ( void * ) xTaskHandle );
 
     configASSERT( xCommandAdded == pdTRUE );
 

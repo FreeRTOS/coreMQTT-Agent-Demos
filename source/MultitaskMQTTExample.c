@@ -340,7 +340,7 @@ static uint32_t prvGetTimeMs( void );
 
 //_RB_ To document.
 static BaseType_t prvCreateMQTTAgent( void );
-static void prvSubscribeCommandCallback( TaskHandle_t xTaskToNotify,
+static void prvSubscribeCommandCallback( CommandContext_t *pxCommandContext,
                                          MQTTStatus_t xReturnStatus );
 
 /*-----------------------------------------------------------*/
@@ -349,7 +349,7 @@ static void prvSubscribeCommandCallback( TaskHandle_t xTaskToNotify,
  * @brief Global MQTT context.
  */
 static MQTTContext_t *globalMqttContext;
-static MQTTContextHandle_t xMQTTContextHandle = 0;
+static const MQTTContextHandle_t xMQTTContextHandle = 0;
 
 /**
  * @brief Global Network context.
@@ -507,6 +507,7 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
     BaseType_t xConnected = pdFAIL;
     RetryUtilsStatus_t xRetryUtilsStatus = RetryUtilsSuccess;
     RetryUtilsParams_t xReconnectParams;
+    const TickType_t transportTimeout = 0;
 
     #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
         TlsTransportStatus_t xNetworkStatus = TLS_TRANSPORT_CONNECT_FAILURE;
@@ -599,6 +600,13 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
                                       FREERTOS_SO_WAKEUP_CALLBACK,
                                       ( void * ) prvMQTTClientSocketWakeupCallback,
                                       sizeof( &( prvMQTTClientSocketWakeupCallback ) ) );
+
+        ( void ) FreeRTOS_setsockopt( pxNetworkContext->tcpSocket,
+                                      0,
+                                      FREERTOS_SO_RCVTIMEO,
+                                      &transportTimeout,
+                                      sizeof( TickType_t ) );
+
     }
 
     return xConnected;
@@ -686,11 +694,11 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( TaskHandle_t xTaskToNotify,
+static void prvSubscribeCommandCallback( CommandContext_t *pxCommandContext,
                                          MQTTStatus_t xReturnStatus )
 {
-    configASSERT( xTaskToNotify );
-    xTaskNotify( xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
+    configASSERT( pxCommandContext );
+    xTaskNotify( pxCommandContext->xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
 }
 
 /*-----------------------------------------------------------*/
@@ -711,13 +719,13 @@ static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     LogInfo( ( "Subscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );
 
-    xCommandAdded = MQTTAgent_Subscribe( globalMqttContext,
+    xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
                                          &( xSubscribeInfo ),
                                          1,
                                          prvCopyPublishToQueue,
                                          ( void * ) pxResponseQueues[ ulTaskNumber ],
-                                         ( void * ) xTaskHandle,
-                                         prvSubscribeCommandCallback );
+                                         prvSubscribeCommandCallback,
+                                        ( void * ) xTaskHandle );
     configASSERT( xCommandAdded == true );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
@@ -775,7 +783,8 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         xCommandContext.ulNotificationValue = ulValueToNotify;
 
         LogInfo( ( "Adding publish operation for message \"%s\" on topic \"%s\"", payloadBuf, xPublishInfo.pTopicName ) );
-        xCommandAdded = MQTTAgent_Publish( globalMqttContext, &xPublishInfo, &xCommandContext, prvCommandCallback );
+
+        xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &xPublishInfo, prvCommandCallback, &xCommandContext );
         configASSERT( xCommandAdded == pdTRUE );
         LogInfo( ( "Task %s waiting for publish %d to complete.", taskName, ulValueToNotify ) );
 
@@ -784,10 +793,9 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
             LogError( ( "Synchronous publish loop iteration %d"
                         " exceeded maximum wait time.\n", ulValueToNotify ) );
         }
-
         configASSERT( ulNotification == ulValueToNotify );
 
-        while( xQueueReceive( pxResponseQueues[ ulTaskNumber ], &xReceivedPublish, mqttexampleDEMO_TICKS_TO_WAIT ) != pdFALSE )
+        if( xQueueReceive( pxResponseQueues[ ulTaskNumber ], &xReceivedPublish, mqttexampleDEMO_TICKS_TO_WAIT ) != pdFALSE )
         {
             static char cTerminatedTopicName[ mqttexampleDEMO_BUFFER_SIZE ]; /*_RB_ Max topic name length? */
             memset( ( void * ) cTerminatedTopicName, 0x00, sizeof( cTerminatedTopicName ) );
@@ -912,9 +920,7 @@ static void prvMQTTDemoTask( void * pvParameters )
 
 
 //    vStartOTADemo( globalMqttContext );
-//    vTaskSuspend( NULL );
-
-
+//_RB_ Won't get here if OTA demo is running.
     /* Finally turn this task into an instance of prvSimpleSubscribePublishTask()
      * too. */
     prvSimpleSubscribePublishTask( ( void * ) i );
