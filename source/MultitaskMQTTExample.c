@@ -245,13 +245,9 @@ typedef struct publishElement
  * @brief Initializes an MQTT context, including transport interface and
  * network buffer.
  *
- * @param[in] pxMQTTContext MQTT Context to initialize.
- * @param[in] pxNetworkContext Network context.
- *
  * @return `MQTTSuccess` if the initialization succeeds, else `MQTTBadParameter`.
  */
-static MQTTStatus_t prvMQTTInit( MQTTContext_t * pxMQTTContext,
-                                 NetworkContext_t * pxNetworkContext );
+static MQTTStatus_t prvMQTTInit( void );
 
 /**
  * @brief Sends an MQTT Connect packet over the already connected TCP socket.
@@ -314,7 +310,7 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
  * @brief Task used to run the MQTT agent.
  *
  * This task calls MQTTAgent_CommandLoop() in a loop, until MQTTAgent_Terminate()
- * is called. If an error occcurs in the command loop, then it will reconnect the
+ * is called. If an error occurs in the command loop, then it will reconnect the
  * TCP and MQTT connections.
  *
  * @param[in] pvParameters Parameters as passed at the time of task creation. Not
@@ -352,7 +348,8 @@ static void prvSubscribeCommandCallback( TaskHandle_t xTaskToNotify,
 /**
  * @brief Global MQTT context.
  */
-static MQTTContext_t globalMqttContext;
+static MQTTContext_t *globalMqttContext;
+static MQTTContextHandle_t xMQTTContextHandle = 0;
 
 /**
  * @brief Global Network context.
@@ -368,11 +365,6 @@ static TaskHandle_t xMainTask;
  * @brief Handle for prvMQTTAgentTask.
  */
 static TaskHandle_t xAgentTask;
-
-/**
- * @brief The network buffer must remain valid for the lifetime of the MQTT context.
- */
-static uint8_t pcNetworkBuffer[ mqttexampleNETWORK_BUFFER_SIZE ];
 
 /**
  * @brief Response queue for publishes received on non-subscribed topics.
@@ -408,18 +400,14 @@ void vStartSimpleMQTTDemo( void )
 }
 /*-----------------------------------------------------------*/
 
-static MQTTStatus_t prvMQTTInit( MQTTContext_t * pxMQTTContext,
-                                 NetworkContext_t * pxNetworkContext )
+static MQTTStatus_t prvMQTTInit( void )
 {
     TransportInterface_t xTransport;
-    MQTTFixedBuffer_t xNetworkBuffer;
-
-    /* Fill the values for network buffer. */
-    xNetworkBuffer.pBuffer = pcNetworkBuffer;
-    xNetworkBuffer.size = mqttexampleNETWORK_BUFFER_SIZE;
+    MQTTStatus_t xReturn;
+    const MQTTContextHandle_t xGlobalMQTTContextHandle = 0;
 
     /* Fill in Transport Interface send and receive function pointers. */
-    xTransport.pNetworkContext = pxNetworkContext;
+    xTransport.pNetworkContext = &xNetworkContext;
     #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
         xTransport.send = TLS_FreeRTOS_send;
         xTransport.recv = TLS_FreeRTOS_recv;
@@ -429,7 +417,17 @@ static MQTTStatus_t prvMQTTInit( MQTTContext_t * pxMQTTContext,
     #endif
 
     /* Initialize MQTT library. */
-    return MQTT_Init( pxMQTTContext, &xTransport, prvGetTimeMs, MQTTAgent_EventCallback, &xNetworkBuffer );
+    xReturn = MQTTAgent_Init( xGlobalMQTTContextHandle,
+                              &xTransport,
+                              prvGetTimeMs,
+                              prvCopyPublishToQueue, /* Callback to execute if receiving publishes on unexpected topics. */
+                              xDefaultResponseQueue ); /* Context to pass into the callback. */
+
+
+    /*_RB_ Temporary until all APIs are using the handle. */
+    globalMqttContext = MQTTAgent_GetMQTTContext( xGlobalMQTTContextHandle );
+
+    return xReturn;
 }
 
 static MQTTStatus_t prvMQTTConnect( MQTTContext_t * pxMQTTContext,
@@ -496,7 +494,7 @@ static MQTTStatus_t prvMQTTConnect( MQTTContext_t * pxMQTTContext,
     /* Resume a session if desired. */
     if( ( xResult == MQTTSuccess ) && !xCleanSession )
     {
-        xResult = MQTTAgent_ResumeSession( &globalMqttContext, xSessionPresent );
+        xResult = MQTTAgent_ResumeSession( globalMqttContext, xSessionPresent );
     }
 
     return xResult;
@@ -646,7 +644,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
     if( MQTTAgent_GetNumWaiting() == 0U )
     {
-        xResult = MQTTAgent_ProcessLoop( &globalMqttContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS, NULL, NULL );
+        xResult = MQTTAgent_ProcessLoop( globalMqttContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS, NULL, NULL );
         configASSERT( xResult == pdTRUE );
     }
 }
@@ -713,7 +711,7 @@ static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     LogInfo( ( "Subscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );
 
-    xCommandAdded = MQTTAgent_Subscribe( &globalMqttContext,
+    xCommandAdded = MQTTAgent_Subscribe( globalMqttContext,
                                          &( xSubscribeInfo ),
                                          1,
                                          prvCopyPublishToQueue,
@@ -742,16 +740,9 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     CommandContext_t xCommandContext;
     uint32_t ulNotification = 0U, ulValueToNotify = 0UL;
     BaseType_t xCommandAdded = pdTRUE;
-    const TickType_t xMQTTInitWait = ( TickType_t ) 200;
     uint32_t ulTaskNumber = ( uint32_t ) pvParameters;
     PublishElement_t xReceivedPublish;
     MQTTPublishInfo_t * pxReceivedPublish;
-
-    /* Wait for the MQTT agent to be ready. */
-    while( globalMqttContext.connectStatus != MQTTConnected )
-    {
-        vTaskDelay( xMQTTInitWait );
-    }
 
     /* Create a unique name for this task from the task number that is passed into
      * the task using the task's parameter. */
@@ -784,7 +775,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         xCommandContext.ulNotificationValue = ulValueToNotify;
 
         LogInfo( ( "Adding publish operation for message \"%s\" on topic \"%s\"", payloadBuf, xPublishInfo.pTopicName ) );
-        xCommandAdded = MQTTAgent_Publish( &globalMqttContext, &xPublishInfo, &xCommandContext, prvCommandCallback );
+        xCommandAdded = MQTTAgent_Publish( globalMqttContext, &xPublishInfo, &xCommandContext, prvCommandCallback );
         configASSERT( xCommandAdded == pdTRUE );
         LogInfo( ( "Task %s waiting for publish %d to complete.", taskName, ulValueToNotify ) );
 
@@ -858,8 +849,6 @@ static void prvMQTTAgentTask( void * pvParameters )
 static BaseType_t prvCreateMQTTAgent( void )
 {
     BaseType_t xResult;
-    CommandContext_t initializeContext;
-    uint32_t ulNotifiedValue;
 
     /* In this demo, send publishes on non-subscribed topics to this queue.
      * Note that this value is not meant to be changed after `MQTTAgent_CommandLoop` has
@@ -871,23 +860,6 @@ static BaseType_t prvCreateMQTTAgent( void )
      * across demo iterations. */
     xResult = xTaskCreate( prvMQTTAgentTask, "MQTTAgent", democonfigDEMO_STACKSIZE, NULL, configMAX_PRIORITIES - 2, &xAgentTask );
     configASSERT( xResult == pdPASS );
-
-    if( xResult != pdFALSE )
-    {
-        /* Register the MQTT context with the agent. */
-        initializeContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
-        //_RB_ The parameter ordering is muddled up in MQTTAgent_Register - callback then context or context then callback?
-        xResult = MQTTAgent_Register( &globalMqttContext, /* MQTT context. */
-                            prvCopyPublishToQueue, /* Callback to execute if receiving publishes on unexpected topics. */
-                            xDefaultResponseQueue, /* Context to pass into the callback. */
-                            &initializeContext, /* Context to pass into callback executed when this command completes. */
-                            prvCommandCallback ); /* Callback to execute when this command completes. */
-
-        if( xResult != pdFALSE )
-        {
-            xResult = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
-        }
-    }
 
     return xResult;
 }
@@ -915,22 +887,20 @@ static void prvMQTTDemoTask( void * pvParameters )
         pxResponseQueues[ i ] = xQueueCreate( mqttexamplePUBLISH_QUEUE_SIZE, sizeof( PublishElement_t ) );
     }
 
-	/* Create the agent task and register the MQTT context. */
-	prvCreateMQTTAgent();
-
     /* Connect a TCP socket to the broker. */
     xNetworkStatus = prvSocketConnect( &xNetworkContext );
     configASSERT( xNetworkStatus == pdPASS );
 
     /* Initialise the MQTT context with the buffer and transport interface. */
-    xMQTTStatus = prvMQTTInit( &globalMqttContext, &xNetworkContext );
+    xMQTTStatus = prvMQTTInit();
     configASSERT( xMQTTStatus == MQTTSuccess );
 
+    /* Create the agent task itself. */
+    prvCreateMQTTAgent();
 
     /* Form an MQTT connection without a persistent session. */
-    xMQTTStatus = prvMQTTConnect( &globalMqttContext, true );
+    xMQTTStatus = prvMQTTConnect( globalMqttContext, true );
     configASSERT( xMQTTStatus == MQTTSuccess );
-    configASSERT( globalMqttContext.connectStatus == MQTTConnected );
 
     /* Create a few instances of prvSimpleSubscribePublishTask(). */
     for( i = 0; i < ( mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS - 1 ); i++ )
@@ -941,8 +911,8 @@ static void prvMQTTDemoTask( void * pvParameters )
     }
 
 
-    vStartOTADemo( &globalMqttContext );
-    vTaskSuspend( NULL );
+//    vStartOTADemo( globalMqttContext );
+//    vTaskSuspend( NULL );
 
 
     /* Finally turn this task into an instance of prvSimpleSubscribePublishTask()
@@ -957,9 +927,9 @@ static void prvMQTTDemoTask( void * pvParameters )
     }
 
     LogInfo( ( "Adding disconnect operation.\n" ) );
-    MQTTAgent_Disconnect( &globalMqttContext, NULL, NULL );
+    MQTTAgent_Disconnect( globalMqttContext, NULL, NULL );
     LogInfo( ( "Clearing stored MQTT connection information.\n" ) );
-    MQTTAgent_Free( &globalMqttContext, NULL, NULL );
+    MQTTAgent_Free( globalMqttContext, NULL, NULL );
     LogInfo( ( "Terminating MQTT agent.\n" ) );
     MQTTAgent_Terminate();
     LogInfo( ( "Demo completed successfully.\r\n" ) );
