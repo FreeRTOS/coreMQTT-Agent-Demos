@@ -49,8 +49,7 @@
 #ifndef MBEDTLS_CONFIG_H
 #define MBEDTLS_CONFIG_H
 
-/* FreeRTOS include. */
-#include "FreeRTOS.h"
+#include "stdint.h"
 
 #define MBEDTLS_DEBUG_C
 #define MBEDTLS_DEBUG_THRESHOLD 5 /* 0 to 5. */

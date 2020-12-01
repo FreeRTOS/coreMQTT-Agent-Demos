@@ -61,7 +61,7 @@
 #define dlLOGGING_FILE_SIZE             ( 40ul * 1024ul * 1024ul )
 
 /* Dimensions the arrays into which print messages are created. */
-#define dlMAX_PRINT_STRING_LENGTH       255
+#define dlMAX_PRINT_STRING_LENGTH       512
 
 /* The size of the stream buffer used to pass messages from FreeRTOS tasks to
  * the Win32 thread that is responsible for making any Win32 system calls that are
@@ -396,12 +396,14 @@ void vLoggingPrintf( const char * pcFormat,
                  * as there are potentially multiple writers.  The stream buffer is
                  * only thread safe when there is a single writer (likewise for
                  * reading from the buffer). */
-                xCurrentTask = GetCurrentThread();
-                iOriginalPriority = GetThreadPriority( xCurrentTask );
-                SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL );
+vTaskSuspendAll();
+//                xCurrentTask = GetCurrentThread();
+//                iOriginalPriority = GetThreadPriority( xCurrentTask );
+//                SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL );
                 uxStreamBufferAdd( xLogStreamBuffer, 0, ( const uint8_t * ) &( xLength ), sizeof( xLength ) );
                 uxStreamBufferAdd( xLogStreamBuffer, 0, ( const uint8_t * ) cOutputString, xLength );
-                SetThreadPriority( GetCurrentThread(), iOriginalPriority );
+//                SetThreadPriority( GetCurrentThread(), iOriginalPriority );
+xTaskResumeAll();
             }
 
             /* xDirectPrint is initialized to pdTRUE, and while it remains true the
@@ -437,6 +439,7 @@ static void prvLoggingFlushBuffer( void )
     {
         memset( cPrintString, 0x00, dlMAX_PRINT_STRING_LENGTH );
         uxStreamBufferGet( xLogStreamBuffer, 0, ( uint8_t * ) &xLength, sizeof( xLength ), pdFALSE );
+        configASSERT( xLength < dlMAX_PRINT_STRING_LENGTH );
         uxStreamBufferGet( xLogStreamBuffer, 0, ( uint8_t * ) cPrintString, xLength, pdFALSE );
 
         /* Write the message to standard out if requested to do so when
