@@ -106,14 +106,6 @@
  */
 
 /**
- * @brief The size to use for the network buffer.
- */
-#ifndef mqttexampleNETWORK_BUFFER_SIZE
-    #define mqttexampleNETWORK_BUFFER_SIZE    ( 1024U )
-#endif
-
-
-/**
  * @brief Timeout for receiving CONNACK packet in milliseconds.
  */
 #define mqttexampleCONNACK_RECV_TIMEOUT_MS           ( 1000U )
@@ -131,7 +123,8 @@
 
 /**
  * @brief Transport timeout in milliseconds for transport send and receive. Used
- * while connecting.
+ * while connecting, after which the receive timeout is set to 0 ready for use in
+ * the agent task.
  */
 #define mqttexampleTRANSPORT_SEND_RECV_TIMEOUT_MS    ( 1000 )
 
@@ -145,10 +138,6 @@
  */
 #define mqttexampleMILLISECONDS_PER_TICK             ( mqttexampleMILLISECONDS_PER_SECOND / configTICK_RATE_HZ )
 
-/**
- * @brief Max number of commands that can be enqueued.
- */
-#define mqttexampleCOMMAND_QUEUE_SIZE                25
 
 /**
  * @brief Max number of received publishes that can be enqueued for a task.
@@ -876,14 +865,20 @@ static BaseType_t prvCreateMQTTAgent( void )
     BaseType_t xResult;
 
     /* In this demo, send publishes on non-subscribed topics to this queue.
-     * Note that this value is not meant to be changed after `MQTTAgent_CommandLoop` has
-     * been called, since access to this variable is not protected by thread
+     * Note that this value is not meant to be changed after `MQTTAgent_CommandLoop`
+     * has been called, since access to this variable is not protected by thread
      * synchronization primitives. */
     xDefaultResponseQueue = xQueueCreate( 1, sizeof( PublishElement_t ) );
 
     /* Create the MQTT agent task. This task is only created once and persists
      * across demo iterations. */
-    xResult = xTaskCreate( prvMQTTAgentTask, "MQTTAgent", democonfigDEMO_STACKSIZE, NULL, configMAX_PRIORITIES - 2, &xAgentTask );
+    xResult = xTaskCreate(  prvMQTTAgentTask,
+                            "MQTTAgent",
+                            democonfigDEMO_STACKSIZE,
+                            NULL,
+                            configMAX_PRIORITIES - 2,
+                            &xAgentTask );
+
     configASSERT( xResult == pdPASS );
 
     return xResult;
@@ -894,7 +889,6 @@ static void prvMQTTDemoTask( void * pvParameters )
 {
     BaseType_t xNetworkStatus = pdFAIL;
     MQTTStatus_t xMQTTStatus;
-    BaseType_t xResult = pdFALSE;
     int32_t i = 0;
     char pcTaskNameBuf[ 10 ];
     extern int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext );
@@ -902,9 +896,6 @@ static void prvMQTTDemoTask( void * pvParameters )
     ( void ) pvParameters;
 
     ulGlobalEntryTimeMs = prvGetTimeMs();
-
-    /* Create command queue for processing MQTT commands. */
-    xResult = MQTTAgent_CreateCommandQueue( mqttexampleCOMMAND_QUEUE_SIZE );
 
     /* Create response queues for each task. */
     for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )

@@ -77,4 +77,6 @@ extern void vLoggingPrintf( const char * pcFormatString,
  */
 #define MQTT_STATE_ARRAY_MAX_COUNT    20U
 
+#define MQTT_AGENT_COMMAND_QUEUE_LENGTH 25
+
 #endif /* ifndef CORE_MQTT_CONFIG_H */
