@@ -695,7 +695,7 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 /*-----------------------------------------------------------*/
 
 static void prvSubscribeCommandCallback( CommandContext_t *pxCommandContext,
-                                         MQTTStatus_t xReturnStatus )
+                                         MQTTStatus_t xReturnStatus ) /*_RB_ Do we need the packet ID here so we know which subscribe is being acked? */
 {
     configASSERT( pxCommandContext );
     xTaskNotify( pxCommandContext->xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
@@ -712,7 +712,7 @@ static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     MQTTSubscribeInfo_t xSubscribeInfo;
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
-    xSubscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeInfo.pTopicFilter = pcTopicFilter;/* Topic string must persist for duration of subscription. */
     xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
     xSubscribeInfo.qos = xQoS;
 
@@ -725,15 +725,28 @@ static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
                                          prvCopyPublishToQueue,
                                          ( void * ) pxResponseQueues[ ulTaskNumber ],
                                          prvSubscribeCommandCallback,
-                                        ( void * ) xTaskHandle );
+                                         ( void * ) xTaskHandle );
     configASSERT( xCommandAdded == true );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
      * duration of the command. */
     if( xCommandAdded != pdFALSE )
     {
+        LogInfo( ("Sent subscribe command to agent for %s", pcTopicFilter ) );
+
         xCommandAdded = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
+
+        if( xCommandAdded == pdTRUE )
+        {
+            LogInfo( ( "Received ack for subscribe to %s", pcTopicFilter ) );
+        }
+        else
+        {
+            LogInfo( ( "Error - did not receive ack for subscribe to %s", pcTopicFilter ) );
+        }
     }
+
+
 
     return xCommandAdded;
 }
@@ -743,7 +756,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 {
     MQTTPublishInfo_t xPublishInfo = { 0 };
     char payloadBuf[ mqttexampleDEMO_BUFFER_SIZE ];
-    char topicBuf[ mqttexampleDEMO_BUFFER_SIZE ];
+    char topicBuf[ mqttexampleDEMO_BUFFER_SIZE ]; /*_RB_ Must persist until publish ack received. */
     char taskName[ mqttexampleDEMO_BUFFER_SIZE ];
     CommandContext_t xCommandContext;
     uint32_t ulNotification = 0U, ulValueToNotify = 0UL;
@@ -792,6 +805,10 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         {
             LogError( ( "Synchronous publish loop iteration %d"
                         " exceeded maximum wait time.\n", ulValueToNotify ) );
+        }
+        else
+        {
+            LogInfo( ( "Task %s recieved ack for publish %d.", taskName, ulValueToNotify ) );
         }
         configASSERT( ulNotification == ulValueToNotify );
 
