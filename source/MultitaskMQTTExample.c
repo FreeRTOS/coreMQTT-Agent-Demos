@@ -197,13 +197,6 @@
 
 /*-----------------------------------------------------------*/
 
-typedef struct SubscribeCommandContext
-{
-    TaskHandle_t xSourceTask;
-    MQTTStatus_t xCommandResult;
-    uint32_t ulMessageID;
-} SubscribeCommandContext_t;
-
 struct CommandContext /*_RB_ Don't need all these parameter. */
 {
     MQTTStatus_t xReturnStatus;
@@ -685,13 +678,13 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 static void prvSubscribeCommandCallback( void *pxCommandContext,
                                          MQTTStatus_t xReturnStatus ) /*_RB_ Do we need the packet ID here so we know which subscribe is being acked? */
 {
-SubscribeCommandContext_t *pxApplicationDefinedContext = ( SubscribeCommandContext_t * ) pxCommandContext;
+CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
     configASSERT( pxCommandContext );
 
     /* Store the result in the application defined context. */
-    pxApplicationDefinedContext->xCommandResult = xReturnStatus;
-    xTaskNotify( pxApplicationDefinedContext->xSourceTask, xReturnStatus, eSetValueWithOverwrite );
+    pxApplicationDefinedContext->xReturnStatus = xReturnStatus;
+    xTaskNotify( pxApplicationDefinedContext->xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
 }
 
 /*-----------------------------------------------------------*/
@@ -719,7 +712,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     uint32_t ulSubscribeMessageID;
     MQTTSubscribeInfo_t xSubscribeInfo;
     static int32_t ulNextSubscribeMessageID = 0;
-    volatile SubscribeCommandContext_t xApplicationDefinedContext = { 0 };
+    volatile CommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Create a unique number of the subscribe that is about to be sent.  The number
      * is used as the command context and is sent back to this task as a notification
@@ -742,8 +735,8 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     /* Complete an application defined context associated with this subscribe message.
      * This gets updated in the callback function so the variable must persist until
      * the callback executes. */
-    xApplicationDefinedContext.ulMessageID = ulNextSubscribeMessageID;
-    xApplicationDefinedContext.xSourceTask = xTaskGetCurrentTaskHandle();
+    xApplicationDefinedContext.ulNotificationValue = ulNextSubscribeMessageID;
+    xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
 
     /* Loop in case the queue used to communicate with the MQTT agent is full and
      * attempts to post to it time out.  The queue will not become full if the
@@ -769,7 +762,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     }
     else
     {
-        if( ( xApplicationDefinedContext.ulMessageID == ulSubscribeMessageID ) && ( xApplicationDefinedContext.xCommandResult == MQTTSuccess ) )
+        if( ( xApplicationDefinedContext.ulNotificationValue == ulSubscribeMessageID ) && ( xApplicationDefinedContext.xReturnStatus == MQTTSuccess ) )
         {
             LogInfo( ( "Received subscribe ack for topic %s", pcTopicFilter ) );
         }
