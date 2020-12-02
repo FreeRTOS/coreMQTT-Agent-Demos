@@ -188,7 +188,7 @@
 /**
  * @brief The number of subscribe-publish tasks to create.
  */
-#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       10
+#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       1
 
 /**
  * @brief Used to clear bits in a task's notification value.
@@ -197,18 +197,18 @@
 
 /*-----------------------------------------------------------*/
 
-struct CommandContext
+typedef struct SubscribeCommandContext
 {
-    MQTTPublishInfo_t * pxPublishInfo;
-    MQTTSubscribeInfo_t * pxSubscribeInfo;
-    size_t ulSubscriptionCount;
-    MQTTStatus_t xReturnStatus;
-    bool xIsComplete;
+    TaskHandle_t xSourceTask;
+    MQTTStatus_t xCommandResult;
+    uint32_t ulMessageID;
+} SubscribeCommandContext_t;
 
-    /* The below fields are specific to this FreeRTOS implementation. */
+struct CommandContext /*_RB_ Don't need all these parameter. */
+{
+    MQTTStatus_t xReturnStatus;
     TaskHandle_t xTaskToNotify;
     uint32_t ulNotificationValue;
-    QueueHandle_t pxResponseQueue;
 };
 
 /**
@@ -329,7 +329,7 @@ static uint32_t prvGetTimeMs( void );
 
 //_RB_ To document.
 static BaseType_t prvCreateMQTTAgent( void );
-static void prvSubscribeCommandCallback( CommandContext_t *pxCommandContext,
+static void prvSubscribeCommandCallback( void *pxCommandContext,
                                          MQTTStatus_t xReturnStatus );
 
 /*-----------------------------------------------------------*/
@@ -641,7 +641,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
     if( MQTTAgent_GetNumWaiting() == 0U )
     {
-        xResult = MQTTAgent_ProcessLoop( globalMqttContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS, NULL, NULL );
+        xResult = MQTTAgent_ProcessLoop( globalMqttContext, NULL, NULL );
 //        configASSERT( xResult == pdTRUE );
     }
 }
@@ -672,7 +672,6 @@ static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are
 static void prvCommandCallback( CommandContext_t * pxCommandContext,
                                 MQTTStatus_t xReturnStatus )
 {
-    pxCommandContext->xIsComplete = true;
     pxCommandContext->xReturnStatus = xReturnStatus;
 
     if( pxCommandContext->xTaskToNotify != NULL )
@@ -683,59 +682,102 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( CommandContext_t *pxCommandContext,
+static void prvSubscribeCommandCallback( void *pxCommandContext,
                                          MQTTStatus_t xReturnStatus ) /*_RB_ Do we need the packet ID here so we know which subscribe is being acked? */
 {
+SubscribeCommandContext_t *pxApplicationDefinedContext = ( SubscribeCommandContext_t * ) pxCommandContext;
+
     configASSERT( pxCommandContext );
-    xTaskNotify( pxCommandContext->xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
+
+    /* Store the result in the application defined context. */
+    pxApplicationDefinedContext->xCommandResult = xReturnStatus;
+    xTaskNotify( pxApplicationDefinedContext->xSourceTask, xReturnStatus, eSetValueWithOverwrite );
 }
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvSubscribeToTopic( MQTTQoS_t xQoS,
-                                       char * pcTopicFilter,
-                                       uint32_t ulTaskNumber )
+static BaseType_t prvWaitForCommandAcknowledgment( void )
+{
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xReturn;
+
+    /* Wait for this task to get notified. */
+    xReturn = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
+
+    /* ulNotifiedValue is ignored here as the callback that notified this task stored
+     * information in the application defined context so it can be checked after
+     * this function returns. */
+    return xReturn;
+}
+/*-----------------------------------------------------------*/
+
+static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
+                                 char * pcTopicFilter,
+                                 uint32_t ulTaskNumber )
 {
     BaseType_t xCommandAdded;
-    uint32_t ulNotifiedValue;
+    uint32_t ulSubscribeMessageID;
     MQTTSubscribeInfo_t xSubscribeInfo;
-    TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
+    static int32_t ulNextSubscribeMessageID = 0;
+    volatile SubscribeCommandContext_t xApplicationDefinedContext = { 0 };
 
-    xSubscribeInfo.pTopicFilter = pcTopicFilter;/* Topic string must persist for duration of subscription. */
+    /* Create a unique number of the subscribe that is about to be sent.  The number
+     * is used as the command context and is sent back to this task as a notification
+     * in the callback that executed upon receipt of the subscription acknowledgment.
+     * That way this task can match an acknowledgment to a subscription. */
+    xTaskNotifyStateClear( NULL );
+    taskENTER_CRITICAL();
+    {
+        ulNextSubscribeMessageID++;
+        ulSubscribeMessageID = ulNextSubscribeMessageID;
+    }
+    taskEXIT_CRITICAL();
+
+    /* Complete the subscribe information.  The topic string must persist for
+    duration of subscription! */
+    xSubscribeInfo.pTopicFilter = pcTopicFilter;
     xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
     xSubscribeInfo.qos = xQoS;
 
-    LogInfo( ( "Subscribing to topic filter: %s", pcTopicFilter ) );
-    xTaskNotifyStateClear( NULL );
+    /* Complete an application defined context associated with this subscribe message.
+     * This gets updated in the callback function so the variable must persist until
+     * the callback executes. */
+    xApplicationDefinedContext.ulMessageID = ulNextSubscribeMessageID;
+    xApplicationDefinedContext.xSourceTask = xTaskGetCurrentTaskHandle();
 
-    xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
-                                         &( xSubscribeInfo ),
-                                         1,
-                                         prvCopyPublishToQueue,
-                                         ( void * ) pxResponseQueues[ ulTaskNumber ],
-                                         prvSubscribeCommandCallback,
-                                         ( void * ) xTaskHandle );
-    configASSERT( xCommandAdded == true );
-
-    /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
-     * duration of the command. */
-    if( xCommandAdded != pdFALSE )
+    /* Loop in case the queue used to communicate with the MQTT agent is full and
+     * attempts to post to it time out.  The queue will not become full if the
+     * priority of the MQTT agent task is higher than the priority of the task
+     * calling this function. */
+    LogInfo( ( "Subscribing to topic filter: %s with id %d", pcTopicFilter, ( int ) ulSubscribeMessageID ) );
+    do
     {
-        LogInfo( ("Sent subscribe command to agent for %s", pcTopicFilter ) );
+        xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
+                                             &( xSubscribeInfo ),
+                                             prvCopyPublishToQueue,
+                                             ( void * ) pxResponseQueues[ ulTaskNumber ],
+                                             prvSubscribeCommandCallback,
+                                             ( void * ) &xApplicationDefinedContext );
+    } while( xCommandAdded == false );
 
-        xCommandAdded = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
+    /* Always wait for acks from subscribe messages. */
+    xCommandAdded = prvWaitForCommandAcknowledgment();
 
-        if( xCommandAdded == pdTRUE )
+    if( xCommandAdded == pdFALSE )
+    {
+        LogInfo( ( "Timed out waiting for ack to subscribe message topic %s", pcTopicFilter ) );
+    }
+    else
+    {
+        if( ( xApplicationDefinedContext.ulMessageID == ulSubscribeMessageID ) && ( xApplicationDefinedContext.xCommandResult == MQTTSuccess ) )
         {
-            LogInfo( ( "Received ack for subscribe to %s", pcTopicFilter ) );
+            LogInfo( ( "Received subscribe ack for topic %s", pcTopicFilter ) );
         }
         else
         {
-            LogInfo( ( "Error - did not receive ack for subscribe to %s", pcTopicFilter ) );
+            LogInfo( ( "Error failed to subscribe to topic %s", pcTopicFilter ) );
         }
     }
-
-
 
     return xCommandAdded;
 }
