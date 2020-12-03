@@ -353,8 +353,6 @@ static TaskHandle_t xAgentTask;
  */
 static QueueHandle_t xDefaultResponseQueue;
 
-static QueueHandle_t pxResponseQueues[ mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS ];
-
 /**
  * @brief Global entry time into the application to use as a reference timestamp
  * in the #prvGetTimeMs function. #prvGetTimeMs will always return the difference
@@ -669,7 +667,7 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 
     if( pxCommandContext->xTaskToNotify != NULL )
     {
-        xTaskNotify( pxCommandContext->xTaskToNotify, pxCommandContext->ulNotificationValue, eSetBits );
+        xTaskNotify( pxCommandContext->xTaskToNotify, pxCommandContext->ulNotificationValue, eSetValueWithOverwrite );
     }
 }
 
@@ -689,24 +687,42 @@ CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxCommand
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvWaitForCommandAcknowledgment( void )
+static BaseType_t prvWaitForCommandAcknowledgment( uint32_t *pulNotifiedValue )
 {
-    uint32_t ulNotifiedValue = 0;
     BaseType_t xReturn;
 
     /* Wait for this task to get notified. */
-    xReturn = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
-
-    /* ulNotifiedValue is ignored here as the callback that notified this task stored
-     * information in the application defined context so it can be checked after
-     * this function returns. */
+    xReturn = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, pulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
 
+static void prvPrintIncomingPublish( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are these parameters the other way round in the coreMQTT library? */
+                                     void * pvNotUsed )
+{
+    static char cTerminatedString[ mqttexampleDEMO_BUFFER_SIZE ];
+
+    /* Although pvNotUsed is not used it was set to NULL, so check it has its
+     * expected value. */
+    configASSERT( pvNotUsed == NULL );
+
+    if( pxPublishInfo->payloadLength < mqttexampleDEMO_BUFFER_SIZE )
+    {
+        memcpy( ( void * ) cTerminatedString, pxPublishInfo->pPayload, pxPublishInfo->payloadLength );
+        cTerminatedString[ pxPublishInfo->payloadLength ] = 0x00;
+    }
+    else
+    {
+        memcpy( ( void * ) cTerminatedString, pxPublishInfo->pPayload, mqttexampleDEMO_BUFFER_SIZE );
+        cTerminatedString[ mqttexampleDEMO_BUFFER_SIZE - 1 ] = 0x00;
+    }
+
+    LogInfo( ( "Received incoming publish message %s", cTerminatedString ) );
+}
+/*-----------------------------------------------------------*/
+
 static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
-                                 char * pcTopicFilter,
-                                 uint32_t ulTaskNumber )
+                                 char * pcTopicFilter )
 {
     BaseType_t xCommandAdded;
     uint32_t ulSubscribeMessageID;
@@ -742,19 +758,19 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
      * attempts to post to it time out.  The queue will not become full if the
      * priority of the MQTT agent task is higher than the priority of the task
      * calling this function. */
-    LogInfo( ( "Subscribing to topic filter: %s with id %d", pcTopicFilter, ( int ) ulSubscribeMessageID ) );
+    LogInfo( ( "Sending subscribe request to agent for topic filter: %s with id %d", pcTopicFilter, ( int ) ulSubscribeMessageID ) );
     do
     {
         xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
                                              &( xSubscribeInfo ),
-                                             prvCopyPublishToQueue,
-                                             ( void * ) pxResponseQueues[ ulTaskNumber ],
+                                             prvPrintIncomingPublish,
+                                             NULL,
                                              prvSubscribeCommandCallback,
                                              ( void * ) &xApplicationDefinedContext );
     } while( xCommandAdded == false );
 
     /* Always wait for acks from subscribe messages. */
-    xCommandAdded = prvWaitForCommandAcknowledgment();
+    xCommandAdded = prvWaitForCommandAcknowledgment( NULL );
 
     if( xCommandAdded == pdFALSE )
     {
@@ -776,6 +792,117 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 }
 /*-----------------------------------------------------------*/
 
+#define mqttexamplePROTOCOL_OVERHEAD 50
+#define mqttexampleMAX_PAYLOAD_LENGTH ( mqttexampleNETWORK_BUFFER_SIZE - mqttexamplePROTOCOL_OVERHEAD )
+
+static void prvWriteIncomingPayloadToBuffer( MQTTPublishInfo_t * pxPublishInfo,
+                                             void * pxSubscriptionContext )
+{
+    CommandContext_t *xApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
+
+    configASSERT( pxPublishInfo->payloadLength <= mqttexampleMAX_PAYLOAD_LENGTH );
+    memcpy( ( void * ) xApplicationDefinedContext->ulNotificationValue, ( void * ) pxPublishInfo->pPayload, pxPublishInfo->payloadLength );
+    xTaskNotify( xApplicationDefinedContext->xTaskToNotify, 0x00, eSetValueWithOverwrite );
+}
+
+static void prvLargeMessageSubscribePublishTask( void * pvParameters )
+{
+    static char maxPayloadMessage[ mqttexampleMAX_PAYLOAD_LENGTH ];
+    static char receivedEchoesPayload[ mqttexampleMAX_PAYLOAD_LENGTH ];
+    MQTTPublishInfo_t xPublishInfo = { 0 };
+    BaseType_t x;
+    char c = '0';
+    const char* topicBuf = "/max/payload/message";
+    volatile CommandContext_t xApplicationDefinedContext = { 0 };
+    BaseType_t xCommandAdded;
+    MQTTSubscribeInfo_t xSubscribeInfo;
+
+    ( void ) pvParameters;
+
+    /* Create a large buffer of data. */
+    for( x = 0; x < mqttexampleNETWORK_BUFFER_SIZE; x++ )
+    {
+        maxPayloadMessage[ x ] = c;
+        c++;
+
+        /* Keep the characters human readable. */
+        if( c == '~' )
+        {
+            c = '0';
+        }
+    }
+
+//////////
+
+    xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
+    xApplicationDefinedContext.ulNotificationValue = ( uint32_t ) receivedEchoesPayload;
+
+    /* Complete the subscribe information.  The topic string must persist for
+    duration of subscription! */
+    xSubscribeInfo.pTopicFilter = topicBuf;
+    xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( topicBuf );
+    xSubscribeInfo.qos = MQTTQoS1;
+
+    /* Loop in case the queue used to communicate with the MQTT agent is full and
+     * attempts to post to it time out.  The queue will not become full if the
+     * priority of the MQTT agent task is higher than the priority of the task
+     * calling this function. */
+    xTaskNotifyStateClear( NULL );
+    LogInfo( ( "Sending subscribe request to agent for topic filter: %s", topicBuf ) );
+    do
+    {
+        xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
+                                             &( xSubscribeInfo ),
+                                             prvWriteIncomingPayloadToBuffer,
+                                             ( void * ) &xApplicationDefinedContext,
+                                             prvSubscribeCommandCallback,
+                                             ( void * ) &xApplicationDefinedContext );
+    } while( xCommandAdded == false );
+
+    /* Always wait for acks from subscribe messages. */
+    xCommandAdded = prvWaitForCommandAcknowledgment( NULL );
+    configASSERT( xCommandAdded == pdTRUE );
+    LogInfo( ( "Received subscribe ack for topic %s", topicBuf ) );
+
+    memset( ( void * ) &xPublishInfo, 0x00, sizeof( xPublishInfo ) );
+    xPublishInfo.qos = MQTTQoS1;
+    xPublishInfo.pTopicName = topicBuf;
+    xPublishInfo.topicNameLength = ( uint16_t ) strlen( topicBuf );
+    xPublishInfo.pPayload = maxPayloadMessage;
+    xPublishInfo.payloadLength = mqttexampleMAX_PAYLOAD_LENGTH;
+
+    for( ;; )
+    {
+        /* Clear out the buffer used to receive incoming publishes. */
+        memset( receivedEchoesPayload, 0x00, sizeof receivedEchoesPayload );
+
+        xTaskNotifyStateClear( NULL );
+
+        /* Publish to the topic to which this task is also subscribed to receive an
+        echo back. */
+        LogInfo( ( "Sending large publish request to agent with message on topic \"%s\"", topicBuf ) );
+        xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &xPublishInfo, prvCommandCallback, &xApplicationDefinedContext );
+        configASSERT( xCommandAdded == pdTRUE );
+
+        LogInfo( ( "Waiting for large publish to topic %s to complete.", topicBuf ) );
+        prvWaitForCommandAcknowledgment( NULL );
+
+        x = memcmp( maxPayloadMessage, receivedEchoesPayload, mqttexampleMAX_PAYLOAD_LENGTH );
+        configASSERT( x == 0 );
+        if( x == 0 )
+        {
+            LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+        }
+        else
+        {
+            LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+        }
+    }
+}
+
+/*-----------------------------------------------------------*/
+
+
 static void prvSimpleSubscribePublishTask( void * pvParameters )
 {
     MQTTPublishInfo_t xPublishInfo = { 0 };
@@ -786,8 +913,10 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     uint32_t ulNotification = 0U, ulValueToNotify = 0UL;
     BaseType_t xCommandAdded = pdTRUE;
     uint32_t ulTaskNumber = ( uint32_t ) pvParameters;
-    PublishElement_t xReceivedPublish;
-    MQTTPublishInfo_t * pxReceivedPublish;
+    MQTTQoS_t xQoS;
+
+    /* Have different tasks use different QoS.  3 as there are 3 QoS options, 0 to 2. */
+    xQoS = ( MQTTQoS_t ) ( ulTaskNumber % 3UL );
 
     /* Create a unique name for this task from the task number that is passed into
      * the task using the task's parameter. */
@@ -798,12 +927,11 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 
     /* Subscribe to the same topic to which this task will publish.  That will
      * result in each published message being published from the server back to us. */
-    prvSubscribeToTopic( MQTTQoS1, topicBuf, ulTaskNumber );
+    prvSubscribeToTopic( xQoS, topicBuf );
 
-    /* We use QoS 1 so that the operation won't be counted as complete until we
-     * receive the publish acknowledgment. */
+    /* Use the task number as the QoS so different tasks are testing different QoS. */
     memset( ( void * ) &xPublishInfo, 0x00, sizeof( xPublishInfo ) );
-    xPublishInfo.qos = MQTTQoS1;
+    xPublishInfo.qos = xQoS;
     xPublishInfo.pTopicName = topicBuf;
     xPublishInfo.topicNameLength = ( uint16_t ) strlen( topicBuf );
     xPublishInfo.pPayload = payloadBuf;
@@ -819,41 +947,34 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 
         xCommandContext.ulNotificationValue = ulValueToNotify;
 
-        LogInfo( ( "Adding publish operation for message \"%s\" on topic \"%s\"", payloadBuf, xPublishInfo.pTopicName ) );
-
+        LogInfo( ( "Sending publish request to agent with message \"%s\" on topic \"%s\"", payloadBuf, topicBuf ) );
         xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &xPublishInfo, prvCommandCallback, &xCommandContext );
         configASSERT( xCommandAdded == pdTRUE );
-        LogInfo( ( "Task %s waiting for publish %d to complete.", taskName, ulValueToNotify ) );
 
-        if( xTaskNotifyWait( 0, UINT_MAX, &ulNotification, 4 * mqttexampleDEMO_TICKS_TO_WAIT ) == pdFAIL )
+        /* For QoS 1 and 2, wait for the publish acknowledgment.  For QoS0, wait for
+         * the publish to be sent. */
+        ulNotification = ~ulValueToNotify; /* To ensure ulNotification doesn't accidentally hold the expected value. */
+        LogInfo( ( "Task %s waiting for publish %d to complete.", taskName, ulValueToNotify ) );
+        prvWaitForCommandAcknowledgment( &ulNotification );
+
+        if( ulNotification == ulValueToNotify )
         {
-            LogError( ( "Synchronous publish loop iteration %d"
-                        " exceeded maximum wait time.\n", ulValueToNotify ) );
+            LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
         else
         {
-            LogInfo( ( "Task %s recieved ack for publish %d.", taskName, ulValueToNotify ) );
-        }
-        configASSERT( ulNotification == ulValueToNotify );
-
-        if( xQueueReceive( pxResponseQueues[ ulTaskNumber ], &xReceivedPublish, mqttexampleDEMO_TICKS_TO_WAIT ) != pdFALSE )
-        {
-            static char cTerminatedTopicName[ mqttexampleDEMO_BUFFER_SIZE ]; /*_RB_ Max topic name length? */
-            memset( ( void * ) cTerminatedTopicName, 0x00, sizeof( cTerminatedTopicName ) );
-            pxReceivedPublish = &( xReceivedPublish.xPublishInfo );
-            pxReceivedPublish->pTopicName = ( const char * ) xReceivedPublish.pcTopicNameBuf;
-            pxReceivedPublish->pPayload = xReceivedPublish.pcPayloadBuf;
-
-            if( pxReceivedPublish->topicNameLength < sizeof( cTerminatedTopicName ) )
-            {
-                memcpy( ( void * ) cTerminatedTopicName, pxReceivedPublish->pTopicName, pxReceivedPublish->topicNameLength );
-            }
-
-            LogInfo( ( "Received \"%s\" from topic \"%s\"", pxReceivedPublish->pPayload, cTerminatedTopicName ) );
+            LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            configASSERT( ulNotification == ulValueToNotify );
         }
 
-        LogInfo( ( "Publish operation complete. Sleeping for %d ms.\n", mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+if( xQoS != MQTTQoS0 )//_RB_ so the server doesn't get overwhemled and cause tasks at other QoS levels to timeout.
+{
+    vTaskDelay( 2 );
+}
+else
+{
         vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+}
     }
 
     /* Delete the task if it is not the main one. */
@@ -911,7 +1032,7 @@ static BaseType_t prvCreateMQTTAgent( void )
                             "MQTTAgent",
                             democonfigDEMO_STACKSIZE,
                             NULL,
-                            configMAX_PRIORITIES - 2,
+                            configMAX_PRIORITIES - 3,
                             &xAgentTask );
 
     configASSERT( xResult == pdPASS );
@@ -932,12 +1053,6 @@ static void prvMQTTDemoTask( void * pvParameters )
 
     ulGlobalEntryTimeMs = prvGetTimeMs();
 
-    /* Create response queues for each task. */
-    for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
-    {
-        pxResponseQueues[ i ] = xQueueCreate( mqttexamplePUBLISH_QUEUE_SIZE, sizeof( PublishElement_t ) );
-    }
-
     /* Connect a TCP socket to the broker. */
     xNetworkStatus = prvSocketConnect( &xNetworkContext );
     configASSERT( xNetworkStatus == pdPASS );
@@ -953,6 +1068,8 @@ static void prvMQTTDemoTask( void * pvParameters )
     xMQTTStatus = prvMQTTConnect( globalMqttContext, true );
     configASSERT( xMQTTStatus == MQTTSuccess );
 
+    xTaskCreate( prvLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
+vTaskSuspend( NULL );//_RB_ Temorary so only prvLargeMessageSubscribePublishTask() executes.
     /* Create a few instances of prvSimpleSubscribePublishTask(). */
     for( i = 0; i < ( mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS - 1 ); i++ )
     {
