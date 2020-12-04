@@ -197,7 +197,7 @@
 
 /*-----------------------------------------------------------*/
 
-struct CommandContext /*_RB_ Don't need all these parameter. */
+struct CommandContext
 {
     MQTTStatus_t xReturnStatus;
     TaskHandle_t xTaskToNotify;
@@ -240,8 +240,7 @@ static MQTTStatus_t prvMQTTInit( void );
  * @return `MQTTSuccess` if connection succeeds, else appropriate error code
  * from MQTT_Connect.
  */
-static MQTTStatus_t prvMQTTConnect( MQTTContext_t * pxMQTTContext,
-                                    bool xCleanSession );
+static MQTTStatus_t prvMQTTConnect( bool xCleanSession );
 
 /**
  * @brief Form a TCP connection to a server.
@@ -328,9 +327,8 @@ static void prvSubscribeCommandCallback( void *pxCommandContext,
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Global MQTT context.
+ * @brief Global MQTT context handle - use context 0.
  */
-static MQTTContext_t *globalMqttContext;
 static const MQTTContextHandle_t xMQTTContextHandle = 0;
 
 /**
@@ -403,15 +401,10 @@ static MQTTStatus_t prvMQTTInit( void )
                               prvCopyPublishToQueue, /* Callback to execute if receiving publishes on unexpected topics. */
                               xDefaultResponseQueue ); /* Context to pass into the callback. */
 
-
-    /*_RB_ Temporary until all APIs are using the handle. */
-    globalMqttContext = MQTTAgent_GetMQTTContext( xGlobalMQTTContextHandle );
-
     return xReturn;
 }
 
-static MQTTStatus_t prvMQTTConnect( MQTTContext_t * pxMQTTContext,
-                                    bool xCleanSession )
+static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
 {
     MQTTStatus_t xResult;
     MQTTConnectInfo_t xConnectInfo;
@@ -429,7 +422,7 @@ static MQTTStatus_t prvMQTTConnect( MQTTContext_t * pxMQTTContext,
     /* The client identifier is used to uniquely identify this MQTT client to
      * the MQTT broker. In a production device the identifier can be something
      * unique, such as a device serial number. */
-    xConnectInfo.pClientIdentifier = democonfigCLIENT_IDENTIFIER;
+    xConnectInfo.pClientIdentifier = democonfigCLIENT_IDENTIFIER;/*_RB_ should use functions to obtain these constants. */
     xConnectInfo.clientIdentifierLength = ( uint16_t ) strlen( democonfigCLIENT_IDENTIFIER );
 
     /* Set MQTT keep-alive period. It is the responsibility of the application
@@ -463,18 +456,18 @@ static MQTTStatus_t prvMQTTConnect( MQTTContext_t * pxMQTTContext,
 
     /* Send MQTT CONNECT packet to broker. MQTT's Last Will and Testament feature
      * is not used in this demo, so it is passed as NULL. */
-    xResult = MQTT_Connect( pxMQTTContext,
-                            &xConnectInfo,
-                            NULL,
-                            mqttexampleCONNACK_RECV_TIMEOUT_MS,
-                            &xSessionPresent );
+    xResult = MQTTAgent_Connect( xMQTTContextHandle,
+                                 &xConnectInfo,
+                                 NULL,
+                                 mqttexampleCONNACK_RECV_TIMEOUT_MS,
+                                 &xSessionPresent );
 
     LogInfo( ( "Session present: %d\n", xSessionPresent ) );
 
     /* Resume a session if desired. */
     if( ( xResult == MQTTSuccess ) && !xCleanSession )
     {
-        xResult = MQTTAgent_ResumeSession( globalMqttContext, xSessionPresent );
+        xResult = MQTTAgent_ResumeSession( xMQTTContextHandle, xSessionPresent );
     }
 
     return xResult;
@@ -632,7 +625,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
     if( MQTTAgent_GetNumWaiting() == 0U )
     {
-        xResult = MQTTAgent_ProcessLoop( globalMqttContext, NULL, NULL );
+        xResult = MQTTAgent_ProcessLoop( xMQTTContextHandle, NULL, NULL );
 //        configASSERT( xResult == pdTRUE );
     }
 }
@@ -1007,7 +1000,7 @@ static void prvMQTTAgentTask( void * pvParameters )
             xNetworkResult = prvSocketConnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
             /* MQTT Connect with a persistent session. */
-            xMQTTStatus = prvMQTTConnect( pMqttContext, false );/*_RB_ Should this be true or false? */
+            xMQTTStatus = prvMQTTConnect( false );/*_RB_ Should this be true or false? */
         }
     } while( pMqttContext );
 
@@ -1065,7 +1058,7 @@ static void prvMQTTDemoTask( void * pvParameters )
     prvCreateMQTTAgent();
 
     /* Form an MQTT connection without a persistent session. */
-    xMQTTStatus = prvMQTTConnect( globalMqttContext, true );
+    xMQTTStatus = prvMQTTConnect( true );
     configASSERT( xMQTTStatus == MQTTSuccess );
 
     xTaskCreate( prvLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
@@ -1090,9 +1083,9 @@ vTaskSuspend( NULL );//_RB_ Temorary so only prvLargeMessageSubscribePublishTask
     }
 
     LogInfo( ( "Adding disconnect operation.\n" ) );
-    MQTTAgent_Disconnect( globalMqttContext, NULL, NULL );
+    MQTTAgent_Disconnect( xMQTTContextHandle, NULL, NULL );
     LogInfo( ( "Clearing stored MQTT connection information.\n" ) );
-    MQTTAgent_Free( globalMqttContext, NULL, NULL );
+    MQTTAgent_Free( xMQTTContextHandle, NULL, NULL );
     LogInfo( ( "Terminating MQTT agent.\n" ) );
     MQTTAgent_Terminate();
     LogInfo( ( "Demo completed successfully.\r\n" ) );
