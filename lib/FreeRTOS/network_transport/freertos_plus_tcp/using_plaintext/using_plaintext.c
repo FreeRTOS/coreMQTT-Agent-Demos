@@ -101,9 +101,22 @@ int32_t Plaintext_FreeRTOS_recv( NetworkContext_t * pNetworkContext,
                                  void * pBuffer,
                                  size_t bytesToRecv )
 {
-    int32_t socketStatus = 0;
+    int32_t socketStatus;
 
-    socketStatus = FreeRTOS_recv( pNetworkContext->tcpSocket, pBuffer, bytesToRecv, 0 );
+    /* The TCP socket may have a receive block time.  If bytesToRecv is greater than
+     * 1 then a frame is already part way through reception and blocking is the
+     * right thing to do.  If bytesToRecv is 1 then this may be a speculative read to
+     * find the start of a new frame, in which case blocking is not desirable as it
+     * could block an entire protocol agent - so only read if bytes are known to be
+     * available. */
+    if( ( bytesToRecv > 1 ) || ( FreeRTOS_recvcount( pNetworkContext->tcpSocket ) > 0 ) )
+    {
+        socketStatus = FreeRTOS_recv( pNetworkContext->tcpSocket, pBuffer, bytesToRecv, 0 );
+    }
+    else
+    {
+        socketStatus = 0;
+    }
 
     return socketStatus;
 }
@@ -115,6 +128,14 @@ int32_t Plaintext_FreeRTOS_send( NetworkContext_t * pNetworkContext,
     int32_t socketStatus = 0;
 
     socketStatus = FreeRTOS_send( pNetworkContext->tcpSocket, pBuffer, bytesToSend, 0 );
+
+    if( socketStatus == -pdFREERTOS_ERRNO_ENOSPC )
+    {
+        /* The TCP buffers could not accept any more bytes so zero bytes were sent
+         * but this is not necessarily an error that should cause a disconnect
+         * unless it persists. */
+        socketStatus = 0;
+    }
 
     return socketStatus;
 }
