@@ -94,11 +94,13 @@
 /* Exponential backoff retry include. */
 #include "exponential_backoff.h"
 
+
 /* Transport interface include. */
 #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
     #include "using_mbedtls.h"
 #else
     #include "using_plaintext.h"
+
 #endif
 
 /**
@@ -147,7 +149,7 @@
 /**
  * @brief Ticks to wait for task notifications.
  */
-#define mqttexampleDEMO_TICKS_TO_WAIT                pdMS_TO_TICKS( 1000 )
+#define mqttexampleDEMO_TICKS_TO_WAIT                pdMS_TO_TICKS( 10000 )
 
 /**
  * @brief Timeout for MQTT_ProcessLoop function in milliseconds.
@@ -178,7 +180,7 @@
 /**
  * @brief Delay for the synchronous publisher task between publishes.
  */
-#define mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      0U
+#define mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      25U
 
 /**
  * @brief Number of publishes done by each task in this demo.
@@ -188,7 +190,7 @@
 /**
  * @brief The number of subscribe-publish tasks to create.
  */
-#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       1
+#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       3
 
 /**
  * @brief Used to clear bits in a task's notification value.
@@ -815,7 +817,14 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
     /* Create a large buffer of data. */
     for( x = 0; x < mqttexampleNETWORK_BUFFER_SIZE; x++ )
     {
-        maxPayloadMessage[ x ] = c;
+        if( x < mqttexampleNETWORK_BUFFER_SIZE / 2 )
+		{
+            maxPayloadMessage[ x ] = 'a';
+		}
+        else
+		{
+            maxPayloadMessage[ x ] = 'b';
+		}
         c++;
 
         /* Keep the characters human readable. */
@@ -880,6 +889,9 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
         LogInfo( ( "Waiting for large publish to topic %s to complete.", topicBuf ) );
         prvWaitForCommandAcknowledgment( NULL );
 
+        /* Wait for the publish back to this task. */
+        xTaskNotifyWait( 0x00, 0x00, NULL, mqttexampleDEMO_TICKS_TO_WAIT );
+
         x = memcmp( maxPayloadMessage, receivedEchoesPayload, mqttexampleMAX_PAYLOAD_LENGTH );
         configASSERT( x == 0 );
         if( x == 0 )
@@ -888,8 +900,10 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
         }
         else
         {
-            LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            LogError( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
+
+        vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS * 5 ) );
     }
 }
 
@@ -909,7 +923,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     MQTTQoS_t xQoS;
 
     /* Have different tasks use different QoS.  3 as there are 3 QoS options, 0 to 2. */
-    xQoS = ( MQTTQoS_t ) ( ulTaskNumber % 3UL );
+    xQoS = ( MQTTQoS_t ) ( ulTaskNumber % 2UL );
 
     /* Create a unique name for this task from the task number that is passed into
      * the task using the task's parameter. */
@@ -960,14 +974,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
             configASSERT( ulNotification == ulValueToNotify );
         }
 
-if( xQoS != MQTTQoS0 )//_RB_ so the server doesn't get overwhemled and cause tasks at other QoS levels to timeout.
-{
-    vTaskDelay( 2 );
-}
-else
-{
         vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
-}
     }
 
     /* Delete the task if it is not the main one. */
@@ -1062,7 +1069,7 @@ static void prvMQTTDemoTask( void * pvParameters )
     configASSERT( xMQTTStatus == MQTTSuccess );
 
     xTaskCreate( prvLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
-vTaskSuspend( NULL );//_RB_ Temorary so only prvLargeMessageSubscribePublishTask() executes.
+
     /* Create a few instances of prvSimpleSubscribePublishTask(). */
     for( i = 0; i < ( mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS - 1 ); i++ )
     {
@@ -1074,7 +1081,7 @@ vTaskSuspend( NULL );//_RB_ Temorary so only prvLargeMessageSubscribePublishTask
     /* Finally turn this task into an instance of prvSimpleSubscribePublishTask()
      * too. */
     prvSimpleSubscribePublishTask( ( void * ) i );
-
+vTaskSuspend( NULL );
     /* Wait for all queues to become empty.
      * TODO: This may be a race condition, so using task notifications would be better. */
     while( MQTTAgent_GetNumWaiting() != 0 )
