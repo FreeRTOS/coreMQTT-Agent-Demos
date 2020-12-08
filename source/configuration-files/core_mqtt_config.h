@@ -76,6 +76,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * context maintains.
  */
 #define MQTT_STATE_ARRAY_MAX_COUNT    20U
+#define MQTT_RECV_POLLING_TIMEOUT_MS 80
 
 /*_RB_ To document and add to the mqtt config defaults header file. */
 #define MQTT_AGENT_COMMAND_QUEUE_LENGTH 25
