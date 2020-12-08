@@ -581,11 +581,11 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 }
 
 /*-----------------------------------------------------------*/
-
+volatile uint32_t socketCallbackCount = 0, socketCallbackPostCount = 0;
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
     BaseType_t xResult;
-
+    socketCallbackCount++;
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;
@@ -594,6 +594,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
     if( MQTTAgent_GetNumWaiting() == 0U )
     {
+        socketCallbackPostCount++;
         xResult = MQTTAgent_ProcessLoop( xMQTTContextHandle, NULL, NULL );
 //        configASSERT( xResult == pdTRUE );
     }
@@ -623,7 +624,6 @@ static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are
 /*-----------------------------------------------------------*/
 
 extern void vLargeMessageSubscribePublishTask( void * pvParameters );
-
 extern void vSimpleSubscribePublishTask( void * pvParameters );
 
 /*-----------------------------------------------------------*/
