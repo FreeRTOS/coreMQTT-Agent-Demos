@@ -652,8 +652,6 @@ static void prvMQTTAgentTask( void * pvParameters )
             xMQTTStatus = prvMQTTConnect( false );/*_RB_ Should this be true or false? */
         }
     } while( pMqttContext );
-
-    vTaskDelete( NULL );
 }
 
 /*-----------------------------------------------------------*/
@@ -704,7 +702,7 @@ static void prvMQTTDemoTask( void * pvParameters )
     configASSERT( xMQTTStatus == MQTTSuccess );
 
     /* Create the agent task itself. */
-    prvCreateMQTTAgent();
+    //prvCreateMQTTAgent();
 
     /* Form an MQTT connection without a persistent session. */
     xMQTTStatus = prvMQTTConnect( true );
@@ -713,31 +711,15 @@ static void prvMQTTDemoTask( void * pvParameters )
     xTaskCreate( vLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
 
     /* Create a few instances of vSimpleSubscribePublishTask(). */
-    for( i = 0; i < ( mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS - 1 ); i++ )
+    for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
     {
         memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
         snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
         xTaskCreate( vSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
     }
 
-    /* Finally turn this task into an instance of vSimpleSubscribePublishTask()
-     * too. */
-    vSimpleSubscribePublishTask( ( void * ) i );
-vTaskSuspend( NULL );
-    /* Wait for all queues to become empty.
-     * TODO: This may be a race condition, so using task notifications would be better. */
-    while( MQTTAgent_GetNumWaiting() != 0 )
-    {
-        vTaskDelay( mqttexampleDEMO_TICKS_TO_WAIT );
-    }
-
-    LogInfo( ( "Adding disconnect operation.\n" ) );
-    MQTTAgent_Disconnect( xMQTTContextHandle, NULL, NULL );
-    LogInfo( ( "Clearing stored MQTT connection information.\n" ) );
-    MQTTAgent_Free( xMQTTContextHandle, NULL, NULL );
-    LogInfo( ( "Terminating MQTT agent.\n" ) );
-    MQTTAgent_Terminate();
-    LogInfo( ( "Demo completed successfully.\r\n" ) );
+    /* Start the MQTT agent. */
+    prvMQTTAgentTask( NULL );
 }
 
 /*-----------------------------------------------------------*/
