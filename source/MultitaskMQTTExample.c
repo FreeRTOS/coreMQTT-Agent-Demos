@@ -602,7 +602,8 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
     if( ( MQTTAgent_GetNumWaiting() == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
     {
-        MQTTAgent_TriggerProcessLoop( xMQTTContextHandle );
+        /* Don't block as this is called from the context of the IP task. */
+        MQTTAgent_TriggerProcessLoop( xMQTTContextHandle, 0 );
     }
 }
 

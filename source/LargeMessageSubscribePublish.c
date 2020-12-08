@@ -58,6 +58,13 @@
  */
 #define mqttexampleMAX_UINT32                       0xffffffff
 
+/**
+ * @brief The maximum amount of time in milliseconds to wait for the command to be
+ * posted to the MQTT agent should the MQTT agent's command queue be full.  Tasks
+ * wait in the Blocked state, so don't use any CPU time.
+ */
+#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS   200
+
 #define mqttexamplePROTOCOL_OVERHEAD 50
 #define mqttexampleMAX_PAYLOAD_LENGTH ( mqttexampleNETWORK_BUFFER_SIZE - mqttexamplePROTOCOL_OVERHEAD )
 
@@ -196,7 +203,8 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
                                              prvWriteIncomingPayloadToBuffer,
                                              ( void * ) &xApplicationDefinedContext,
                                              prvSubscribeCommandCallback,
-                                             ( void * ) &xApplicationDefinedContext );
+                                             ( void * ) &xApplicationDefinedContext,
+                                             mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
     } while( xCommandAdded == false );
 
     /* Always wait for acks from subscribe messages. */
@@ -221,7 +229,11 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
         /* Publish to the topic to which this task is also subscribed to receive an
         echo back. */
         LogInfo( ( "Sending large publish request to agent with message on topic \"%s\"", topicBuf ) );
-        xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &xPublishInfo, prvCommandCallback, &xApplicationDefinedContext );
+        xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle,
+                                           &xPublishInfo,
+                                           prvCommandCallback,
+                                           &xApplicationDefinedContext,
+                                           mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
         configASSERT( xCommandAdded == pdTRUE );
 
         LogInfo( ( "Waiting for large publish to topic %s to complete.", topicBuf ) );

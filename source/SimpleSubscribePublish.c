@@ -68,6 +68,12 @@
  */
 #define mqttexampleMAX_UINT32                       0xffffffff
 
+/**
+ * @brief The maximum amount of time in milliseconds to wait for the command to be
+ * posted to the MQTT agent should the MQTT agent's command queue be full.  Tasks
+ * wait in the Blocked state, so don't use any CPU time.
+ */
+#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS   200
 /*-----------------------------------------------------------*/
 
 struct CommandContext
@@ -212,7 +218,8 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
                                              prvPrintIncomingPublish,
                                              NULL,
                                              prvSubscribeCommandCallback,
-                                             ( void * ) &xApplicationDefinedContext );
+                                             ( void * ) &xApplicationDefinedContext,
+                                             mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
     } while( xCommandAdded == false );
 
     /* Always wait for acks from subscribe messages. */
@@ -284,7 +291,11 @@ void vSimpleSubscribePublishTask( void * pvParameters )
         xCommandContext.ulNotificationValue = ulValueToNotify;
 
         LogInfo( ( "Sending publish request to agent with message \"%s\" on topic \"%s\"", payloadBuf, topicBuf ) );
-        xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &xPublishInfo, prvCommandCallback, &xCommandContext );
+        xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle,
+                                           &xPublishInfo,
+                                           prvCommandCallback,
+                                           &xCommandContext,
+                                           mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
         configASSERT( xCommandAdded == pdTRUE );
 
         /* For QoS 1 and 2, wait for the publish acknowledgment.  For QoS0, wait for
