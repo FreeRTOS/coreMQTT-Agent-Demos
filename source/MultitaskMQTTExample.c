@@ -43,7 +43,7 @@
  *!!! mutually authenticated and encrypted connections.
  *
  * There are four tasks to note in this demo:
- *  - prvMQTTDemoTask() manages multiple iterations of the demo.  Each iteration
+ *  - prvConnectAndCreateDemoTasks() manages multiple iterations of the demo.  Each iteration
  *    creates the other tasks, calls MQTTAgent_CommandLoop() to handle the MQTT traffic,
  *    then cleans up ready for the next iteration.
  *  - prvSyncPublishTask() which demonstrates synchronous publishes. The task creates
@@ -281,7 +281,7 @@ static void prvMQTTAgentTask( void * pvParameters );
  * @param[in] pvParameters Parameters as passed at the time of task creation. Not
  * used in this example.
  */
-static void prvMQTTDemoTask( void * pvParameters );
+static void prvConnectAndCreateDemoTasks( void * pvParameters );
 
 /**
  * @brief The timer query function provided to the MQTT context.
@@ -292,6 +292,13 @@ static uint32_t prvGetTimeMs( void );
 
 //_RB_ To document.
 static BaseType_t prvCreateMQTTAgent( void );
+
+/*
+ * Demo tasks that can be created from this task.
+ */
+extern void vLargeMessageSubscribePublishTask( void * pvParameters );
+extern void vSimpleSubscribePublishTask( void * pvParameters );
+
 
 /*-----------------------------------------------------------*/
 
@@ -306,7 +313,7 @@ const MQTTContextHandle_t xMQTTContextHandle = 0;
 static NetworkContext_t xNetworkContext;
 
 /**
- * @brief Handle for prvMQTTDemoTask.
+ * @brief Handle for prvConnectAndCreateDemoTasks.
  */
 static TaskHandle_t xMainTask;
 
@@ -335,15 +342,15 @@ static uint32_t ulGlobalEntryTimeMs;
  */
 void vStartSimpleMQTTDemo( void )
 {
-    /* This example uses one application task to process the command queue for
-     * MQTT operations, and creates additional tasks to add operations to that
-     * queue. */
-    xTaskCreate( prvMQTTDemoTask,          /* Function that implements the task. */
-                 "DemoTask",               /* Text name for the task - only used for debugging. */
-                 democonfigDEMO_STACKSIZE, /* Size of stack (in words, not bytes) to allocate for the task. */
-                 NULL,                     /* Task parameter - not used in this case. */
-                 tskIDLE_PRIORITY + 1,     /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
-                 &xMainTask );             /* Used to pass out a handle to the created task. */
+    /* This example uses one application task to manage the TCP connection and its
+     * interaction with the MQTT agent, as well as create the other example MQTT
+     * tasks in accordance with the build configuration. */
+    xTaskCreate( prvConnectAndCreateDemoTasks,  /* Function that implements the task. */
+                 "ConnectManager",              /* Text name for the task - only used for debugging. */
+                 democonfigDEMO_STACKSIZE,      /* Size of stack (in words, not bytes) to allocate for the task. */
+                 NULL,                          /* Optional - task parameter - not used in this case. */
+                 tskIDLE_PRIORITY + 1,          /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
+                 &xMainTask );                  /* Optional - used to pass out a handle to the created task. */
 }
 
 /*-----------------------------------------------------------*/
@@ -537,7 +544,7 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
         }
     } while( ( xConnected != pdPASS ) && ( xRetryUtilsStatus == RetryUtilsSuccess ) );
 
-    /* Set the socket wakeup callback. */
+    /* Set the socket wakeup callback and ensure the read block time. */
     if( xConnected )
     {
         ( void ) FreeRTOS_setsockopt( pxNetworkContext->tcpSocket,
@@ -622,11 +629,6 @@ static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are
 
 /*-----------------------------------------------------------*/
 
-extern void vLargeMessageSubscribePublishTask( void * pvParameters );
-extern void vSimpleSubscribePublishTask( void * pvParameters );
-
-/*-----------------------------------------------------------*/
-
 static void prvMQTTAgentTask( void * pvParameters )
 {
     BaseType_t xNetworkResult = pdFAIL;
@@ -680,7 +682,7 @@ static BaseType_t prvCreateMQTTAgent( void )
 }
 /*-----------------------------------------------------------*/
 
-static void prvMQTTDemoTask( void * pvParameters )
+static void prvConnectAndCreateDemoTasks( void * pvParameters )
 {
     BaseType_t xNetworkStatus = pdFAIL;
     MQTTStatus_t xMQTTStatus;
