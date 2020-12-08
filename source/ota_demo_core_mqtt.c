@@ -581,7 +581,6 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
 
     xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
                                          &( xSubscribeInfo[ iNext ] ),
-                                         1,
                                          ( void * ) pCallback,
                                          NULL,
                                          prvCommandCallback,
