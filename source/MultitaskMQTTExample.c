@@ -345,6 +345,7 @@ void vStartSimpleMQTTDemo( void )
                  tskIDLE_PRIORITY + 1,     /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
                  &xMainTask );             /* Used to pass out a handle to the created task. */
 }
+
 /*-----------------------------------------------------------*/
 
 static MQTTStatus_t prvMQTTInit( void )
@@ -372,6 +373,8 @@ static MQTTStatus_t prvMQTTInit( void )
 
     return xReturn;
 }
+
+/*-----------------------------------------------------------*/
 
 static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
 {
@@ -581,22 +584,18 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 }
 
 /*-----------------------------------------------------------*/
-volatile uint32_t socketCallbackCount = 0, socketCallbackPostCount = 0;
+
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
-    BaseType_t xResult;
-    socketCallbackCount++;
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;
 
     /* A socket used by the MQTT task may need attention.  Send an event
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
-    if( MQTTAgent_GetNumWaiting() == 0U )
+    if( ( MQTTAgent_GetNumWaiting() == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
     {
-        socketCallbackPostCount++;
-        xResult = MQTTAgent_ProcessLoop( xMQTTContextHandle, NULL, NULL );
-//        configASSERT( xResult == pdTRUE );
+        MQTTAgent_TriggerProcessLoop( xMQTTContextHandle );
     }
 }
 

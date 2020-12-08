@@ -241,8 +241,6 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
             LogError( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
 
-        vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS * 5 ) );
+        vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
     }
-
-    vTaskDelete( NULL );
 }
