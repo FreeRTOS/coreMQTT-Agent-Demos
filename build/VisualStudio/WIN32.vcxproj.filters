@@ -195,6 +195,12 @@
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\LargeMessageSubscribePublish.c">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\SimpleSubscribePublish.c">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">

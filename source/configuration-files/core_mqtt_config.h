@@ -46,7 +46,7 @@
 #endif
 
 #ifndef LIBRARY_LOG_LEVEL
-    #define LIBRARY_LOG_LEVEL    LOG_ERROR
+    #define LIBRARY_LOG_LEVEL    LOG_WARN
 #endif
 
 /* Prototype for the function used to print to console on Windows simulator
@@ -76,5 +76,10 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * context maintains.
  */
 #define MQTT_STATE_ARRAY_MAX_COUNT    20U
+#define MQTT_RECV_POLLING_TIMEOUT_MS 80
+
+/*_RB_ To document and add to the mqtt config defaults header file. */
+#define MQTT_AGENT_COMMAND_QUEUE_LENGTH 25
+#define MQTT_COMMAND_CONTEXTS_POOL_SIZE 10
 
 #endif /* ifndef CORE_MQTT_CONFIG_H */
