@@ -154,7 +154,7 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
     char c = '0';
     const char* topicBuf = "/max/payload/message";
     volatile CommandContext_t xApplicationDefinedContext = { 0 };
-    BaseType_t xCommandAdded;
+    MQTTStatus_t xCommandAdded;
     MQTTSubscribeInfo_t xSubscribeInfo;
 
     ( void ) pvParameters;
@@ -205,11 +205,11 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
                                              prvSubscribeCommandCallback,
                                              ( void * ) &xApplicationDefinedContext,
                                              mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
-    } while( xCommandAdded == false );
+    } while( xCommandAdded != MQTTSuccess );
 
     /* Always wait for acks from subscribe messages. */
     xCommandAdded = prvWaitForCommandAcknowledgment( NULL );
-    configASSERT( xCommandAdded == pdTRUE );
+    configASSERT( xCommandAdded == pdPASS );
     LogInfo( ( "Received subscribe ack for topic %s", topicBuf ) );
 
     memset( ( void * ) &xPublishInfo, 0x00, sizeof( xPublishInfo ) );
@@ -234,7 +234,7 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
                                            prvCommandCallback,
                                            &xApplicationDefinedContext,
                                            mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
-        configASSERT( xCommandAdded == pdTRUE );
+        configASSERT( xCommandAdded == MQTTSuccess );
 
         LogInfo( ( "Waiting for large publish to topic %s to complete.", topicBuf ) );
         prvWaitForCommandAcknowledgment( NULL );
@@ -246,11 +246,14 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
         configASSERT( x == 0 );
         if( x == 0 )
         {
-            LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.",
+                        topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
         else
         {
-            LogError( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.", topicBuf, mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            LogError( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.",
+                         topicBuf,
+                         mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
 
         vTaskDelay( pdMS_TO_TICKS( mqttDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );

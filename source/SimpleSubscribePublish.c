@@ -176,7 +176,8 @@ static void prvPrintIncomingPublish( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ A
 static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
                                  char * pcTopicFilter )
 {
-    BaseType_t xCommandAdded;
+    MQTTStatus_t xCommandAdded;
+    BaseType_t xCommandAcknowledged = pdFALSE;
     uint32_t ulSubscribeMessageID;
     MQTTSubscribeInfo_t xSubscribeInfo;
     static int32_t ulNextSubscribeMessageID = 0;
@@ -220,12 +221,12 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
                                              prvSubscribeCommandCallback,
                                              ( void * ) &xApplicationDefinedContext,
                                              mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
-    } while( xCommandAdded == false );
+    } while( xCommandAdded != MQTTSuccess );
 
     /* Always wait for acks from subscribe messages. */
-    xCommandAdded = prvWaitForCommandAcknowledgment( NULL );
+    xCommandAcknowledged = prvWaitForCommandAcknowledgment( NULL );
 
-    if( xCommandAdded == pdFALSE )
+    if( xCommandAcknowledged == MQTTSuccess )
     {
         LogInfo( ( "Timed out waiting for ack to subscribe message topic %s", pcTopicFilter ) );
     }
@@ -241,7 +242,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
         }
     }
 
-    return xCommandAdded;
+    return xCommandAcknowledged;
 }
 
 /*-----------------------------------------------------------*/
@@ -254,7 +255,7 @@ void vSimpleSubscribePublishTask( void * pvParameters )
     char taskName[ mqttexampleDEMO_BUFFER_SIZE ];
     CommandContext_t xCommandContext;
     uint32_t ulNotification = 0U, ulValueToNotify = 0UL;
-    BaseType_t xCommandAdded = pdTRUE;
+    MQTTStatus_t xCommandAdded;
     uint32_t ulTaskNumber = ( uint32_t ) pvParameters;
     MQTTQoS_t xQoS;
 
@@ -296,7 +297,7 @@ void vSimpleSubscribePublishTask( void * pvParameters )
                                            prvCommandCallback,
                                            &xCommandContext,
                                            mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
-        configASSERT( xCommandAdded == pdTRUE );
+        configASSERT( xCommandAdded == MQTTSuccess );
 
         /* For QoS 1 and 2, wait for the publish acknowledgment.  For QoS0, wait for
          * the publish to be sent. */
