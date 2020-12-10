@@ -109,7 +109,8 @@ static UBaseType_t ulNextRand;
 int main( void )
 {
     /***
-     * See https://www.FreeRTOS.org/coremqtt for configuration and usage instructions.
+     * See https://www.FreeRTOS.org/mqtt and https://www.FreeRTOS.org/tcp for
+     * configuration and usage instructions.
      ***/
 
     /* Miscellaneous initialization including preparing the logging and seeding
