@@ -46,7 +46,7 @@
 #endif
 
 #ifndef LIBRARY_LOG_LEVEL
-    #define LIBRARY_LOG_LEVEL    LOG_INFO
+    #define LIBRARY_LOG_LEVEL    LOG_DEBUG
 #endif
 
 /* Prototype for the function used to print to console on Windows simulator
@@ -78,7 +78,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_IDENTIFIER				"insert here."
  */
-#define democonfigCLIENT_IDENTIFIER "myclient123"
+#define democonfigCLIENT_IDENTIFIER    "Thing3"
 
 /**
  * @brief Endpoint of the MQTT broker to connect to.
@@ -96,7 +96,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * #define democonfigMQTT_BROKER_ENDPOINT				"insert here."
  */
 //#define democonfigMQTT_BROKER_ENDPOINT                  "test.mosquitto.org"
-#define democonfigMQTT_BROKER_ENDPOINT                  "192.168.0.25"
+//#define democonfigMQTT_BROKER_ENDPOINT                  "192.168.0.25"
+#define democonfigMQTT_BROKER_ENDPOINT                  "a91t51ne5wq71-ats.iot.us-west-2.amazonaws.com"
 
 /**
  * @brief The port to use for the demo.
@@ -111,7 +112,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_PORT    ( insert here. )
  */
-#define democonfigMQTT_BROKER_PORT ( 50000 )
+//#define democonfigMQTT_BROKER_PORT ( 8883 )
 
 /**
  * @brief Server's root CA certificate.
@@ -133,8 +134,27 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigROOT_CA_PEM    "...insert here..."
  */
-#define democonfigROOT_CA_PEM "_RB_Dummy"
-
+#define democonfigROOT_CA_PEM                                             \
+    "-----BEGIN CERTIFICATE-----\n"                                      \
+    "MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF\n" \
+    "ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6\n" \
+    "b24gUm9vdCBDQSAxMB4XDTE1MDUyNjAwMDAwMFoXDTM4MDExNzAwMDAwMFowOTEL\n" \
+    "MAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJv\n" \
+    "b3QgQ0EgMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4gHHKeNXj\n" \
+    "ca9HgFB0fW7Y14h29Jlo91ghYPl0hAEvrAIthtOgQ3pOsqTQNroBvo3bSMgHFzZM\n" \
+    "9O6II8c+6zf1tRn4SWiw3te5djgdYZ6k/oI2peVKVuRF4fn9tBb6dNqcmzU5L/qw\n" \
+    "IFAGbHrQgLKm+a/sRxmPUDgH3KKHOVj4utWp+UhnMJbulHheb4mjUcAwhmahRWa6\n" \
+    "VOujw5H5SNz/0egwLX0tdHA114gk957EWW67c4cX8jJGKLhD+rcdqsq08p8kDi1L\n" \
+    "93FcXmn/6pUCyziKrlA4b9v7LWIbxcceVOF34GfID5yHI9Y/QCB/IIDEgEw+OyQm\n" \
+    "jgSubJrIqg0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC\n" \
+    "AYYwHQYDVR0OBBYEFIQYzIU07LwMlJQuCFmcx7IQTgoIMA0GCSqGSIb3DQEBCwUA\n" \
+    "A4IBAQCY8jdaQZChGsV2USggNiMOruYou6r4lK5IpDB/G/wkjUu0yKGX9rbxenDI\n" \
+    "U5PMCCjjmCXPI6T53iHTfIUJrU6adTrCC2qJeHZERxhlbI1Bjjt/msv0tadQ1wUs\n" \
+    "N+gDS63pYaACbvXy8MWy7Vu33PqUXHeeE6V/Uq2V8viTO96LXFvKWlJbYK8U90vv\n" \
+    "o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU\n" \
+    "5MsI+yMRQ+hDKXJioaldXgjUkK642M4UwtBV8ob2xJNDd2ZhwLnoQdeXeGADbkpy\n" \
+    "rqXRfboQnoZsG4q5WTP468SQvvG5\n"                                     \
+    "-----END CERTIFICATE-----\n"
 
 /**
  * @brief Client certificate.
@@ -152,7 +172,29 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
  */
-#define democonfigCLIENT_CERTIFICATE_PEM "_RB_ Dummy"
+#define democonfigCLIENT_CERTIFICATE_PEM                                  \
+"-----BEGIN CERTIFICATE-----\n"\
+"MIIDWTCCAkGgAwIBAgIUJgGp2otBnSu1zlXmgjV7wH3r/5MwDQYJKoZIhvcNAQEL\n"\
+"BQAwTTFLMEkGA1UECwxCQW1hem9uIFdlYiBTZXJ2aWNlcyBPPUFtYXpvbi5jb20g\n"\
+"SW5jLiBMPVNlYXR0bGUgU1Q9V2FzaGluZ3RvbiBDPVVTMB4XDTE5MTAxNTE3MzY0\n"\
+"OFoXDTQ5MTIzMTIzNTk1OVowHjEcMBoGA1UEAwwTQVdTIElvVCBDZXJ0aWZpY2F0\n"\
+"ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANJ6ZWn6z8lluVvDcBjY\n"\
+"IonMX1XPMiSfNKXqbBKw6J3xoGJk4gcMKKw8C49WWtFDnGHa3UVROUx4w9jDrWfE\n"\
+"eHZy9HhLOU9GCfQU2fwiUaQnQNXCceoUPZdl6V6L3hyEJBcDMvLalTX88O8hYJCQ\n"\
+"L4miVLlMEMZecWZbzd9lNFboOUCd8JZ2wn4krLF9VX7+GRmoRN2Gi9hQmIn2OVIY\n"\
+"WXK2B8V468wzI3O78eq2X3L1RGNvWTgyoGIpOXngxLD4i9nQK9Fleu9IHoTDmjz5\n"\
+"OdAUpWeO9QHv8Bq8MgnzNHg59jlQyAHJyUDyDA0cNeB+g+/DIs8gFVo74Q9VJLiT\n"\
+"y+sCAwEAAaNgMF4wHwYDVR0jBBgwFoAU3LqZ+L5sHMDAqQnu7jYFmoeeVvYwHQYD\n"\
+"VR0OBBYEFPF7lsAdltfelSVVUY1tCdKm7/PnMAwGA1UdEwEB/wQCMAAwDgYDVR0P\n"\
+"AQH/BAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQBAXRmoPT0lAPUdtsZzkxBY/rQd\n"\
+"ooG8weu1jw7WIGd7OcU017pB0YWIy3CcEdCs+WrJpwzwgJ3I9SqmVx8w/MYx8cFa\n"\
+"388aetA+WQS5GqnmxWCgVIEMcrRBqLCkpq397u99gKm130BLQT285ulpVOnHEzTE\n"\
+"xrHsaF96gWnvXA+lO2e45gknWRZgt5c+UNzpR7qd0DooqLVlfj8y8gUhaD4XdgH2\n"\
+"n/bD2r9ZaPGLevOyhk1CboS56qpysmn3OwjMEm+GIvmODZx7x6Mm/9O7TC0ky9IH\n"\
+"kNbOKbGlTTxzAZoJ1NjnfVqRCOvxi4aOOC3bz/cejQM1ezPoiiBsJHJxHsQC\n"\
+"-----END CERTIFICATE-----"
+
+
 
 
 /**
@@ -179,7 +221,35 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
  */
-#define democonfigCLIENT_PRIVATE_KEY_PEM "_RB_Dummy"
+#define democonfigCLIENT_PRIVATE_KEY_PEM                                  \
+"-----BEGIN RSA PRIVATE KEY-----\n"\
+"MIIEpQIBAAKCAQEA0nplafrPyWW5W8NwGNgiicxfVc8yJJ80pepsErDonfGgYmTi\n"\
+"BwworDwLj1Za0UOcYdrdRVE5THjD2MOtZ8R4dnL0eEs5T0YJ9BTZ/CJRpCdA1cJx\n"\
+"6hQ9l2XpXoveHIQkFwMy8tqVNfzw7yFgkJAviaJUuUwQxl5xZlvN32U0Vug5QJ3w\n"\
+"lnbCfiSssX1Vfv4ZGahE3YaL2FCYifY5UhhZcrYHxXjrzDMjc7vx6rZfcvVEY29Z\n"\
+"ODKgYik5eeDEsPiL2dAr0WV670gehMOaPPk50BSlZ471Ae/wGrwyCfM0eDn2OVDI\n"\
+"AcnJQPIMDRw14H6D78MizyAVWjvhD1UkuJPL6wIDAQABAoIBAQC4lG/VZgfM5bGN\n"\
+"ALKQhxKa56h/dwnRRfEEw7TtG0mUIW72euQhLA+LI8k7dY6FUBaXVjmP7XAjWRDf\n"\
+"SpMKmijOL3em+skSdSiLbbHQxEP2ghoAm9oMXp245L2olV4+gb+okryebwRFaUHd\n"\
+"Y9bsUBXwTHSiX0uiuvYVvtKnY3hn8Py2DxYElxwlGzHQ1fVkOaXDiRSyeUprcP6u\n"\
+"iCzGZRjtq92Y0XSErQr3w2PnJdq9MRXk5l592HD1L5SRj90WH/jRMbPJY005hNd2\n"\
+"wl6XR4p0FYtpXRGeFzbnrFhwudW+Tax0ERIo+LqU0YSyqD/p4NTsVXWptSGt8Iau\n"\
+"maHjYq55AoGBAPumH3NzRLJ5ZXYEbZPSEPbGTYZVnad7WAf8TjDaMmzdm/PLtg1J\n"\
+"g/NxLLlL4bYAsQ7Pg9p97MRsE5h7OUhytJ9DbrshuXRNMY/TlHW2+T9dGsusaV1L\n"\
+"uH8WpNqtJCKB5pr9s6akOvbKX3ov3Ec+Vs5bYv2B/+hMXfunPvQ27SLlAoGBANYe\n"\
+"CdKF0kLrwcnajdDRtZ7hIUY3/cmYHytSx9E96JvPT6X2DPJSjbFrrtfvCi0K/+Fm\n"\
+"svNqQbsijtSeec7zODf3WiTo7BkI1rybxM8TCghkhHcNOTRwWQNmxjlgSC8bGSGd\n"\
+"F9Jy9OlTETBa6wyUMS80/8cWnqhX7UvT0O6wrTaPAoGAaProa/VOV1YlaZJ3VA9y\n"\
+"XEBl3wCggFoIY2xyAhdEqf3ZLV9yVyCwF0LDcZmiU5b+RjtzuhaGS3r6wcXGI98W\n"\
+"UsqCyzZKc6YwYtvVNzZZzIE+yHDok68fDIWZyFAqnuqqFUZ5R6+DmajbI9ILhv0O\n"\
+"oY+mQDOXWoVhP7aJoL+5NbECgYEAqWJH+O/+fwxMWKf5ynkryY1lqkv/C+y4s6gg\n"\
+"BMqJ6kCdTLgSU9y01OdQAOjMTwfFlwWMiX3ElArpnQ/lYq8MCVI3UL2mkMNqRPih\n"\
+"QANay3rhQ+EFIRPDhypVo+wkDofMYMgKoWRplO8uyOcTzPaq1iKCOXgOeTRdt7/Q\n"\
+"KBNCY8cCgYEAwgcQvcjObhK6D39N5w2D+Vtc9sUi+NnjVIkCUhaAPfagAFMiakfL\n"\
+"FqhcrARcUo9bK43b/RWOkBPp9B+XZ6mD202lvsCtw2zryYpjxqPynUuqYlalgtV7\n"\
+"vaTGVSXRThE5V+hOLh3c9jEyk5AQQURwTGuNF/3atgbdhKFZKF0KsVs=\n"\
+"-----END RSA PRIVATE KEY-----"
+
 
 /**
  * @brief An option to disable Server Name Indication.
@@ -200,6 +270,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigUSE_AWS_IOT_CORE_BROKER    ( 1 )
  */
+#define democonfigUSE_AWS_IOT_CORE_BROKER    ( 1 )
 
 /**
  * @brief The username value for authenticating client to the MQTT broker when
@@ -258,7 +329,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * @brief Whether to use mutual authentication. If this macro is not set to 1
  * or not defined, then plaintext TCP will be used instead of TLS over TCP.
  */
-#define democonfigUSE_TLS                   0
+#define democonfigUSE_TLS                   1
 
 /**
  * @brief Set the stack size of the main demo task.
@@ -268,7 +339,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  */
 #define democonfigDEMO_STACKSIZE            configMINIMAL_STACK_SIZE
 
-
+#define mqttexampleNETWORK_BUFFER_SIZE 5000
 
 /**********************************************************************************
 * Error checks and derived values only below here - do not edit below here. -----*

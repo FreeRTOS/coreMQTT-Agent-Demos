@@ -10,3 +10,9 @@
 [submodule "lib/ThirdParty/mbedtls"]
 	path = lib/ThirdParty/mbedtls
 	url = https://github.com/ARMmbed/mbedtls.git
+[submodule "lib/AWS/ota"]
+	path = lib/AWS/ota
+	url = git@github.com:aws/ota-for-aws-iot-embedded-sdk.git
+[submodule "lib/FreeRTOS/coreJSON"]
+	path = lib/FreeRTOS/coreJSON
+	url = git@github.com:FreeRTOS/coreJSON.git

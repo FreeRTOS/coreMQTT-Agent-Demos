@@ -97,6 +97,39 @@
     <Filter Include="Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS">
       <UniqueIdentifier>{39644eee-1d73-4734-8fdd-21e1a05fc9c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lib\AWS">
+      <UniqueIdentifier>{0c3e2cfb-ce8e-4d3e-b405-3e4190be0701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\OTA">
+      <UniqueIdentifier>{14c00792-c133-44c6-a523-a6484c985dfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\OTA\portable">
+      <UniqueIdentifier>{9936f14a-36dc-4168-a9f2-c4c496dfd4c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\OTA\portable\os">
+      <UniqueIdentifier>{7e8a45b3-1299-475b-bdb6-137c1b5ad68d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\coreJSON">
+      <UniqueIdentifier>{737ecce3-e41e-4ca3-aa31-7486d1dba7b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\coreJSON\include">
+      <UniqueIdentifier>{cca56d33-b6e4-4161-bf35-7517538dca4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\ThirdParty\tinyCBOR">
+      <UniqueIdentifier>{7700122a-9e03-4471-b366-387347514071}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Utilities\IoT-Crypto">
+      <UniqueIdentifier>{a9df260b-5035-49af-8e6a-7be077672655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\Utilities\IoT-Crypto\include">
+      <UniqueIdentifier>{1f14e829-6c1e-4c8e-9164-e34c5b684c28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\OTA-PAL">
+      <UniqueIdentifier>{fa0111a2-63f8-4ddd-a4c4-03e8e146330d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\OTA-PAL\Win32">
+      <UniqueIdentifier>{8d582a10-0114-489a-9db0-e948e1915081}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c">
@@ -198,7 +231,61 @@
     <ClCompile Include="..\..\source\LargeMessageSubscribePublish.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\SimpleSubscribePublish.c">
+    <ClCompile Include="..\..\lib\AWS\ota\source\ota.c">
+      <Filter>Lib\AWS\OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\ota_base64.c">
+      <Filter>Lib\AWS\OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\ota_cbor.c">
+      <Filter>Lib\AWS\OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\ota_http.c">
+      <Filter>Lib\AWS\OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\ota_interface.c">
+      <Filter>Lib\AWS\OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\ota_mqtt.c">
+      <Filter>Lib\AWS\OTA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.c">
+      <Filter>Lib\AWS\OTA\portable\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\coreJSON\source\core_json.c">
+      <Filter>Lib\FreeRTOS\coreJSON</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder_close_container_checked.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborerrorstrings.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborparser.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborparser_dup_string.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborpretty.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborpretty_stdio.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborvalidation.c">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\Utilities\crypto\src\iot_crypto.c">
+      <Filter>Lib\FreeRTOS\Utilities\IoT-Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.c">
+      <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ota_demo_core_mqtt.c">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -362,6 +449,36 @@
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.h">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.h">
+      <Filter>Lib\AWS\OTA\portable\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\coreJSON\source\include\core_json.h">
+      <Filter>Lib\FreeRTOS\coreJSON\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\cbor.h">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\cborinternal_p.h">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\compilersupport_p.h">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\tinycbor-version.h">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\utf8_p.h">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\iot_appversion32.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\crypto\include\iot_crypto.h">
+      <Filter>Lib\FreeRTOS\Utilities\IoT-Crypto\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h">
+      <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\lib\ThirdParty\WinPCap\wpcap.lib">
@@ -370,5 +487,13 @@
     <Library Include="Debug\mbedTLS.lib">
       <Filter>Lib\ThirdParty\mbedTLS</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\lib\ThirdParty\tinycbor\src\LICENSE">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </None>
+    <None Include="..\..\lib\ThirdParty\tinycbor\src\README.md">
+      <Filter>Lib\ThirdParty\tinyCBOR</Filter>
+    </None>
   </ItemGroup>
 </Project>
