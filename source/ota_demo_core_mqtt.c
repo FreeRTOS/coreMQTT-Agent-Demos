@@ -69,7 +69,6 @@
 
 /* Include platform abstraction header. */
 #include "ota_pal.h"
-#include "ota_demo_helpers.h"
 
 /* Transport interface include.
  * OTA needs a TLS secure connection. So inclue mbedtls Network context.
@@ -284,31 +283,6 @@ uint8_t bitmap[ OTA_MAX_BLOCK_BITMAP_SIZE ];
 static OtaEventData_t eventBuffer;
 
 /**
- * @brief Static handle for MQTT context.
- */
-static MQTTContext_t xMQTTContext;
-
-/**
- * @brief Static handle for Network context.
- */
-static NetworkContext_t xNetworkContext;
-
-/**
- * @brief Mutex for synchronizing coreMQTT API calls.
- */
-static SemaphoreHandle_t xMqttMutex;
-
-/**
- * @brief Semaphore for synchronizing buffer operations.
- */
-static SemaphoreHandle_t xBufferSemaphore;
-
-/**
- * @brief Semaphore for acknowledgment from MQTT packet.
- */
-static SemaphoreHandle_t xMqttAckSem;
-
-/**
  * @brief Static buffer used to hold MQTT messages being sent and received.
  */
 static uint8_t ucSharedBuffer[ otaexampleNETWORK_BUFFER_SIZE ];
@@ -324,9 +298,7 @@ static uint32_t ulGlobalEntryTimeMs;
 /**
  * @brief Static handle for MQTT context.
  */
-static MQTTContext_t* pxMQTTContext;
-
-static const MQTTContextHandle_t xMQTTContextHandle = 0;
+static MQTTContextHandle_t xOTAMQTTContextHandle;
 
 /** @brief Static buffer used to hold MQTT messages being sent and received. */
 static MQTTFixedBuffer_t xBuffer =
@@ -509,7 +481,7 @@ static void prvEventCallback( MQTTContext_t * pxMQTTContext,
 /*
  * Publish a message to the specified client/topic at the given QOS.
  */
-static OtaErr_t mqttPublish( const char * const pacTopic,
+static OtaMqttStatus_t mqttPublish( const char * const pacTopic,
                              uint16_t topicLen,
                              const char * pMsg,
                              uint32_t msgSize,
@@ -518,92 +490,17 @@ static OtaErr_t mqttPublish( const char * const pacTopic,
 /*
  * Subscribe to the topics.
  */
-static OtaErr_t mqttSubscribe( const char * pTopicFilter,
-                               uint16_t topicFilterLength,
-                               uint8_t qos );
+static OtaMqttStatus_t mqttSubscribe(const char* pTopicFilter,
+    uint16_t topicFilterLength,
+    uint8_t ucQoS);
 
 /*
  * Unsubscribe from the topics.
  */
-static OtaErr_t mqttUnsubscribe( const char * pTopicFilter,
-                                 uint16_t topicFilterLength,
-                                 uint8_t qos );
-
+static OtaMqttStatus_t mqttUnsubscribe(const char* pTopicFilter,
+    uint16_t topicFilterLength,
+    uint8_t ucQoS);
 /*-----------------------------------------------------------*/
-
-static void prvEventCallback( MQTTContext_t * pxMQTTContext,
-                              MQTTPacketInfo_t * pxPacketInfo,
-                              MQTTDeserializedInfo_t * pxDeserializedInfo )
-{
-    configASSERT( pxMQTTContext != NULL );
-    configASSERT( pxPacketInfo != NULL );
-    configASSERT( pxDeserializedInfo != NULL );
-
-    /* Handle incoming publish. The lower 4 bits of the publish packet
-     * type is used for the dup, QoS, and retain flags. Hence masking
-     * out the lower bits to check if the packet is publish. */
-    if( ( pxPacketInfo->type & 0xF0U ) == MQTT_PACKET_TYPE_PUBLISH )
-    {
-        configASSERT( pxDeserializedInfo->pPublishInfo != NULL );
-        /* Handle incoming publish. */
-        SubscriptionManager_DispatchHandler( pxMQTTContext, pxDeserializedInfo->pPublishInfo );
-    }
-    else
-    {
-        /* Handle other packets. */
-        switch( pxPacketInfo->type )
-        {
-            case MQTT_PACKET_TYPE_SUBACK:
-                LogInfo( ( "Received SUBACK.\n\n" ) );
-                xSemaphoreGive( xMqttAckSem );
-                break;
-
-            case MQTT_PACKET_TYPE_UNSUBACK:
-                LogInfo( ( "Received UNSUBACK.\n\n" ) );
-                xSemaphoreGive( xMqttAckSem );
-                break;
-
-            case MQTT_PACKET_TYPE_PINGRESP:
-
-                /* Nothing to be done from application as library handles
-                 * PINGRESP. */
-                LogWarn( ( "PINGRESP should not be handled by the application "
-                           "callback when using MQTT_ProcessLoop.\n\n" ) );
-                break;
-
-            case MQTT_PACKET_TYPE_PUBACK:
-                LogInfo( ( "PUBACK received for packet id %u.\n\n",
-                           pxDeserializedInfo->packetIdentifier ) );
-                xSemaphoreGive( xMqttAckSem );
-                break;
-
-            /* Any other packet type is invalid. */
-            default:
-                LogError( ( "Unknown packet type received:(%02x).\n\n",
-                            pxPacketInfo->type ) );
-        }
-    }
-}
-
-/*-----------------------------------------------------------*/
-
-static uint32_t prvGetTimeMs( void )
-{
-    TickType_t xTickCount = 0;
-    uint32_t ulTimeMs = 0UL;
-
-    /* Get the current tick count. */
-    xTickCount = xTaskGetTickCount();
-
-    /* Convert the ticks to milliseconds. */
-    ulTimeMs = ( uint32_t ) xTickCount * MILLISECONDS_PER_TICK;
-
-    /* Reduce ulGlobalEntryTimeMs from obtained time so as to always return the
-     * elapsed time in the application. */
-    ulTimeMs = ( uint32_t ) ( ulTimeMs - ulGlobalEntryTimeMs );
-
-    return ulTimeMs;
-}
 
 static int32_t prvGenerateRandomNumber()
 {
@@ -626,152 +523,7 @@ static int32_t prvGenerateRandomNumber()
 }
 
 /*-----------------------------------------------------------*/
-#ifdef _AK_
-static BaseType_t prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
-                                                     NetworkContext_t * pxNetworkContext )
-{
-    MQTTStatus_t xResult;
-    MQTTConnectInfo_t xConnectInfo;
-    bool xSessionPresent;
-    TransportInterface_t xTransport;
-    BaseType_t xStatus = pdFAIL;
 
-    /* Fill in Transport Interface send and receive function pointers. */
-    xTransport.pNetworkContext = pxNetworkContext;
-    xTransport.send = SecureSocketsTransport_Send;
-    xTransport.recv = SecureSocketsTransport_Recv;
-
-    /* Initialize MQTT library. */
-    xResult = MQTT_Init( pxMQTTContext, &xTransport, prvGetTimeMs, prvEventCallback, &xBuffer );
-    configASSERT( xResult == MQTTSuccess );
-
-    /* Some fields are not used in this demo so start with everything at 0. */
-    ( void ) memset( ( void * ) &xConnectInfo, 0x00, sizeof( xConnectInfo ) );
-
-    /* Start with a clean session i.e. direct the MQTT broker to discard any
-     * previous session data. Also, establishing a connection with clean session
-     * will ensure that the broker does not store any data when this client
-     * gets disconnected. */
-    xConnectInfo.cleanSession = true;
-
-    /* The client identifier is used to uniquely identify this MQTT client to
-     * the MQTT broker. In a production device the identifier can be something
-     * unique, such as a device serial number. */
-    xConnectInfo.pClientIdentifier = democonfigCLIENT_IDENTIFIER;
-    xConnectInfo.clientIdentifierLength = ( uint16_t ) strlen( democonfigCLIENT_IDENTIFIER );
-
-    /* Set MQTT keep-alive period. If the application does not send packets at an interval less than
-     * the keep-alive period, the MQTT library will send PINGREQ packets. */
-    xConnectInfo.keepAliveSeconds = otaexampleKEEP_ALIVE_TIMEOUT_SECONDS;
-
-    if( xSemaphoreTake( xMqttMutex, DEFAULT_TICKS_TO_WAIT_FOR_SEMPHR ) == pdTRUE )
-    {
-        /* Send MQTT CONNECT packet to broker. LWT is not used in this demo, so it
-         * is passed as NULL. */
-        xResult = MQTT_Connect( pxMQTTContext,
-                                &xConnectInfo,
-                                NULL,
-                                otaexampleCONNACK_RECV_TIMEOUT_MS,
-                                &xSessionPresent );
-        xSemaphoreGive( xMqttMutex );
-    }
-    else
-    {
-        LogError( ( "Failed to acquire mqtt mutex for executing MQTT_Connect." ) );
-    }
-
-    if( xResult != MQTTSuccess )
-    {
-        LogError( ( "Failed to establish MQTT connection: Server=%s, MQTTStatus=%s",
-                    democonfigMQTT_BROKER_ENDPOINT, MQTT_Status_strerror( xResult ) ) );
-    }
-    else
-    {
-        /* Successfully established and MQTT connection with the broker. */
-        LogInfo( ( "An MQTT connection is established with %s.", democonfigMQTT_BROKER_ENDPOINT ) );
-        xStatus = pdPASS;
-    }
-
-    return xStatus;
-}
-
-
-static BaseType_t prvConnectToServerWithBackoffRetries( NetworkContext_t * pxNetworkContext )
-{
-    ServerInfo_t xServerInfo = { 0 };
-    SocketsConfig_t xSocketsConfig = { 0 };
-    BaseType_t xStatus = pdPASS;
-    TransportSocketStatus_t xNetworkStatus = TRANSPORT_SOCKET_STATUS_SUCCESS;
-    BackoffAlgorithmStatus_t xBackoffAlgStatus = BackoffAlgorithmSuccess;
-    BackoffAlgorithmContext_t xReconnectParams;
-    uint16_t usNextRetryBackOff = 0U;
-
-    /* Set the credentials for establishing a TLS connection. */
-    /* Initializer server information. */
-    xServerInfo.pHostName = democonfigMQTT_BROKER_ENDPOINT;
-    xServerInfo.hostNameLength = strlen( democonfigMQTT_BROKER_ENDPOINT );
-    xServerInfo.port = democonfigMQTT_BROKER_PORT;
-
-    /* Configure credentials for TLS mutual authenticated session. */
-    xSocketsConfig.enableTls = true;
-    xSocketsConfig.pAlpnProtos = NULL;
-    xSocketsConfig.maxFragmentLength = 0;
-    xSocketsConfig.disableSni = false;
-    xSocketsConfig.pRootCa = democonfigROOT_CA_PEM;
-    xSocketsConfig.rootCaSize = sizeof( democonfigROOT_CA_PEM );
-    xSocketsConfig.sendTimeoutMs = otaexampleTRANSPORT_SEND_RECV_TIMEOUT_MS;
-    xSocketsConfig.recvTimeoutMs = otaexampleTRANSPORT_SEND_RECV_TIMEOUT_MS;
-
-    /* Initialize reconnect attempts and interval. */
-    BackoffAlgorithm_InitializeParams( &xReconnectParams,
-                                       RETRY_BACKOFF_BASE_MS,
-                                       RETRY_MAX_BACKOFF_DELAY_MS,
-                                       RETRY_MAX_ATTEMPTS,
-                                       prvGenerateRandomNumber );
-
-    /* Attempt to connect to MQTT broker. If connection fails, retry after
-     * a timeout. Timeout value will exponentially increase till maximum
-     * attempts are reached.
-     */
-    do
-    {
-        /* Establish a TLS session with the MQTT broker. This example connects to
-         * the MQTT broker as specified in democonfigMQTT_BROKER_ENDPOINT and
-         * democonfigMQTT_BROKER_PORT at the top of this file. */
-        LogInfo( ( "Creating a TLS connection to %s:%u.",
-                   democonfigMQTT_BROKER_ENDPOINT,
-                   democonfigMQTT_BROKER_PORT ) );
-        /* Attempt to create a mutually authenticated TLS connection. */
-        xNetworkStatus = SecureSocketsTransport_Connect( pxNetworkContext,
-                                                         &xServerInfo,
-                                                         &xSocketsConfig );
-
-        if( xNetworkStatus != TRANSPORT_SOCKET_STATUS_SUCCESS )
-        {
-            /* Get back-off value (in milliseconds) for the next connection retry. */
-            xBackoffAlgStatus = BackoffAlgorithm_GetNextBackoff( &xReconnectParams, &usNextRetryBackOff );
-            configASSERT( xBackoffAlgStatus != BackoffAlgorithmRngFailure );
-
-            if( xBackoffAlgStatus == BackoffAlgorithmRetriesExhausted )
-            {
-                LogError( ( "Connection to the broker failed, all attempts exhausted." ) );
-                xStatus = pdFAIL;
-            }
-            else if( xBackoffAlgStatus == BackoffAlgorithmSuccess )
-            {
-                LogWarn( ( "Connection to the broker failed. Retrying connection after backoff delay." ) );
-                vTaskDelay( pdMS_TO_TICKS( usNextRetryBackOff ) );
-
-                LogInfo( ( "Retry attempt %lu out of maximum retry attempts %lu.",
-                           ( xReconnectParams.attemptsDone + 1 ),
-                           xReconnectParams.maxRetryAttempts ) );
-            }
-        }
-    } while( ( xNetworkStatus != TRANSPORT_SOCKET_STATUS_SUCCESS ) && ( xBackoffAlgStatus == BackoffAlgorithmSuccess ) );
-
-    return xStatus;
-}
-#endif
 /*-----------------------------------------------------------*/
 
 /**
@@ -840,11 +592,12 @@ static void otaAppCallback( OtaJobEvent_t event )
 
 /*-----------------------------------------------------------*/
 
-static void mqttDataCallback( MQTTPublishInfo_t * pPublishInfo,
-                              MQTTContext_t * pContext )
+static void mqttDataCallback(MQTTPublishInfo_t* pPublishInfo,
+                             void* pxSubscriptionContext)
 {
     configASSERT( pPublishInfo != NULL );
-    configASSERT( pContext != NULL );
+
+    (void)pxSubscriptionContext;
 
     OtaEventData_t * pData;
     OtaEventMsg_t eventMsg = { 0 };
@@ -871,14 +624,16 @@ static void mqttDataCallback( MQTTPublishInfo_t * pPublishInfo,
 
 /*-----------------------------------------------------------*/
 
-static void mqttJobCallback( MQTTContext_t * pContext,
-                             MQTTPublishInfo_t * pPublishInfo )
+static void mqttJobCallback( MQTTPublishInfo_t* pPublishInfo,
+                                  void* pxSubscriptionContext)
 {
-    configASSERT( pPublishInfo != NULL );
-    configASSERT( pContext != NULL );
-
     OtaEventData_t * pData;
     OtaEventMsg_t eventMsg = { 0 };
+
+
+    (void)pxSubscriptionContext;
+
+    configASSERT(pPublishInfo != NULL);
 
     LogInfo( ( "Received job message callback, size %d.\n\n", pPublishInfo->payloadLength ) );
 
@@ -900,107 +655,76 @@ static void mqttJobCallback( MQTTContext_t * pContext,
     }
 }
 /*-----------------------------------------------------------*/
-static SubscriptionManagerCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { mqttJobCallback, mqttDataCallback };
+static PublishCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { mqttJobCallback, mqttDataCallback };
 /*-----------------------------------------------------------*/
 
-static void prvCommandCallback( TaskHandle_t xTaskToNotify,
+static void prvCommandCallback( void *pCommandContext,
                                          MQTTStatus_t xReturnStatus )
 {
+    TaskHandle_t xTaskToNotify = (TaskHandle_t)pCommandContext;
     configASSERT( xTaskToNotify );
     xTaskNotify( xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
 }
 
 /*-----------------------------------------------------------*/
-#ifdef _AK_
 static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
-                                       char * pcTopicFilter,
-                                       void * pCallback )
+    char* pcTopicFilter,
+    void* pCallback)
 {
-    BaseType_t xCommandAdded;
-    MQTTStatus_t xReturn;
+    MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
-    MQTTSubscribeInfo_t xSubscribeInfo [ 100 ];
-    int iNext = 0;
+    MQTTSubscribeInfo_t xSubscribeInfo[1] = { 0 };
+    BaseType_t result;
+
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
-    xSubscribeInfo[ iNext ].pTopicFilter = pcTopicFilter;
-    xSubscribeInfo[ iNext ].topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeInfo[ iNext ].qos = xQoS;
+    xSubscribeInfo[0].pTopicFilter = pcTopicFilter;
+    xSubscribeInfo[0].topicFilterLength = (uint16_t)strlen(pcTopicFilter);
+    xSubscribeInfo[0].qos = xQoS;
 
-    LogInfo( ( "Subscribing to topic filter: %s", pcTopicFilter ) );
-    xTaskNotifyStateClear( NULL );
+    LogInfo((" Subscribing to topic filter: %s", pcTopicFilter));
+    xTaskNotifyStateClear(NULL);
 
-    xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
-                                         &( xSubscribeInfo[ iNext ] ),
-                                         ( void * ) pCallback,
-                                         NULL,
-                                         prvCommandCallback,
-                                         ( void * ) xTaskHandle );
+    mqttStatus = MQTTAgent_Subscribe( xOTAMQTTContextHandle,
+        xSubscribeInfo,
+        (void*)pCallback,
+        NULL,
+        prvCommandCallback,
+        (void*)xTaskHandle,
+        otaexampleTASK_DELAY_MS );
 
-    configASSERT( xCommandAdded == true );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
      * duration of the command. */
-    if( xCommandAdded != pdFALSE )
+    if (mqttStatus == MQTTSuccess )
     {
-        xCommandAdded = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, pdMS_TO_TICKS( otaexampleTASK_DELAY_MS ) );
-        configASSERT( xCommandAdded );
+        result = xTaskNotifyWait(0, mqttexampleMAX_UINT32, &ulNotifiedValue, pdMS_TO_TICKS(otaexampleTASK_DELAY_MS));
+        if (result == pdFALSE)
+        {
+            mqttStatus = MQTTRecvFailed;
+        }
     }
-
-    if( xCommandAdded != pdFALSE )
-    {
-        xReturn = MQTTSuccess;
-        iNext++;
-    }
-    else
-    {
-        xReturn = MQTTSendFailed;
-    }
-
-    configASSERT( xReturn == MQTTSuccess );
-
-    return xReturn;
+    return mqttStatus;
 }
-#endif
 
-
-static OtaErr_t mqttSubscribe( const char * pTopicFilter,
-                               uint16_t topicFilterLength,
-                               uint8_t qos )
+static OtaMqttStatus_t mqttSubscribe(const char* pTopicFilter,
+                                        uint16_t topicFilterLength,
+                                        uint8_t ucQoS)
 {
     OtaMqttStatus_t otaRet = OtaMqttSuccess;
-    SubscriptionManagerStatus_t subscriptionStatus = SUBSCRIPTION_MANAGER_SUCCESS;
     OtaMessageType_t otaMessageType;
-
     MQTTStatus_t mqttStatus = MQTTBadParameter;
-    MQTTContext_t * pMqttContext = &xMQTTContext;
-    MQTTSubscribeInfo_t pSubscriptionList[ 1 ];
 
-    configASSERT( pMqttContext != NULL );
     configASSERT( pTopicFilter != NULL );
     configASSERT( topicFilterLength > 0 );
 
-    /* Start with everything at 0. */
-    ( void ) memset( ( void * ) pSubscriptionList, 0x00, sizeof( pSubscriptionList ) );
+    otaMessageType = getOtaMessageType(pTopicFilter, topicFilterLength);
+    configASSERT(otaMessageType < OtaNumOfMessageType);
 
-    /* This example subscribes to only one topic and uses QOS1. */
-    pSubscriptionList[ 0 ].qos = qos;
-    pSubscriptionList[ 0 ].pTopicFilter = pTopicFilter;
-    pSubscriptionList[ 0 ].topicFilterLength = topicFilterLength;
-
-    if( xSemaphoreTake( xMqttMutex, DEFAULT_TICKS_TO_WAIT_FOR_SEMPHR ) == pdTRUE )
-    {
-        /* Send SUBSCRIBE packet. */
-        mqttStatus = MQTT_Subscribe( pMqttContext,
-                                     pSubscriptionList,
-                                     sizeof( pSubscriptionList ) / sizeof( MQTTSubscribeInfo_t ),
-                                     MQTT_GetPacketId( pMqttContext ) );
-        xSemaphoreGive( xMqttMutex );
-    }
-    else
-    {
-        LogError( ( "Failed to acquire mqtt mutex for executing MQTT_Subscribe" ) );
-    }
+    /* Send SUBSCRIBE packet. */
+    mqttStatus = prvSubscribeToTopic(ucQoS,
+        pTopicFilter,
+        otaMessageCallback[otaMessageType] );
 
     if( mqttStatus != MQTTSuccess )
     {
@@ -1011,35 +735,12 @@ static OtaErr_t mqttSubscribe( const char * pTopicFilter,
     }
     else
     {
-        if( xSemaphoreTake( xMqttAckSem, DEFAULT_TICKS_TO_WAIT_FOR_SEMPHR ) == pdTRUE )
-        {
-            LogInfo( ( "SUBSCRIBED to topic %.*s to broker.\n\n",
-                   topicFilterLength,
-                   pTopicFilter ) );
-        }
-        else
-        {
-            LogError( ( "Failed to receive suback for topic %.*s.\n\n",
-                        topicFilterLength,
-                        pTopicFilter ) );
-            otaRet = OtaMqttSubscribeFailed;
-        }
-    }
+        LogInfo(("SUBSCRIBE topic %.*s to broker.\n\n",
+            topicFilterLength,
+            pTopicFilter));
 
-    if( otaRet == OtaMqttSuccess )
-    {
-        otaMessageType = getOtaMessageType( pTopicFilter, topicFilterLength );
-
-        assert( ( otaMessageType >= 0 ) && ( otaMessageType < OtaNumOfMessageType ) );
-
-        /* Register callback to subscription manager. */
-        subscriptionStatus = SubscriptionManager_RegisterCallback( pTopicFilter, topicFilterLength, otaMessageCallback[ otaMessageType ] );
-
-        if( subscriptionStatus != SUBSCRIPTION_MANAGER_SUCCESS )
-        {
-            LogWarn( ( "Failed to register a callback to subscription manager with error = %d.",
-                       subscriptionStatus ) );
-        }
+        otaRet = OtaMqttSuccess;
+    
     }
 
     return otaRet;
@@ -1048,18 +749,16 @@ static OtaErr_t mqttSubscribe( const char * pTopicFilter,
 /*
  * Publish a message to the specified client/topic at the given QOS.
  */
-static OtaErr_t mqttPublish( const char * const pacTopic,
+static OtaMqttStatus_t mqttPublish( const char * const pacTopic,
                              uint16_t topicLen,
                              const char * pMsg,
                              uint32_t msgSize,
                              uint8_t qos )
 {
     OtaMqttStatus_t otaRet = OtaMqttSuccess;
-
+    BaseType_t result;
     MQTTStatus_t mqttStatus = MQTTBadParameter;
     MQTTPublishInfo_t publishInfo;
-    MQTTContext_t * pMqttContext = pxMQTTContext;
-    BaseType_t xCommandAdded;
     TaskHandle_t xTaskHandle;
     uint32_t ulNotifiedValue;
 
@@ -1072,34 +771,27 @@ static OtaErr_t mqttPublish( const char * const pacTopic,
     xTaskHandle = xTaskGetCurrentTaskHandle();
     xTaskNotifyStateClear( NULL );
 
-    xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &publishInfo, prvCommandCallback, ( void * ) xTaskHandle , /*_AK_ Remove and replace*/ 2000 );
-
-    configASSERT( xCommandAdded == pdTRUE );
+    mqttStatus = MQTTAgent_Publish(xOTAMQTTContextHandle,
+        &publishInfo,
+        prvCommandCallback,
+        ( void * ) xTaskHandle,
+        otaexampleTASK_DELAY_MS );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
      * duration of the command. */
-    if( qos != MQTTQoS0 )
+    if( mqttStatus == MQTTSuccess )
     {
-        if( xCommandAdded != pdFALSE )
-        {
-            xCommandAdded = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, pdMS_TO_TICKS( otaexampleTASK_DELAY_MS ) );
-            configASSERT( xCommandAdded );
-        }
-    }
 
-    if( xCommandAdded == pdTRUE )
-    {
-        mqttStatus = MQTTSuccess;
-    }
-    else
-    {
-        mqttStatus = MQTTNoDataAvailable;
+        result = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, &ulNotifiedValue, pdMS_TO_TICKS( otaexampleTASK_DELAY_MS ) );
+        if( result != pdTRUE )
+        {
+            mqttStatus = MQTTSendFailed;
+        }
     }
 
     if( mqttStatus != MQTTSuccess )
     {
         LogError( ( "Failed to send PUBLISH packet to broker with error = %u.", mqttStatus ) );
-
         otaRet = OtaMqttPublishFailed;
     }
     else
@@ -1108,67 +800,85 @@ static OtaErr_t mqttPublish( const char * const pacTopic,
                    topicLen,
                    pacTopic ) );
 
-        otaRet = OtaErrNone;
+        otaRet = OtaMqttSuccess;
     }
 
     return otaRet;
 }
 
-static OtaErr_t mqttUnsubscribe( const char * pTopicFilter,
-                                 uint16_t topicFilterLength,
-                                 uint8_t qos )
+static MQTTStatus_t prvUnSubscribeFromTopic(MQTTQoS_t xQoS,
+    char* pcTopicFilter,
+    void* pCallback)
+{
+    MQTTStatus_t mqttStatus;
+    uint32_t ulNotifiedValue;
+    MQTTSubscribeInfo_t xSubscribeInfo[ 1 ] = { 0 };
+    int index = 0;
+    BaseType_t result;
+
+    TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
+
+    xSubscribeInfo[index].pTopicFilter = pcTopicFilter;
+    xSubscribeInfo[index].topicFilterLength = (uint16_t)strlen(pcTopicFilter);
+    xSubscribeInfo[index].qos = xQoS;
+
+    LogInfo((" Subscribing to topic filter: %s", pcTopicFilter));
+    xTaskNotifyStateClear(NULL);
+
+
+    mqttStatus = MQTTAgent_Unsubscribe(xOTAMQTTContextHandle,
+        xSubscribeInfo,
+        prvCommandCallback,
+        (void*)xTaskHandle,
+        otaexampleTASK_DELAY_MS);
+
+
+    /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
+     * duration of the command. */
+    if (mqttStatus == MQTTSuccess)
+    {
+        result = xTaskNotifyWait(0, mqttexampleMAX_UINT32, &ulNotifiedValue, pdMS_TO_TICKS(otaexampleTASK_DELAY_MS));
+        if (result == pdFALSE)
+        {
+            mqttStatus = MQTTRecvFailed;
+        }
+    }
+    return mqttStatus;
+}
+
+static OtaMqttStatus_t mqttUnsubscribe(const char* pTopicFilter,
+    uint16_t topicFilterLength,
+    uint8_t ucQoS)
 {
     OtaMqttStatus_t otaRet = OtaMqttSuccess;
+    OtaMessageType_t otaMessageType;
     MQTTStatus_t mqttStatus = MQTTBadParameter;
 
-    MQTTSubscribeInfo_t pSubscriptionList[ 1 ];
-    MQTTContext_t * pMqttContext = pxMQTTContext;
+    configASSERT(pTopicFilter != NULL);
+    configASSERT(topicFilterLength > 0);
 
-    /* Start with everything at 0. */
-    ( void ) memset( ( void * ) pSubscriptionList, 0x00, sizeof( pSubscriptionList ) );
+    otaMessageType = getOtaMessageType(pTopicFilter, topicFilterLength);
+    configASSERT(otaMessageType < OtaNumOfMessageType);
 
-    /* This example subscribes to and unsubscribes from only one topic
-     * and uses QOS1. */
-    pSubscriptionList[ 0 ].qos = qos;
-    pSubscriptionList[ 0 ].pTopicFilter = pTopicFilter;
-    pSubscriptionList[ 0 ].topicFilterLength = topicFilterLength;
+    /* Send SUBSCRIBE packet. */
+    mqttStatus = prvUnSubscribeFromTopic(ucQoS,
+        pTopicFilter,
+        otaMessageCallback[otaMessageType]);
 
-    if( xSemaphoreTake( xMqttMutex, DEFAULT_TICKS_TO_WAIT_FOR_SEMPHR ) == pdTRUE )
+    if (mqttStatus != MQTTSuccess)
     {
-    /* Send UNSUBSCRIBE packet. */
-    mqttStatus = MQTT_Unsubscribe( pMqttContext,
-                                   pSubscriptionList,
-                                   sizeof( pSubscriptionList ) / sizeof( MQTTSubscribeInfo_t ),
-                                   MQTT_GetPacketId( pMqttContext ) );
-
-        xSemaphoreGive( xMqttMutex );
-    }
-    else
-    {
-        LogError( ( "Failed to acquire mutex for executing MQTT_Unsubscribe" ) );
-    }
-    if( mqttStatus != MQTTSuccess )
-    {
-        LogError( ( "Failed to send SUBSCRIBE packet to broker with error = %u.",
-                    mqttStatus ) );
+        LogError(("Failed to send UNSUBSCRIBE packet to broker with error = %u.",
+            mqttStatus));
 
         otaRet = OtaMqttUnsubscribeFailed;
     }
     else
     {
-        if( xSemaphoreTake( xMqttAckSem, DEFAULT_TICKS_TO_WAIT_FOR_SEMPHR ) == pdTRUE )
-        {
-        LogInfo( ( "SUBSCRIBE topic %.*s to broker.\n\n",
-                   topicFilterLength,
-                   pTopicFilter ) );
-        }
-        else
-        {
-            LogError( ( "Failed to get unsuback for topic %.*s.\n\n",
-                        topicFilterLength,
-                        pTopicFilter ) );
-            otaRet = OtaMqttUnsubscribeFailed;
-        }
+        LogInfo(("UNSUBSCRIBED topic %.*s from broker.\n\n",
+            topicFilterLength,
+            pTopicFilter));
+
+        otaRet = OtaMqttSuccess;
     }
 
     return otaRet;
@@ -1207,53 +917,7 @@ static void setOtaInterfaces( OtaInterfaces_t * pOtaInterfaces )
     pOtaInterfaces->pal.createFile = otaPal_CreateFileForRx;
 }
 
-static BaseType_t prvEstablishConnection( void )
-{
-    BaseType_t xRet = pdFAIL;
-
-    /* Attempt to establish TLS session with MQTT broker. If connection fails,
-     * retry after a timeout. Timeout value will be exponentially increased until
-     * the maximum number of attempts are reached or the maximum timeout value is reached.
-     * The function returns a failure status if the TLS over TCP connection cannot be established
-     * to the broker after the configured number of attempts. */
-    xRet = prvConnectToServerWithBackoffRetries( &xNetworkContext );
-
-    if( xRet == pdPASS )
-    {
-        /* Sends an MQTT Connect packet over the already established TLS connection,
-         * and waits for connection acknowledgment (CONNACK) packet. */
-        LogInfo( ( "Creating an MQTT connection to %s.", democonfigMQTT_BROKER_ENDPOINT ) );
-        xRet = prvCreateMQTTConnectionWithBroker( &xMQTTContext, &xNetworkContext );
-    }
-
-    return xRet;
-}
-
-#ifdef _AK_
-static TransportSocketStatus_t prvDisconnect( void )
-{
-    /* Transport socket return status. */
-    TransportSocketStatus_t xNetworkStatus;
-
-    /* Disconnect from broker. */
-    LogInfo( ( "Disconnecting the MQTT connection with %s.", democonfigMQTT_BROKER_ENDPOINT ) );
-    MQTT_Disconnect( &xMQTTContext );
-
-    /* Close the network connection. */
-    xNetworkStatus = SecureSocketsTransport_Disconnect( &xNetworkContext );
-
-    if( xNetworkStatus != TRANSPORT_SOCKET_STATUS_SUCCESS )
-    {
-        LogError( ( "SecureSocketsTransport_Disconnect() failed to close the network connection. "
-                    "StatusCode=%d.", ( int ) xNetworkStatus ) );
-    }
-
-    return xNetworkStatus;
-}
-/*-----------------------------------------------------------*/
-#endif
-
-int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext )
+int vStartOTADemo( MQTTContextHandle_t xMQTTContextHandle )
 {
     /* Status indicating a successful demo or not. */
     int32_t returnStatus = EXIT_SUCCESS;
@@ -1283,7 +947,7 @@ int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext )
 
     BaseType_t xIsConnectionEstablished = pdFALSE;
 
-    pxMQTTContext = pxOTAMQTTConext;
+     xOTAMQTTContextHandle = xMQTTContextHandle;
     /* Maximum time to wait for the OTA agent to get suspended. */
     TickType_t xSuspendTimeout;
 
@@ -1399,112 +1063,3 @@ vTaskSuspend( NULL ); /*_RB*/
 
     return returnStatus;
 }
-
-#if _AK_
-/**
- * @brief The function that runs the OTA demo, called by the demo runner.
- *
- * @param[in] awsIotMqttMode Specify if this demo is running with the AWS IoT
- * MQTT server. Set this to `false` if using another MQTT server.
- * @param[in] pIdentifier NULL-terminated MQTT client identifier.
- * @param[in] pNetworkServerInfo Passed to the MQTT connect function when
- * establishing the MQTT connection.
- * @param[in] pNetworkCredentialInfo Passed to the MQTT connect function when
- * establishing the MQTT connection.
- * @param[in] pNetworkInterface The network interface to use for this demo.
- *
- * @return `EXIT_SUCCESS` if the demo completes successfully; `EXIT_FAILURE` otherwise.
- */
-int RunOtaCoreMqttDemo( bool awsIotMqttMode,
-                        const char * pIdentifier,
-                        void * pNetworkServerInfo,
-                        void * pNetworkCredentialInfo,
-                        const IotNetworkInterface_t * pNetworkInterface )
-{
-    /* Remove compiler warnings about unused parameters. */
-    ( void ) awsIotMqttMode;
-    ( void ) pIdentifier;
-    ( void ) pNetworkServerInfo;
-    ( void ) pNetworkCredentialInfo;
-    ( void ) pNetworkInterface;
-
-    /* Return error status. */
-    int32_t returnStatus = EXIT_SUCCESS;
-
-    /* Semaphore initialization flag. */
-    bool xBufferSemInitialized = false;
-    bool xMqttMutexInitialized = false;
-    bool xMqttAckSemInitialized = false;
-
-    /* Initialize semaphore for buffer operations. */
-    xBufferSemaphore = xSemaphoreCreateBinary();
-
-    if( xBufferSemaphore == NULL )
-    {
-        LogError( ( "Failed to initialize buffer semaphore." ) );
-
-        returnStatus = EXIT_FAILURE;
-    }
-    else
-    {
-        xBufferSemInitialized = true;
-    }
-
-    /* Initialize mutex for coreMQTT APIs. */
-    xMqttMutex = xSemaphoreCreateMutex();
-
-    if( xMqttMutex == NULL )
-    {
-        LogError( ( "Failed to initialize mutex for mqtt apis" ) );
-
-        returnStatus = EXIT_FAILURE;
-    }
-    else
-    {
-        xMqttMutexInitialized = true;
-    }
-
-    /* Initialize mutex for coreMQTT APIs. */
-    xMqttAckSem = xSemaphoreCreateBinary();
-
-    if( xMqttAckSem == NULL )
-    {
-        LogError( ( "Failed to initialize semaphore for MQTT acknowledgments." ) );
-
-        returnStatus = EXIT_FAILURE;
-    }
-    else
-    {
-        xMqttAckSemInitialized = true;
-    }
-
-    /*TODO: initialize mqtt. */
-    /************************* Start OTA demo. ****************************/
-
-    if( returnStatus == EXIT_SUCCESS )
-    {
-        /* Start OTA demo. */
-        returnStatus = prvStartOTADemo();
-    }
-
-    if( xBufferSemInitialized == true )
-    {
-        /* Cleanup semaphore created for buffer operations. */
-        vSemaphoreDelete( xBufferSemaphore );
-    }
-
-    if( xMqttMutexInitialized == true )
-    {
-        /* Cleanup mutex created for MQTT operations. */
-        vSemaphoreDelete( xMqttMutex );
-    }
-
-    if( xMqttAckSemInitialized == true )
-    {
-        vSemaphoreDelete( xMqttAckSem );
-    }
-
-    return returnStatus;
-}
-
-#endif
