@@ -66,7 +66,7 @@
 #define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS   200
 
 #define mqttexamplePROTOCOL_OVERHEAD 50
-#define mqttexampleMAX_PAYLOAD_LENGTH ( mqttexampleNETWORK_BUFFER_SIZE - mqttexamplePROTOCOL_OVERHEAD )
+#define mqttexampleMAX_PAYLOAD_LENGTH ( MQTT_AGENT_NETWORK_BUFFER_SIZE - mqttexamplePROTOCOL_OVERHEAD )
 
 /*-----------------------------------------------------------*/
 
@@ -153,23 +153,23 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
     BaseType_t x;
     char c = '0';
     const char* topicBuf = "/max/payload/message";
-    volatile CommandContext_t xApplicationDefinedContext = { 0 };
+    CommandContext_t xApplicationDefinedContext = { 0 };
     MQTTStatus_t xCommandAdded;
     MQTTSubscribeInfo_t xSubscribeInfo;
 
     ( void ) pvParameters;
 
     /* Create a large buffer of data. */
-    for( x = 0; x < mqttexampleNETWORK_BUFFER_SIZE; x++ )
+    for( x = 0; x < MQTT_AGENT_NETWORK_BUFFER_SIZE; x++ )
     {
-        if( x < mqttexampleNETWORK_BUFFER_SIZE / 2 )
-		{
+        if( x < MQTT_AGENT_NETWORK_BUFFER_SIZE / 2 )
+        {
             maxPayloadMessage[ x ] = 'a';
-		}
+        }
         else
-		{
+        {
             maxPayloadMessage[ x ] = 'b';
-		}
+        }
         c++;
 
         /* Keep the characters human readable. */

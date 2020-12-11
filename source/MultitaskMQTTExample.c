@@ -650,6 +650,7 @@ static void prvMQTTAgentTask( void * pvParameters )
             configASSERT( xNetworkResult == pdPASS );
             xNetworkResult = prvSocketConnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
+            pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
             xMQTTStatus = prvMQTTConnect( false );/*_RB_ Should this be true or false? */
         }
