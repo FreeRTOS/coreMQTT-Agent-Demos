@@ -248,12 +248,12 @@
 #define APP_VERSION_BUILD    2
 
 
-/* Each compilation unit must define the NetworkContext struct. *
+/* Each compilation unit must define the NetworkContext struct. */
 struct NetworkContext
 {
     char pParams[400];
     //OpensslParams_t * pParams;
-};*/
+};
 
 /**
  * @brief Update File path buffer.
@@ -1401,7 +1401,7 @@ vTaskSuspend( NULL ); /*_RB*/
     return returnStatus;
 }
 
-#if 0
+#if _AK_
 /**
  * @brief The function that runs the OTA demo, called by the demo runner.
  *
