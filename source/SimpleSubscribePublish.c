@@ -51,7 +51,7 @@
 /**
  * @brief Size of statically allocated buffers for holding topic names and payloads.
  */
-#define mqttexampleDEMO_BUFFER_SIZE                 100
+#define mqttexampleDEMO_BUFFER_SIZE                  100
 
 /**
  * @brief Delay for the synchronous publisher task between publishes.
@@ -66,14 +66,14 @@
 /**
  * @brief Used to clear bits in a task's notification value.
  */
-#define mqttexampleMAX_UINT32                       0xffffffff
+#define mqttexampleMAX_UINT32                        0xffffffff
 
 /**
  * @brief The maximum amount of time in milliseconds to wait for the command to be
  * posted to the MQTT agent should the MQTT agent's command queue be full.  Tasks
  * wait in the Blocked state, so don't use any CPU time.
  */
-#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS   200
+#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS    200
 /*-----------------------------------------------------------*/
 
 struct CommandContext
@@ -123,10 +123,10 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( void *pxCommandContext,
+static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTStatus_t xReturnStatus ) /*_RB_ Do we need the packet ID here so we know which subscribe is being acked? */
 {
-CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
     configASSERT( pxCommandContext );
 
@@ -137,7 +137,7 @@ CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxCommand
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvWaitForCommandAcknowledgment( uint32_t *pulNotifiedValue )
+static BaseType_t prvWaitForCommandAcknowledgment( uint32_t * pulNotifiedValue )
 {
     BaseType_t xReturn;
 
@@ -196,7 +196,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     taskEXIT_CRITICAL();
 
     /* Complete the subscribe information.  The topic string must persist for
-    duration of subscription! */
+     * duration of subscription! */
     xSubscribeInfo.pTopicFilter = pcTopicFilter;
     xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
     xSubscribeInfo.qos = xQoS;
@@ -212,6 +212,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
      * priority of the MQTT agent task is higher than the priority of the task
      * calling this function. */
     LogInfo( ( "Sending subscribe request to agent for topic filter: %s with id %d", pcTopicFilter, ( int ) ulSubscribeMessageID ) );
+
     do
     {
         xCommandAdded = MQTTAgent_Subscribe( xMQTTContextHandle,
