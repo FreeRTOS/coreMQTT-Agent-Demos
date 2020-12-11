@@ -69,6 +69,7 @@
 
 /* Include platform abstraction header. */
 #include "ota_pal.h"
+#include "ota_demo_helpers.h"
 
 /*------------- Demo configurations -------------------------*/
 
@@ -246,6 +247,14 @@
 #define APP_VERSION_MINOR    9
 #define APP_VERSION_BUILD    2
 
+
+/* Each compilation unit must define the NetworkContext struct. *
+struct NetworkContext
+{
+    char pParams[400];
+    //OpensslParams_t * pParams;
+};*/
+
 /**
  * @brief Update File path buffer.
  */
@@ -313,6 +322,11 @@ static uint8_t ucSharedBuffer[ otaexampleNETWORK_BUFFER_SIZE ];
  * of overflow for the 32 bit unsigned integer used for holding the timestamp.
  */
 static uint32_t ulGlobalEntryTimeMs;
+
+/**
+ * @brief Static handle for MQTT context.
+ */
+static MQTTContext_t* pxMQTTContext;
 
 static const MQTTContextHandle_t xMQTTContextHandle = 0;
 
@@ -461,6 +475,7 @@ static OtaMessageType_t getOtaMessageType( const char * pTopicFilter,
 
 /*-----------------------------------------------------------*/
 
+#ifdef _AK_
 /**
  * @brief Connect to MQTT broker with reconnection retries.
  *
@@ -473,6 +488,7 @@ static OtaMessageType_t getOtaMessageType( const char * pTopicFilter,
  * @return pdFAIL on failure; pdPASS on successful TLS+TCP network connection.
  */
 static BaseType_t prvConnectToServerWithBackoffRetries( NetworkContext_t * pNetworkContext );
+#endif
 
 /**
  * @brief The application callback function for getting the incoming publishes,
@@ -606,7 +622,7 @@ static int32_t prvGenerateRandomNumber()
 }
 
 /*-----------------------------------------------------------*/
-
+#ifdef _AK_
 static BaseType_t prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
                                                      NetworkContext_t * pxNetworkContext )
 {
@@ -674,6 +690,7 @@ static BaseType_t prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTConte
 
     return xStatus;
 }
+
 
 static BaseType_t prvConnectToServerWithBackoffRetries( NetworkContext_t * pxNetworkContext )
 {
@@ -750,7 +767,7 @@ static BaseType_t prvConnectToServerWithBackoffRetries( NetworkContext_t * pxNet
 
     return xStatus;
 }
-
+#endif
 /*-----------------------------------------------------------*/
 
 /**
@@ -890,7 +907,7 @@ static void prvCommandCallback( TaskHandle_t xTaskToNotify,
 }
 
 /*-----------------------------------------------------------*/
-
+#ifdef _AK_
 static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
                                        char * pcTopicFilter,
                                        void * pCallback )
@@ -940,7 +957,7 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
 
     return xReturn;
 }
-
+#endif
 
 
 static OtaErr_t mqttSubscribe( const char * pTopicFilter,
@@ -1051,7 +1068,7 @@ static OtaErr_t mqttPublish( const char * const pacTopic,
     xTaskHandle = xTaskGetCurrentTaskHandle();
     xTaskNotifyStateClear( NULL );
 
-    xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &publishInfo, prvCommandCallback, ( void * ) xTaskHandle );
+    xCommandAdded = MQTTAgent_Publish( xMQTTContextHandle, &publishInfo, prvCommandCallback, ( void * ) xTaskHandle , /*_AK_ Remove and replace*/ 2000 );
 
     configASSERT( xCommandAdded == pdTRUE );
 
@@ -1079,7 +1096,7 @@ static OtaErr_t mqttPublish( const char * const pacTopic,
     {
         LogError( ( "Failed to send PUBLISH packet to broker with error = %u.", mqttStatus ) );
 
-        otaRet = OTA_ERR_PUBLISH_FAILED;
+        otaRet = OtaMqttPublishFailed;
     }
     else
     {
@@ -1207,6 +1224,8 @@ static BaseType_t prvEstablishConnection( void )
 
     return xRet;
 }
+
+#ifdef _AK_
 static TransportSocketStatus_t prvDisconnect( void )
 {
     /* Transport socket return status. */
@@ -1228,6 +1247,7 @@ static TransportSocketStatus_t prvDisconnect( void )
     return xNetworkStatus;
 }
 /*-----------------------------------------------------------*/
+#endif
 
 int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext )
 {
@@ -1381,6 +1401,7 @@ vTaskSuspend( NULL ); /*_RB*/
     return returnStatus;
 }
 
+#if 0
 /**
  * @brief The function that runs the OTA demo, called by the demo runner.
  *
@@ -1486,3 +1507,5 @@ int RunOtaCoreMqttDemo( bool awsIotMqttMode,
 
     return returnStatus;
 }
+
+#endif

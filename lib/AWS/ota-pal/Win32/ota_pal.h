@@ -34,7 +34,7 @@
 #include "ota.h"
 
 typedef uint32_t OtaErr_t;
-static const char signingcredentialSIGNING_CERTIFICATE_PEM[] = "Paste code signing certificate here.";
+//static const char signingcredentialSIGNING_CERTIFICATE_PEM[] = "Paste code signing certificate here.";
 
 /**
  * @brief Abort an OTA transfer.
