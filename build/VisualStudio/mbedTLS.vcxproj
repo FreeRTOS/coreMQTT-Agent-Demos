@@ -247,7 +247,6 @@
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\tests\include\test\drivers\test_driver.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\common.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_core.h" />
-    <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_driver_wrappers.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_invasive.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_its.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_se.h" />
@@ -255,7 +254,6 @@
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_slot_management.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_storage.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\ssl_invasive.h" />
-    <ClInclude Include="..\..\lib\ThirdParty\mbedtls\library\ssl_tls13_keys.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\3rdparty\everest\include\everest\everest.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\3rdparty\everest\include\everest\Hacl_Curve25519.h" />
     <ClInclude Include="..\..\lib\ThirdParty\mbedtls\3rdparty\everest\include\everest\kremlib.h" />
@@ -316,7 +314,6 @@
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\platform_util.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\poly1305.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto.c" />
-    <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_driver_wrappers.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_se.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_slot_management.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\psa_crypto_storage.c" />
@@ -335,7 +332,6 @@
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\ssl_srv.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\ssl_ticket.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\ssl_tls.c" />
-    <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\ssl_tls13_keys.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\threading.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\timing.c" />
     <ClCompile Include="..\..\lib\ThirdParty\mbedtls\library\version.c" />
