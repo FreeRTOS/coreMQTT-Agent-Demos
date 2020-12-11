@@ -71,6 +71,11 @@
 #include "ota_pal.h"
 #include "ota_demo_helpers.h"
 
+/* Transport interface include.
+ * OTA needs a TLS secure connection. So inclue mbedtls Network context.
+ */
+#include "using_mbedtls.h"
+
 /*------------- Demo configurations -------------------------*/
 
 /** Note: The device client certificate and private key credentials are
@@ -248,13 +253,6 @@
 #define APP_VERSION_BUILD    2
 
 
-/* Each compilation unit must define the NetworkContext struct. */
-struct NetworkContext
-{
-    char pParams[400];
-    //OpensslParams_t * pParams;
-};
-
 /**
  * @brief Update File path buffer.
  */
@@ -293,7 +291,7 @@ static MQTTContext_t xMQTTContext;
 /**
  * @brief Static handle for Network context.
  */
-NetworkContext_t xNetworkContext;
+static NetworkContext_t xNetworkContext;
 
 /**
  * @brief Mutex for synchronizing coreMQTT API calls.
@@ -376,7 +374,13 @@ const AppVersion32_t appFirmwareVersion =
 };
 
 /*-----------------------------------------------------------*/
+static void otaAgentTaskWrapper( void* pvParam )
+{
+    otaAgentTask( pvParam );
+    vTaskDelete( NULL );
+}
 
+/*-----------------------------------------------------------*/
 static OtaMessageType_t getOtaMessageType( const char * pTopicFilter,
                                            uint16_t topicFilterLength )
 {
@@ -1307,7 +1311,7 @@ int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext )
 
     if( otaRet == OtaErrNone )
     {
-        if( ( xRet = xTaskCreate( otaAgentTask,
+        if( ( xRet = xTaskCreate( otaAgentTaskWrapper,
                                   "OTA Agent Task",
                                   otaexampleSTACK_SIZE,
                                   NULL,
@@ -1391,11 +1395,6 @@ vTaskSuspend( NULL ); /*_RB*/
             }
         }
 
-        if( xOtaTaskHandle != NULL )
-        {
-            vTaskDelete( xOtaTaskHandle );
-            returnStatus = EXIT_SUCCESS;
-        }
     }
 
     return returnStatus;
