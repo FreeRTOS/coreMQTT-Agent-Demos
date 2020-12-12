@@ -90,7 +90,7 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 static void prvSubscribeCommandCallback( void *pxCommandContext,
                                          MQTTStatus_t xReturnStatus );
 
-static BaseType_t prvWaitForCommandAcknowledgment( uint32_t *pulNotifiedValue );
+static BaseType_t prvWaitForCommandAcknowledgment( void );
 
 static void prvWriteIncomingPayloadToBuffer( MQTTPublishInfo_t * pxPublishInfo,
                                              void * pxSubscriptionContext );
@@ -109,7 +109,7 @@ static void prvCommandCallback( CommandContext_t * pxCommandContext,
 
     if( pxCommandContext->xTaskToNotify != NULL )
     {
-        xTaskNotify( pxCommandContext->xTaskToNotify, pxCommandContext->ulNotificationValue, eSetValueWithOverwrite );
+        xTaskNotifyGive( pxCommandContext->xTaskToNotify );
     }
 }
 
@@ -122,15 +122,16 @@ CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxCommand
 
     /* Store the result in the application defined context. */
     pxApplicationDefinedContext->xReturnStatus = xReturnStatus;
-    xTaskNotify( pxApplicationDefinedContext->xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
+    xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
 }
 
-static BaseType_t prvWaitForCommandAcknowledgment( uint32_t *pulNotifiedValue )
+static BaseType_t prvWaitForCommandAcknowledgment( void )
 {
     BaseType_t xReturn;
 
     /* Wait for this task to get notified. */
-    xReturn = xTaskNotifyWait( 0, mqttexampleMAX_UINT32, pulNotifiedValue, mqttexampleDEMO_TICKS_TO_WAIT );
+    xReturn = ulTaskNotifyTake( pdFALSE, mqttexampleDEMO_TICKS_TO_WAIT );
+
     return xReturn;
 }
 
@@ -141,7 +142,7 @@ static void prvWriteIncomingPayloadToBuffer( MQTTPublishInfo_t * pxPublishInfo,
 
     configASSERT( pxPublishInfo->payloadLength <= mqttexampleMAX_PAYLOAD_LENGTH );
     memcpy( ( void * ) xApplicationDefinedContext->ulNotificationValue, ( void * ) pxPublishInfo->pPayload, pxPublishInfo->payloadLength );
-    xTaskNotify( xApplicationDefinedContext->xTaskToNotify, 0x00, eSetValueWithOverwrite );
+    xTaskNotifyGive( xApplicationDefinedContext->xTaskToNotify );
 }
 
 
@@ -208,8 +209,8 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
     } while( xCommandAdded != MQTTSuccess );
 
     /* Always wait for acks from subscribe messages. */
-    xCommandAdded = prvWaitForCommandAcknowledgment( NULL );
-    configASSERT( xCommandAdded == pdPASS );
+    xCommandAdded = prvWaitForCommandAcknowledgment();
+    configASSERT( xCommandAdded != pdFALSE );
     LogInfo( ( "Received subscribe ack for topic %s", topicBuf ) );
 
     memset( ( void * ) &xPublishInfo, 0x00, sizeof( xPublishInfo ) );
@@ -219,12 +220,14 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
     xPublishInfo.pPayload = maxPayloadMessage;
     xPublishInfo.payloadLength = mqttexampleMAX_PAYLOAD_LENGTH;
 
+    /* This task will wait on index 0 of its notification array for the
+     * callbacks to execute - so ensure the notification state starts clear. */
+    xTaskNotifyStateClear( NULL );
+
     for( ;; )
     {
         /* Clear out the buffer used to receive incoming publishes. */
-        memset( receivedEchoesPayload, 0x00, sizeof receivedEchoesPayload );
-
-        xTaskNotifyStateClear( NULL );
+        memset( receivedEchoesPayload, 0x00, sizeof( receivedEchoesPayload ) );
 
         /* Publish to the topic to which this task is also subscribed to receive an
         echo back. */
@@ -237,13 +240,16 @@ void vLargeMessageSubscribePublishTask( void * pvParameters )
         configASSERT( xCommandAdded == MQTTSuccess );
 
         LogInfo( ( "Waiting for large publish to topic %s to complete.", topicBuf ) );
-        prvWaitForCommandAcknowledgment( NULL );
+        x = prvWaitForCommandAcknowledgment();
+        configASSERT( x != pdFALSE );
 
         /* Wait for the publish back to this task. */
-        xTaskNotifyWait( 0x00, 0x00, NULL, mqttexampleDEMO_TICKS_TO_WAIT );
+        x = ulTaskNotifyTake( pdFALSE, mqttexampleDEMO_TICKS_TO_WAIT );
+        configASSERT( x != pdFALSE );
 
         x = memcmp( maxPayloadMessage, receivedEchoesPayload, mqttexampleMAX_PAYLOAD_LENGTH );
         configASSERT( x == 0 );
+
         if( x == 0 )
         {
             LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.",

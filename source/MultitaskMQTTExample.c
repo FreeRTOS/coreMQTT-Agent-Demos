@@ -459,7 +459,7 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
     BaseType_t xConnected = pdFAIL;
     RetryUtilsStatus_t xRetryUtilsStatus = RetryUtilsSuccess;
     RetryUtilsParams_t xReconnectParams;
-    const TickType_t transportTimeout = 0;
+    const TickType_t transportTimeout = 500;
 
     #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
         TlsTransportStatus_t xNetworkStatus = TLS_TRANSPORT_CONNECT_FAILURE;
@@ -558,7 +558,6 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
                                       FREERTOS_SO_RCVTIMEO,
                                       &transportTimeout,
                                       sizeof( TickType_t ) );
-
     }
 
     return xConnected;
@@ -650,6 +649,7 @@ static void prvMQTTAgentTask( void * pvParameters )
             configASSERT( xNetworkResult == pdPASS );
             xNetworkResult = prvSocketConnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
+            pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
             xMQTTStatus = prvMQTTConnect( false );/*_RB_ Should this be true or false? */
         }

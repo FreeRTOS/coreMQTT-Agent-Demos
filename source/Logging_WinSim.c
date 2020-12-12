@@ -268,9 +268,6 @@ void vLoggingPrintf( const char * pcFormat,
     uint32_t ulIPAddress;
     const char * pcTaskName;
     const char * pcNoTask = "None";
-    int iOriginalPriority;
-    HANDLE xCurrentTask;
-
 
     if( ( xStdoutLoggingUsed != pdFALSE ) || ( xDiskFileLoggingUsed != pdFALSE ) || ( xUDPLoggingUsed != pdFALSE ) )
     {

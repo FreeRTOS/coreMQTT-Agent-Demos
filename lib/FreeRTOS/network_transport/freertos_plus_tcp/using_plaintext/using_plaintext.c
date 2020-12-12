@@ -103,12 +103,15 @@ int32_t Plaintext_FreeRTOS_recv( NetworkContext_t * pNetworkContext,
 {
     int32_t socketStatus;
 
-    /* The TCP socket may have a receive block time.  If bytesToRecv is greater than
-     * 1 then a frame is already part way through reception and blocking is the
-     * right thing to do.  If bytesToRecv is 1 then this may be a speculative read to
-     * find the start of a new frame, in which case blocking is not desirable as it
-     * could block an entire protocol agent - so only read if bytes are known to be
-     * available. */
+    /* The TCP socket may have a receive block time.  If bytesToRecv is greater 
+     * than 1 then a frame is likely already part way through reception and 
+     * blocking to wait for the desired number of bytes to be available is the
+     * most efficient thing to do.  If bytesToRecv is 1 then this may be a 
+     * speculative call to read to find the start of a new frame, in which case 
+     * blocking is not desirable as it could block an entire protocol agent 
+     * task for the duration of the read block time and therefore negatively 
+     * impact performance.  So if bytesToRecv is 1 then don't call recv unless 
+     * it is known that bytes are already available. */
     if( ( bytesToRecv > 1 ) || ( FreeRTOS_recvcount( pNetworkContext->tcpSocket ) > 0 ) )
     {
         socketStatus = FreeRTOS_recv( pNetworkContext->tcpSocket, pBuffer, bytesToRecv, 0 );
