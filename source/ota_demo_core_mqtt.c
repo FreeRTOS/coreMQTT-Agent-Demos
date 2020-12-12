@@ -24,15 +24,15 @@
  */
 
 /**
- * @file aws_iot_ota_update_demo.c
- * @brief A simple OTA update example.
+ * @file ota_demo_core_mqtt.c
+ * @brief OTA Update example.
  *
- * This example initializes the OTA agent to enable OTA updates via the
- * MQTT broker. It simply connects to the MQTT broker with the users
- * credentials and spins in an indefinite loop to allow MQTT messages to be
- * forwarded to the OTA agent for possible processing. The OTA agent does all
- * of the real work; checking to see if the message topic is one destined for
- * the OTA agent. If not, it is simply ignored.
+ * This example shows how to perform an OTA update using OTA agent and coreMQTT
+ * library. The examples creates OTA agent and then spins in its own task
+ * publishing OTA statistics periodically within a configured interval.
+ * The OTA agent MQTT handlers are implemented using MQTT agent APIs, which
+ * allows OTA application to be run concurrently with other MQTT application
+ * tasks.
  */
 
 /* Standard includes. */
@@ -906,8 +906,6 @@ void vOTAUpdateTask( void * pvParmeters )
     OtaAgentStatistics_t otaStatistics = { 0 };
     /* OTA interface context required for library interface functions.*/
     OtaInterfaces_t otaInterfaces;
-
-    uint32_t ulIsConnectionEstablished = pdTRUE;
 
     /* Set OTA Library interfaces.*/
     setOtaInterfaces( &otaInterfaces );
