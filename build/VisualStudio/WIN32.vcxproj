@@ -19,7 +19,6 @@
     <ClCompile Include="..\..\lib\AWS\ota\source\ota_interface.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\ota_mqtt.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.c" />
-    <ClCompile Include="..\..\lib\AWS\ota_demo_helpers.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreJSON\source\core_json.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\list.c" />

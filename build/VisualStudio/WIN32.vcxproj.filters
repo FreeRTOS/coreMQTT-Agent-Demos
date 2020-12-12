@@ -289,7 +289,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\SimpleSubscribePublish.c" />
-    <ClCompile Include="..\..\lib\AWS\ota_demo_helpers.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">

@@ -94,7 +94,6 @@
 /* Exponential backoff retry include. */
 #include "exponential_backoff.h"
 
-#define BLOCK_TIME_MS 1000
 
 /* Transport interface include. */
 #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
@@ -338,66 +337,6 @@ static uint32_t ulGlobalEntryTimeMs;
 
 /*-----------------------------------------------------------*/
 
-static void prvMQTTDemoTask( void * pvParameters )
-{
-    BaseType_t xNetworkStatus = pdFAIL;
-    MQTTStatus_t xMQTTStatus;
-    int32_t i = 0;
-    char pcTaskNameBuf[ 10 ];
-    extern int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext );
-
-    ( void ) pvParameters;
-
-    ulGlobalEntryTimeMs = prvGetTimeMs();
-
-    /* Connect a TCP socket to the broker. */
-    xNetworkStatus = prvSocketConnect( &xNetworkContext );
-    configASSERT( xNetworkStatus == pdPASS );
-
-    /* Initialise the MQTT context with the buffer and transport interface. */
-    xMQTTStatus = prvMQTTInit();
-    configASSERT( xMQTTStatus == MQTTSuccess );
-
-    /* Create the agent task itself. */
-    prvCreateMQTTAgent();
-
-    /* Form an MQTT connection without a persistent session. */
-    xMQTTStatus = prvMQTTConnect( true );
-    configASSERT( xMQTTStatus == MQTTSuccess );
-
-    /* Create a few instances of prvSimpleSubscribePublishTask(). */
-//    for( i = 0; i < ( mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS - 1 ); i++ )
-//    {
-//        memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
-//        snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
-//        xTaskCreate( prvSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
-//    }
-
-    /* Finally turn this task into an instance of prvSimpleSubscribePublishTask()
-     * too. */
-//    prvSimpleSubscribePublishTask( ( void * ) i );
-
-extern MQTTContext_t * MQTTAgent_GetMQTTContext( int );
-MQTTContext_t *globalMqttContext = MQTTAgent_GetMQTTContext( 0 );
-vStartOTADemo( globalMqttContext );
-vTaskSuspend( NULL );
-    /* Wait for all queues to become empty.
-     * TODO: This may be a race condition, so using task notifications would be better. */
-    while( MQTTAgent_GetNumWaiting() != 0 )
-    {
-        vTaskDelay( mqttexampleDEMO_TICKS_TO_WAIT );
-    }
-
-    LogInfo( ( "Adding disconnect operation.\n" ) );
-    MQTTAgent_Disconnect( xMQTTContextHandle, NULL, NULL, BLOCK_TIME_MS );
-    LogInfo( ( "Clearing stored MQTT connection information.\n" ) );
-    MQTTAgent_Free( xMQTTContextHandle, NULL, NULL, BLOCK_TIME_MS );
-    LogInfo( ( "Terminating MQTT agent.\n" ) );
-    MQTTAgent_Terminate( BLOCK_TIME_MS );
-    LogInfo( ( "Demo completed successfully.\r\n" ) );
-}
-
-
 /*
  * @brief Create the task that demonstrates the MQTT Connection sharing demo.
  */
@@ -406,7 +345,7 @@ void vStartSimpleMQTTDemo( void )
     /* This example uses one application task to manage the TCP connection and its
      * interaction with the MQTT agent, as well as create the other example MQTT
      * tasks in accordance with the build configuration. */
-    xTaskCreate( prvMQTTDemoTask,  /* Function that implements the task. */
+    xTaskCreate( prvConnectAndCreateDemoTasks,  /* Function that implements the task. */
                  "ConnectManager",              /* Text name for the task - only used for debugging. */
                  democonfigDEMO_STACKSIZE,      /* Size of stack (in words, not bytes) to allocate for the task. */
                  NULL,                          /* Optional - task parameter - not used in this case. */
@@ -652,10 +591,9 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 }
 
 /*-----------------------------------------------------------*/
-volatile uint32_t socketCallbackCount = 0, socketCallbackPostCount = 0;
+
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
-BaseType_t xResult;
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;
@@ -664,8 +602,8 @@ BaseType_t xResult;
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
     if( ( MQTTAgent_GetNumWaiting() == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
     {
-        socketCallbackPostCount++;
-        xResult = MQTTAgent_ProcessLoop(xMQTTContextHandle, NULL, NULL);
+        /* Don't block as this is called from the context of the IP task. */
+        MQTTAgent_TriggerProcessLoop( xMQTTContextHandle, 0 );
     }
 }
 
