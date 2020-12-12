@@ -301,8 +301,8 @@ static BaseType_t prvCreateMQTTAgent( void );
 extern void vLargeMessageSubscribePublishTask( void * pvParameters );
 extern void vSimpleSubscribePublishTask( void * pvParameters );
 extern void vOTAUpdateTask( void * pvParameters );
-extern void vSuspendOTAUpdate(void);
-extern void vResumeOTAUpdate(void);
+extern void vSuspendOTAUpdate( void );
+extern void vResumeOTAUpdate( void );
 
 /*-----------------------------------------------------------*/
 
@@ -349,12 +349,12 @@ void vStartSimpleMQTTDemo( void )
     /* This example uses one application task to manage the TCP connection and its
      * interaction with the MQTT agent, as well as create the other example MQTT
      * tasks in accordance with the build configuration. */
-    xTaskCreate( prvConnectAndCreateDemoTasks,  /* Function that implements the task. */
-                 "ConnectManager",              /* Text name for the task - only used for debugging. */
-                 democonfigDEMO_STACKSIZE,      /* Size of stack (in words, not bytes) to allocate for the task. */
-                 NULL,                          /* Optional - task parameter - not used in this case. */
-                 tskIDLE_PRIORITY + 1,          /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
-                 &xMainTask );                  /* Optional - used to pass out a handle to the created task. */
+    xTaskCreate( prvConnectAndCreateDemoTasks, /* Function that implements the task. */
+                 "ConnectManager",             /* Text name for the task - only used for debugging. */
+                 democonfigDEMO_STACKSIZE,     /* Size of stack (in words, not bytes) to allocate for the task. */
+                 NULL,                         /* Optional - task parameter - not used in this case. */
+                 tskIDLE_PRIORITY + 1,         /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
+                 &xMainTask );                 /* Optional - used to pass out a handle to the created task. */
 }
 
 /*-----------------------------------------------------------*/
@@ -662,9 +662,9 @@ static void prvMQTTAgentTask( void * pvParameters )
         /* Context is only returned if error occurred. */
         if( pMqttContext != NULL )
         {
-#if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
-            vSuspendOTAUpdate();
-#endif
+            #if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+                vSuspendOTAUpdate();
+            #endif
             /* Reconnect TCP. */
             xNetworkResult = prvSocketDisconnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
@@ -673,12 +673,12 @@ static void prvMQTTAgentTask( void * pvParameters )
             pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
             xMQTTStatus = prvMQTTConnect( false ); /*_RB_ Should this be true or false? */
-#if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
-            if (xMQTTStatus == MQTTSuccess)
-            {
-                vResumeOTAUpdate();
-            }
-#endif
+            #if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+                if( xMQTTStatus == MQTTSuccess )
+                {
+                    vResumeOTAUpdate();
+                }
+            #endif
         }
     } while( pMqttContext );
 }
