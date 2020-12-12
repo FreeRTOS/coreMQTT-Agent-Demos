@@ -42,8 +42,8 @@
 #include <assert.h>
 
 /* Include common demo header. */
-//_RB_#include "aws_demo.h"
-#include "demo_config.h" //_RB_ Added.
+#include "demo_config.h"
+#include "ota_config.h"
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
@@ -282,30 +282,12 @@ uint8_t bitmap[ OTA_MAX_BLOCK_BITMAP_SIZE ];
  */
 static OtaEventData_t eventBuffer;
 
-/**
- * @brief Static buffer used to hold MQTT messages being sent and received.
- */
-static uint8_t ucSharedBuffer[ otaexampleNETWORK_BUFFER_SIZE ];
-
-/**
- * @brief Global entry time into the application to use as a reference timestamp
- * in the #prvGetTimeMs function. #prvGetTimeMs will always return the difference
- * between the current time and the global entry time. This will reduce the chances
- * of overflow for the 32 bit unsigned integer used for holding the timestamp.
- */
-static uint32_t ulGlobalEntryTimeMs;
 
 /**
  * @brief Static handle for MQTT context.
  */
-static MQTTContextHandle_t xOTAMQTTContextHandle;
+static MQTTContextHandle_t xOTAMQTTContextHandle = 0;
 
-/** @brief Static buffer used to hold MQTT messages being sent and received. */
-static MQTTFixedBuffer_t xBuffer =
-{
-    ucSharedBuffer,
-    otaexampleNETWORK_BUFFER_SIZE
-};
 
 /**
  * @brief The buffer passed to the OTA Agent from application while initializing.
@@ -451,32 +433,6 @@ static OtaMessageType_t getOtaMessageType( const char * pTopicFilter,
 
 /*-----------------------------------------------------------*/
 
-#ifdef _AK_
-/**
- * @brief Connect to MQTT broker with reconnection retries.
- *
- * If connection fails, retry is attempted after a timeout.
- * Timeout value will exponentially increase until maximum
- * timeout value is reached or the number of attempts are exhausted.
- *
- * @param[out] pxNetworkContext The output parameter to return the created network context.
- *
- * @return pdFAIL on failure; pdPASS on successful TLS+TCP network connection.
- */
-static BaseType_t prvConnectToServerWithBackoffRetries( NetworkContext_t * pNetworkContext );
-#endif
-
-/**
- * @brief The application callback function for getting the incoming publishes,
- * incoming acks, and ping responses reported from the MQTT library.
- *
- * @param[in] pxMQTTContext MQTT context pointer.
- * @param[in] pxPacketInfo Packet Info pointer for the incoming packet.
- * @param[in] pxDeserializedInfo Deserialized information from the incoming packet.
- */
-static void prvEventCallback( MQTTContext_t * pxMQTTContext,
-                              MQTTPacketInfo_t * pxPacketInfo,
-                              MQTTDeserializedInfo_t * pxDeserializedInfo );
 
 /*
  * Publish a message to the specified client/topic at the given QOS.
@@ -629,7 +585,6 @@ static void mqttJobCallback( MQTTPublishInfo_t* pPublishInfo,
 {
     OtaEventData_t * pData;
     OtaEventMsg_t eventMsg = { 0 };
-
 
     (void)pxSubscriptionContext;
 
@@ -917,13 +872,11 @@ static void setOtaInterfaces( OtaInterfaces_t * pOtaInterfaces )
     pOtaInterfaces->pal.createFile = otaPal_CreateFileForRx;
 }
 
-int vStartOTADemo( MQTTContextHandle_t xMQTTContextHandle )
+void vOTAUpdateTask( void *pvParmeters )
 {
-    /* Status indicating a successful demo or not. */
-    int32_t returnStatus = EXIT_SUCCESS;
 
     /* FreeRTOS APIs return status. */
-    BaseType_t xRet = pdFAIL;
+    BaseType_t xResult = pdPASS;
 
     /* coreMQTT library return status. */
     MQTTStatus_t mqttStatus = MQTTSuccess;
@@ -947,7 +900,6 @@ int vStartOTADemo( MQTTContextHandle_t xMQTTContextHandle )
 
     BaseType_t xIsConnectionEstablished = pdFALSE;
 
-     xOTAMQTTContextHandle = xMQTTContextHandle;
     /* Maximum time to wait for the OTA agent to get suspended. */
     TickType_t xSuspendTimeout;
 
@@ -967,15 +919,14 @@ int vStartOTADemo( MQTTContextHandle_t xMQTTContextHandle )
     {
         LogError( ( "Failed to initialize OTA Agent, exiting = %u.",
                     otaRet ) );
-
-        returnStatus = EXIT_FAILURE;
+        xResult = pdFAIL;
     }
 
     /****************************** Create OTA Task. ******************************/
 
-    if( otaRet == OtaErrNone )
+    if( xResult == pdPASS )
     {
-        if( ( xRet = xTaskCreate( otaAgentTaskWrapper,
+        if( ( xResult = xTaskCreate( otaAgentTaskWrapper,
                                   "OTA Agent Task",
                                   otaexampleSTACK_SIZE,
                                   NULL,
@@ -984,15 +935,14 @@ int vStartOTADemo( MQTTContextHandle_t xMQTTContextHandle )
         {
             LogError( ( "Failed to start OTA task: "
                         ",errno=%d",
-                        xRet ) );
+                xResult) );
 
-            returnStatus = EXIT_FAILURE;
         }
     }
 
     /***************************Start OTA demo loop. ******************************/
 
-    if( xRet == pdPASS )
+    if( xResult == pdPASS )
     {
         /*
          * Wait forever for OTA traffic but allow other tasks to run and output
@@ -1003,7 +953,7 @@ int vStartOTADemo( MQTTContextHandle_t xMQTTContextHandle )
             {
                 //_RB_xRet = prvEstablishConnection();
 
-                if( xRet == pdPASS )
+                if( xResult == pdPASS )
                 {
                     xIsConnectionEstablished = pdTRUE;
 
@@ -1061,5 +1011,5 @@ vTaskSuspend( NULL ); /*_RB*/
 
     }
 
-    return returnStatus;
+    vTaskDelete(NULL);
 }
