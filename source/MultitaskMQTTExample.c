@@ -157,7 +157,7 @@
 /**
  * @brief Size of statically allocated buffers for holding topic names and payloads.
  */
-#define mqttexampleDEMO_BUFFER_SIZE                 100
+#define mqttexampleDEMO_BUFFER_SIZE                  1024
 
 /**
  * @brief The maximum number of loop iterations to wait before declaring failure.
@@ -258,6 +258,9 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo,
                                    void * pxResponseQueue );
 
+static void prvDisplayUnsolicitedMessage( MQTTPublishInfo_t * pxPublishInfo,
+                                          void * pvContext );
+
 /**
  * @brief Task used to run the MQTT agent.
  *
@@ -290,7 +293,7 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters );
  */
 static uint32_t prvGetTimeMs( void );
 
-//_RB_ To document.
+/*_RB_ To document. */
 static BaseType_t prvCreateMQTTAgent( void );
 
 /*
@@ -298,7 +301,7 @@ static BaseType_t prvCreateMQTTAgent( void );
  */
 extern void vLargeMessageSubscribePublishTask( void * pvParameters );
 extern void vSimpleSubscribePublishTask( void * pvParameters );
-
+extern void vOTAUpdateTask( void * pvParameters );
 
 /*-----------------------------------------------------------*/
 
@@ -375,8 +378,8 @@ static MQTTStatus_t prvMQTTInit( void )
     xReturn = MQTTAgent_Init( xGlobalMQTTContextHandle,
                               &xTransport,
                               prvGetTimeMs,
-                              prvCopyPublishToQueue, /* Callback to execute if receiving publishes on unexpected topics. */
-                              xDefaultResponseQueue ); /* Context to pass into the callback. */
+                              prvDisplayUnsolicitedMessage, /* Callback to execute if receiving publishes on unexpected topics. */
+                              NULL );                       /* Context to pass into the callback. */
 
     return xReturn;
 }
@@ -401,7 +404,7 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
     /* The client identifier is used to uniquely identify this MQTT client to
      * the MQTT broker. In a production device the identifier can be something
      * unique, such as a device serial number. */
-    xConnectInfo.pClientIdentifier = democonfigCLIENT_IDENTIFIER;/*_RB_ should use functions to obtain these constants. */
+    xConnectInfo.pClientIdentifier = democonfigCLIENT_IDENTIFIER; /*_RB_ should use functions to obtain these constants. */
     xConnectInfo.clientIdentifierLength = ( uint16_t ) strlen( democonfigCLIENT_IDENTIFIER );
 
     /* Set MQTT keep-alive period. It is the responsibility of the application
@@ -558,7 +561,6 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
                                       FREERTOS_SO_RCVTIMEO,
                                       &transportTimeout,
                                       sizeof( TickType_t ) );
-
     }
 
     return xConnected;
@@ -614,6 +616,10 @@ static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are
 {
     PublishElement_t xCopiedPublish;
 
+
+    configASSERT( pxPublishInfo->topicNameLength < mqttexampleDEMO_BUFFER_SIZE );
+    configASSERT( pxPublishInfo->payloadLength < mqttexampleDEMO_BUFFER_SIZE );
+
     memset( &xCopiedPublish, 0x00, sizeof( xCopiedPublish ) );
     memcpy( &( xCopiedPublish.xPublishInfo ), pxPublishInfo, sizeof( MQTTPublishInfo_t ) );
 
@@ -626,6 +632,16 @@ static void prvCopyPublishToQueue( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are
 
     /* Add to response queue. */
     ( void ) xQueueSendToBack( ( QueueHandle_t ) pxResponseQueue, ( void * ) &xCopiedPublish, mqttexampleDEMO_TICKS_TO_WAIT );
+}
+
+
+static void prvDisplayUnsolicitedMessage( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are these parameters the other way round in the coreMQTT library? */
+                                          void * pvContext )
+{
+    LogInfo( ( "Unsolicited publish on topic %.*s payload %.*s.", pxPublishInfo->topicNameLength,
+               pxPublishInfo->pTopicName,
+               pxPublishInfo->payloadLength,
+               pxPublishInfo->pPayload ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -652,7 +668,7 @@ static void prvMQTTAgentTask( void * pvParameters )
             configASSERT( xNetworkResult == pdPASS );
             pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
-            xMQTTStatus = prvMQTTConnect( false );/*_RB_ Should this be true or false? */
+            xMQTTStatus = prvMQTTConnect( false ); /*_RB_ Should this be true or false? */
         }
     } while( pMqttContext );
 }
@@ -671,12 +687,12 @@ static BaseType_t prvCreateMQTTAgent( void )
 
     /* Create the MQTT agent task. This task is only created once and persists
      * across demo iterations. */
-    xResult = xTaskCreate(  prvMQTTAgentTask,
-                            "MQTTAgent",
-                            democonfigDEMO_STACKSIZE,
-                            NULL,
-                            configMAX_PRIORITIES - 3,
-                            &xAgentTask );
+    xResult = xTaskCreate( prvMQTTAgentTask,
+                           "MQTTAgent",
+                           democonfigDEMO_STACKSIZE,
+                           NULL,
+                           configMAX_PRIORITIES - 3,
+                           &xAgentTask );
 
     configASSERT( xResult == pdPASS );
 
@@ -690,7 +706,7 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     MQTTStatus_t xMQTTStatus;
     int32_t i = 0;
     char pcTaskNameBuf[ 10 ];
-    extern int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext );
+    extern int vStartOTADemo( MQTTContext_t * pxOTAMQTTConext );
 
     ( void ) pvParameters;
 
@@ -704,22 +720,29 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     xMQTTStatus = prvMQTTInit();
     configASSERT( xMQTTStatus == MQTTSuccess );
 
+    xDefaultResponseQueue = xQueueCreate( 1, sizeof( PublishElement_t ) );
+    configASSERT( xDefaultResponseQueue );
+
     /* Create the agent task itself. */
-    //prvCreateMQTTAgent();
+    /*prvCreateMQTTAgent(); */
 
     /* Form an MQTT connection without a persistent session. */
     xMQTTStatus = prvMQTTConnect( true );
     configASSERT( xMQTTStatus == MQTTSuccess );
 
-    xTaskCreate( vLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
+    #if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+        xTaskCreate( vOTAUpdateTask, "OtaUpdate", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
+    #else
+        xTaskCreate( vLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
 
-    /* Create a few instances of vSimpleSubscribePublishTask(). */
-    for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
-    {
-        memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
-        snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
-        xTaskCreate( vSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
-    }
+        /* Create a few instances of vSimpleSubscribePublishTask(). */
+        for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
+        {
+            memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
+            snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
+            xTaskCreate( vSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
+        }
+    #endif /* if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 ) */
 
     /* Start the MQTT agent. */
     prvMQTTAgentTask( NULL );
