@@ -480,6 +480,9 @@
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h">
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\ota_config.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\lib\ThirdParty\WinPCap\wpcap.lib">
