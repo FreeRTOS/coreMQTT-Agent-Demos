@@ -78,7 +78,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_IDENTIFIER				"insert here."
  */
-#define democonfigCLIENT_IDENTIFIER    "Thing3"
+#define democonfigCLIENT_IDENTIFIER				"insert here."
 
 /**
  * @brief Endpoint of the MQTT broker to connect to.
@@ -95,9 +95,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_ENDPOINT				"insert here."
  */
-//#define democonfigMQTT_BROKER_ENDPOINT                  "test.mosquitto.org"
-//#define democonfigMQTT_BROKER_ENDPOINT                  "192.168.0.25"
-#define democonfigMQTT_BROKER_ENDPOINT                  "a91t51ne5wq71-ats.iot.us-west-2.amazonaws.com"
+#define democonfigMQTT_BROKER_ENDPOINT				"insert here."
 
 /**
  * @brief The port to use for the demo.
@@ -172,27 +170,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
  */
-#define democonfigCLIENT_CERTIFICATE_PEM                                  \
-"-----BEGIN CERTIFICATE-----\n"\
-"MIIDWTCCAkGgAwIBAgIUJgGp2otBnSu1zlXmgjV7wH3r/5MwDQYJKoZIhvcNAQEL\n"\
-"BQAwTTFLMEkGA1UECwxCQW1hem9uIFdlYiBTZXJ2aWNlcyBPPUFtYXpvbi5jb20g\n"\
-"SW5jLiBMPVNlYXR0bGUgU1Q9V2FzaGluZ3RvbiBDPVVTMB4XDTE5MTAxNTE3MzY0\n"\
-"OFoXDTQ5MTIzMTIzNTk1OVowHjEcMBoGA1UEAwwTQVdTIElvVCBDZXJ0aWZpY2F0\n"\
-"ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANJ6ZWn6z8lluVvDcBjY\n"\
-"IonMX1XPMiSfNKXqbBKw6J3xoGJk4gcMKKw8C49WWtFDnGHa3UVROUx4w9jDrWfE\n"\
-"eHZy9HhLOU9GCfQU2fwiUaQnQNXCceoUPZdl6V6L3hyEJBcDMvLalTX88O8hYJCQ\n"\
-"L4miVLlMEMZecWZbzd9lNFboOUCd8JZ2wn4krLF9VX7+GRmoRN2Gi9hQmIn2OVIY\n"\
-"WXK2B8V468wzI3O78eq2X3L1RGNvWTgyoGIpOXngxLD4i9nQK9Fleu9IHoTDmjz5\n"\
-"OdAUpWeO9QHv8Bq8MgnzNHg59jlQyAHJyUDyDA0cNeB+g+/DIs8gFVo74Q9VJLiT\n"\
-"y+sCAwEAAaNgMF4wHwYDVR0jBBgwFoAU3LqZ+L5sHMDAqQnu7jYFmoeeVvYwHQYD\n"\
-"VR0OBBYEFPF7lsAdltfelSVVUY1tCdKm7/PnMAwGA1UdEwEB/wQCMAAwDgYDVR0P\n"\
-"AQH/BAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQBAXRmoPT0lAPUdtsZzkxBY/rQd\n"\
-"ooG8weu1jw7WIGd7OcU017pB0YWIy3CcEdCs+WrJpwzwgJ3I9SqmVx8w/MYx8cFa\n"\
-"388aetA+WQS5GqnmxWCgVIEMcrRBqLCkpq397u99gKm130BLQT285ulpVOnHEzTE\n"\
-"xrHsaF96gWnvXA+lO2e45gknWRZgt5c+UNzpR7qd0DooqLVlfj8y8gUhaD4XdgH2\n"\
-"n/bD2r9ZaPGLevOyhk1CboS56qpysmn3OwjMEm+GIvmODZx7x6Mm/9O7TC0ky9IH\n"\
-"kNbOKbGlTTxzAZoJ1NjnfVqRCOvxi4aOOC3bz/cejQM1ezPoiiBsJHJxHsQC\n"\
-"-----END CERTIFICATE-----"
+#define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
 
 
 
@@ -221,34 +199,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
  */
-#define democonfigCLIENT_PRIVATE_KEY_PEM                                  \
-"-----BEGIN RSA PRIVATE KEY-----\n"\
-"MIIEpQIBAAKCAQEA0nplafrPyWW5W8NwGNgiicxfVc8yJJ80pepsErDonfGgYmTi\n"\
-"BwworDwLj1Za0UOcYdrdRVE5THjD2MOtZ8R4dnL0eEs5T0YJ9BTZ/CJRpCdA1cJx\n"\
-"6hQ9l2XpXoveHIQkFwMy8tqVNfzw7yFgkJAviaJUuUwQxl5xZlvN32U0Vug5QJ3w\n"\
-"lnbCfiSssX1Vfv4ZGahE3YaL2FCYifY5UhhZcrYHxXjrzDMjc7vx6rZfcvVEY29Z\n"\
-"ODKgYik5eeDEsPiL2dAr0WV670gehMOaPPk50BSlZ471Ae/wGrwyCfM0eDn2OVDI\n"\
-"AcnJQPIMDRw14H6D78MizyAVWjvhD1UkuJPL6wIDAQABAoIBAQC4lG/VZgfM5bGN\n"\
-"ALKQhxKa56h/dwnRRfEEw7TtG0mUIW72euQhLA+LI8k7dY6FUBaXVjmP7XAjWRDf\n"\
-"SpMKmijOL3em+skSdSiLbbHQxEP2ghoAm9oMXp245L2olV4+gb+okryebwRFaUHd\n"\
-"Y9bsUBXwTHSiX0uiuvYVvtKnY3hn8Py2DxYElxwlGzHQ1fVkOaXDiRSyeUprcP6u\n"\
-"iCzGZRjtq92Y0XSErQr3w2PnJdq9MRXk5l592HD1L5SRj90WH/jRMbPJY005hNd2\n"\
-"wl6XR4p0FYtpXRGeFzbnrFhwudW+Tax0ERIo+LqU0YSyqD/p4NTsVXWptSGt8Iau\n"\
-"maHjYq55AoGBAPumH3NzRLJ5ZXYEbZPSEPbGTYZVnad7WAf8TjDaMmzdm/PLtg1J\n"\
-"g/NxLLlL4bYAsQ7Pg9p97MRsE5h7OUhytJ9DbrshuXRNMY/TlHW2+T9dGsusaV1L\n"\
-"uH8WpNqtJCKB5pr9s6akOvbKX3ov3Ec+Vs5bYv2B/+hMXfunPvQ27SLlAoGBANYe\n"\
-"CdKF0kLrwcnajdDRtZ7hIUY3/cmYHytSx9E96JvPT6X2DPJSjbFrrtfvCi0K/+Fm\n"\
-"svNqQbsijtSeec7zODf3WiTo7BkI1rybxM8TCghkhHcNOTRwWQNmxjlgSC8bGSGd\n"\
-"F9Jy9OlTETBa6wyUMS80/8cWnqhX7UvT0O6wrTaPAoGAaProa/VOV1YlaZJ3VA9y\n"\
-"XEBl3wCggFoIY2xyAhdEqf3ZLV9yVyCwF0LDcZmiU5b+RjtzuhaGS3r6wcXGI98W\n"\
-"UsqCyzZKc6YwYtvVNzZZzIE+yHDok68fDIWZyFAqnuqqFUZ5R6+DmajbI9ILhv0O\n"\
-"oY+mQDOXWoVhP7aJoL+5NbECgYEAqWJH+O/+fwxMWKf5ynkryY1lqkv/C+y4s6gg\n"\
-"BMqJ6kCdTLgSU9y01OdQAOjMTwfFlwWMiX3ElArpnQ/lYq8MCVI3UL2mkMNqRPih\n"\
-"QANay3rhQ+EFIRPDhypVo+wkDofMYMgKoWRplO8uyOcTzPaq1iKCOXgOeTRdt7/Q\n"\
-"KBNCY8cCgYEAwgcQvcjObhK6D39N5w2D+Vtc9sUi+NnjVIkCUhaAPfagAFMiakfL\n"\
-"FqhcrARcUo9bK43b/RWOkBPp9B+XZ6mD202lvsCtw2zryYpjxqPynUuqYlalgtV7\n"\
-"vaTGVSXRThE5V+hOLh3c9jEyk5AQQURwTGuNF/3atgbdhKFZKF0KsVs=\n"\
-"-----END RSA PRIVATE KEY-----"
+#define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
 
 
 /**
