@@ -28,9 +28,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "FreeRTOS.h"
+#include "ota_config.h"
+
 #include "iot_crypto.h"
 #include "ota.h"
-#include "ota_private.h"
 
 #include "aws_ota_codesigner_certificate.h"
 #include "ota_pal.h"
@@ -430,7 +431,7 @@ static uint8_t * otaPal_ReadAndAssumeCertificate( const uint8_t * const pucCertN
 
 /*-----------------------------------------------------------*/
 
-OtaPalStatus_t otaPal_ResetDevice( OtaFileContext_t* pFileContext )
+OtaPalStatus_t otaPal_ResetDevice( OtaFileContext_t* const pFileContext )
 {
 	(void)pFileContext;
 
@@ -440,7 +441,7 @@ OtaPalStatus_t otaPal_ResetDevice( OtaFileContext_t* pFileContext )
 
 /*-----------------------------------------------------------*/
 
-OtaPalStatus_t otaPal_ActivateNewImage( OtaFileContext_t* pFileContext )
+OtaPalStatus_t otaPal_ActivateNewImage( OtaFileContext_t* const pFileContext )
 {
 	(void)pFileContext;
 
@@ -455,7 +456,7 @@ OtaPalStatus_t otaPal_ActivateNewImage( OtaFileContext_t* pFileContext )
  * On Windows, the state of the OTA image is stored in PlaformImageState.txt.
  */
 
-OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t* pFileContext, OtaImageState_t eState )
+OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pFileContext, OtaImageState_t eState )
 {
 	(void)pFileContext;
 
@@ -515,7 +516,7 @@ OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t* pFileContext, Ota
  * causing it to rollback to the previous code. On Windows, this is not
  * fully simulated as there is no easy way to reset the simulated device.
  */
-OtaPalImageState_t otaPal_GetPlatformImageState( OtaFileContext_t* pFileContext )
+OtaPalImageState_t otaPal_GetPlatformImageState( OtaFileContext_t * const pFileContext )
 {
 	(void)pFileContext;
 

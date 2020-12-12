@@ -203,7 +203,6 @@ typedef struct publishElement
 
 /*-----------------------------------------------------------*/
 
-
 /**
  * @brief Initializes an MQTT context, including transport interface and
  * network buffer.
@@ -302,6 +301,8 @@ static BaseType_t prvCreateMQTTAgent( void );
 extern void vLargeMessageSubscribePublishTask( void * pvParameters );
 extern void vSimpleSubscribePublishTask( void * pvParameters );
 extern void vOTAUpdateTask( void * pvParameters );
+extern void vSuspendOTAUpdate(void);
+extern void vResumeOTAUpdate(void);
 
 /*-----------------------------------------------------------*/
 
@@ -661,6 +662,9 @@ static void prvMQTTAgentTask( void * pvParameters )
         /* Context is only returned if error occurred. */
         if( pMqttContext != NULL )
         {
+#if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+            vSuspendOTAUpdate();
+#endif
             /* Reconnect TCP. */
             xNetworkResult = prvSocketDisconnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
@@ -669,6 +673,12 @@ static void prvMQTTAgentTask( void * pvParameters )
             pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
             xMQTTStatus = prvMQTTConnect( false ); /*_RB_ Should this be true or false? */
+#if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+            if (xMQTTStatus == MQTTSuccess)
+            {
+                vResumeOTAUpdate();
+            }
+#endif
         }
     } while( pMqttContext );
 }
