@@ -1,18 +1,18 @@
 [submodule "lib/FreeRTOS/freertos-kernel"]
 	path = lib/FreeRTOS/freertos-kernel
-	url = git@github.com:FreeRTOS/FreeRTOS-Kernel.git
+	url =  https://github.com/FreeRTOS/FreeRTOS-Kernel.git
 [submodule "lib/FreeRTOS/freertos-plus-tcp"]
 	path = lib/FreeRTOS/freertos-plus-tcp
-	url = git@github.com:FreeRTOS/FreeRTOS-Plus-TCP.git
+	url =  https://github.com/FreeRTOS/FreeRTOS-Plus-TCP.git
 [submodule "lib/FreeRTOS/freertos-plus-mqtt/coreMQTT"]
 	path = lib/FreeRTOS/freertos-plus-mqtt/coreMQTT
-	url = git@github.com:FreeRTOS/coreMQTT.git
+	url =  https://github.com/FreeRTOS/coreMQTT.git
 [submodule "lib/ThirdParty/mbedtls"]
 	path = lib/ThirdParty/mbedtls
 	url = https://github.com/ARMmbed/mbedtls.git
 [submodule "lib/FreeRTOS/coreJSON"]
 	path = lib/FreeRTOS/coreJSON
-	url = git@github.com:FreeRTOS/coreJSON.git
+	url =  https://github.com/FreeRTOS/coreJSON.git
 [submodule "lib/AWS/ota"]
 	path = lib/AWS/ota
 	url = https://github.com/aws/OTA-for-AWS-IoT-embedded-SDK
