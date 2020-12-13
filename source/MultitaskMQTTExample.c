@@ -105,14 +105,20 @@
 
 
 #ifndef democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK
-	#error Please define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK to 1 or 0 in demo_config.h - determines if vStartLargeMessageSubscribePublishTask() gets called or not.
+    #error Please define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK to 1 or 0 in demo_config.h - determines if vStartLargeMessageSubscribePublishTask() gets called or not.
 #endif
 
 #if defined( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK ) && !defined( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE )
-	#error Please define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartLargeMessageSubscribePublishTask().
+    #error Please define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartLargeMessageSubscribePublishTask().
 #endif
 
+#ifndef democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE
+    #error Please set democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE to the number of tasks to create in vStartSimpleSubscribePublishTask().  Can be zero.
+#endif
 
+#if defined( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ) && ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0 ) && !defined( democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE )
+    #error Please define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the tasks created by vStartSimpleSubscribePublishTask().
+#endif
 
 /**
  * These configuration settings are required to run the demo.
@@ -181,11 +187,6 @@
  * may be a loss of network connection.
  */
 #define mqttexampleMAX_WAIT_ITERATIONS               ( 20 )
-
-/**
- * @brief The number of subscribe-publish tasks to create.
- */
-#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       3
 
 /*-----------------------------------------------------------*/
 
@@ -302,12 +303,13 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters );
 static uint32_t prvGetTimeMs( void );
 
 /*
- * Demo tasks that can be created from this task.
+ * Functions that start the tasks demonstrated by this project.
  */
 extern void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
                                                     UBaseType_t uxPriority );
-
-extern void vSimpleSubscribePublishTask( void * pvParameters );
+extern void vStartSimpleSubscribePublishTask( uint32_t ulTaskNumber,
+                                             configSTACK_DEPTH_TYPE uxStackSize,
+                                             UBaseType_t uxPriority );
 
 
 /*-----------------------------------------------------------*/
@@ -672,9 +674,6 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
 {
     BaseType_t xNetworkStatus = pdFAIL;
     MQTTStatus_t xMQTTStatus;
-    int32_t i = 0;
-    char pcTaskNameBuf[ 10 ];
-    extern int vStartOTADemo( MQTTContext_t *pxOTAMQTTConext );
 
     ( void ) pvParameters;
 
@@ -705,13 +704,13 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     }
     #endif
 
-    /* Create a few instances of vSimpleSubscribePublishTask(). */
-    for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
+    #if( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0 )
     {
-        memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
-        snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
-//        xTaskCreate( vSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
+        vStartSimpleSubscribePublishTask( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE,
+                                          democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE,
+                                          tskIDLE_PRIORITY );
     }
+    #endif
 
     /* Start the MQTT agent. */
     prvMQTTAgentTask( NULL );
