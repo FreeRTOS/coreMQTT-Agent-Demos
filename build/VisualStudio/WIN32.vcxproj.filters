@@ -471,9 +471,6 @@
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\utf8_p.h">
       <Filter>Lib\ThirdParty\tinyCBOR</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\configuration-files\iot_appversion32.h">
-      <Filter>Configuration Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\Utilities\crypto\include\iot_crypto.h">
       <Filter>Lib\FreeRTOS\Utilities\IoT-Crypto\include</Filter>
     </ClInclude>
@@ -481,6 +478,9 @@
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\ota_config.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\aws_ota_codesigner_certificate.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
   </ItemGroup>

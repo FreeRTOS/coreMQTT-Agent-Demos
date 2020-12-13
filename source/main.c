@@ -50,7 +50,6 @@
 
 /* Demo Specific configs. */
 #include "demo_config.h"
-#include "iot_appversion32.h"
 
 /*
  * Prototypes for the demos that can be started from this project.  Note the

@@ -123,11 +123,11 @@
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\compilersupport_p.h" />
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\tinycbor-version.h" />
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\utf8_p.h" />
+    <ClInclude Include="..\..\source\configuration-files\aws_ota_codesigner_certificate.h" />
     <ClInclude Include="..\..\source\configuration-files\core_mqtt_config.h" />
     <ClInclude Include="..\..\source\configuration-files\demo_config.h" />
     <ClInclude Include="..\..\source\configuration-files\FreeRTOSConfig.h" />
     <ClInclude Include="..\..\source\configuration-files\FreeRTOSIPConfig.h" />
-    <ClInclude Include="..\..\source\configuration-files\iot_appversion32.h" />
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h" />
     <ClInclude Include="..\..\source\configuration-files\ota_config.h" />
   </ItemGroup>

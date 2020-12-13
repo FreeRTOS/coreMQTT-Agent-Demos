@@ -27,8 +27,8 @@
  * @file ota_demo_core_mqtt.c
  * @brief OTA Update example.
  *
- * This example shows how to perform an OTA update using OTA agent and coreMQTT
- * library. The examples creates OTA agent and then spins in its own task
+ * The example shows how to perform OTA update using OTA agent and coreMQTT
+ * library. The example creates the OTA agent task and then spins in its own task
  * publishing OTA statistics periodically within a configured interval.
  * The OTA agent MQTT handlers are implemented using MQTT agent APIs, which
  * allows OTA application to be run concurrently with other MQTT application
@@ -46,10 +46,8 @@
 #include "task.h"
 #include "semphr.h"
 
-
-/* Include the config files required for the demo. */
-#include "demo_config.h"
 #include "ota_config.h"
+#include "demo_config.h"
 
 /* MQTT library includes. */
 #include "freertos_mqtt_agent.h"
@@ -67,12 +65,6 @@
 
 /* Include platform abstraction header. */
 #include "ota_pal.h"
-
-/*
- * Transport interface include.
- * OTA always uses a TLS secure connection, so include mbedtls network context.
- */
-#include "using_mbedtls.h"
 
 /*------------- Demo configurations -------------------------*/
 
