@@ -290,13 +290,12 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters );
  */
 static uint32_t prvGetTimeMs( void );
 
-//_RB_ To document.
-static BaseType_t prvCreateMQTTAgent( void );
-
 /*
  * Demo tasks that can be created from this task.
  */
-extern void vLargeMessageSubscribePublishTask( void * pvParameters );
+extern void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
+                                                    UBaseType_t uxPriority );
+
 extern void vSimpleSubscribePublishTask( void * pvParameters );
 
 
@@ -658,31 +657,6 @@ static void prvMQTTAgentTask( void * pvParameters )
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvCreateMQTTAgent( void )
-{
-    BaseType_t xResult;
-
-    /* In this demo, send publishes on non-subscribed topics to this queue.
-     * Note that this value is not meant to be changed after `MQTTAgent_CommandLoop`
-     * has been called, since access to this variable is not protected by thread
-     * synchronization primitives. */
-    xDefaultResponseQueue = xQueueCreate( 1, sizeof( PublishElement_t ) );
-
-    /* Create the MQTT agent task. This task is only created once and persists
-     * across demo iterations. */
-    xResult = xTaskCreate(  prvMQTTAgentTask,
-                            "MQTTAgent",
-                            democonfigDEMO_STACKSIZE,
-                            NULL,
-                            configMAX_PRIORITIES - 3,
-                            &xAgentTask );
-
-    configASSERT( xResult == pdPASS );
-
-    return xResult;
-}
-/*-----------------------------------------------------------*/
-
 static void prvConnectAndCreateDemoTasks( void * pvParameters )
 {
     BaseType_t xNetworkStatus = pdFAIL;
@@ -703,21 +677,29 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     xMQTTStatus = prvMQTTInit();
     configASSERT( xMQTTStatus == MQTTSuccess );
 
-    /* Create the agent task itself. */
-    //prvCreateMQTTAgent();
+    /* In this demo, send publishes on non-subscribed topics to this queue.
+     * Note that this value is not meant to be changed after `MQTTAgent_CommandLoop`
+     * has been called, since access to this variable is not protected by thread
+     * synchronization primitives. */
+    xDefaultResponseQueue = xQueueCreate( 1, sizeof( PublishElement_t ) );
 
     /* Form an MQTT connection without a persistent session. */
     xMQTTStatus = prvMQTTConnect( true );
     configASSERT( xMQTTStatus == MQTTSuccess );
 
-    xTaskCreate( vLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
+    #if( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK == 1 )
+    {
+        vStartLargeMessageSubscribePublishTask( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE,
+                                                tskIDLE_PRIORITY );
+    }
+    #endif
 
     /* Create a few instances of vSimpleSubscribePublishTask(). */
     for( i = 0; i < mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS; i++ )
     {
         memset( pcTaskNameBuf, 0x00, sizeof( pcTaskNameBuf ) );
         snprintf( pcTaskNameBuf, 10, "SubPub%d", i );
-        xTaskCreate( vSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
+//        xTaskCreate( vSimpleSubscribePublishTask, pcTaskNameBuf, democonfigDEMO_STACKSIZE, ( void * ) i, tskIDLE_PRIORITY, NULL );
     }
 
     /* Start the MQTT agent. */
