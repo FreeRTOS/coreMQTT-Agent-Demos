@@ -662,9 +662,10 @@ static void prvMQTTAgentTask( void * pvParameters )
         /* Context is only returned if error occurred. */
         if( pMqttContext != NULL )
         {
-            #if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+            #if ( democonfigENABLE_OTA_UPDATE_DEMO == 1 )
                 vSuspendOTAUpdate();
             #endif
+
             /* Reconnect TCP. */
             xNetworkResult = prvSocketDisconnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
@@ -673,7 +674,8 @@ static void prvMQTTAgentTask( void * pvParameters )
             pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
             xMQTTStatus = prvMQTTConnect( false ); /*_RB_ Should this be true or false? */
-            #if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+
+            #if ( democonfigENABLE_OTA_UPDATE_DEMO == 1 )
                 if( xMQTTStatus == MQTTSuccess )
                 {
                     vResumeOTAUpdate();
@@ -740,7 +742,7 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     xMQTTStatus = prvMQTTConnect( true );
     configASSERT( xMQTTStatus == MQTTSuccess );
 
-    #if ( demoConfigENABLE_OTA_UPDATE_DEMO == 1 )
+    #if ( democonfigENABLE_OTA_UPDATE_DEMO == 1 )
         xTaskCreate( vOTAUpdateTask, "OtaUpdate", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
     #else
         xTaskCreate( vLargeMessageSubscribePublishTask, "LargeSubPub", democonfigDEMO_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL );
