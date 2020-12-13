@@ -82,4 +82,10 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define MQTT_AGENT_COMMAND_QUEUE_LENGTH 25
 #define MQTT_COMMAND_CONTEXTS_POOL_SIZE 10
 
+/*
+ * The maximum number of bytes that can be used in topic filter strings
+ * such as "/my/topicfilter/#".
+ */
+#define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH 100
+
 #endif /* ifndef CORE_MQTT_CONFIG_H */

@@ -24,8 +24,9 @@
  */
 
 /*
- * This file demonstrates numerous tasks all of which send unique MQTT payloads
- * to unique topics.  Some tasks use QoS0 and others QoS1.
+ * This file demonstrates numerous tasks all of which use the MQTT agent API
+ * to send unique MQTT payloads to unique topics over the same MQTT connection
+ * to the same MQTT agent.  Some tasks use QoS0 and others QoS1.
  *
  * Each created task is a unique instance of the task implemented by
  * prvSimpleSubscribePublishTask().  prvSimpleSubscribePublishTask()
@@ -376,6 +377,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 
 static void prvSimpleSubscribePublishTask( void * pvParameters )
 {
+    extern UBaseType_t uxRand( void );
     MQTTPublishInfo_t xPublishInfo = { 0 };
     char payloadBuf[ mqttexampleSTRING_BUFFER_LENGTH ];
     char topicBuf[ mqttexampleSTRING_BUFFER_LENGTH ]; /* Must persist until publish ack received. */
@@ -385,6 +387,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     MQTTStatus_t xCommandAdded;
     uint32_t ulTaskNumber = ( uint32_t ) pvParameters;
     MQTTQoS_t xQoS;
+    TickType_t xTicksToDelay;
 
     /* Have different tasks use different QoS.  0 and 1.  2 can also be used
      * if supported by the broker. */
@@ -472,7 +475,11 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
                      mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
 
-        vTaskDelay( pdMS_TO_TICKS( mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+        /* Add a little randomness into the delay so the tasks don't remain
+         * in lockstep. */
+        xTicksToDelay = pdMS_TO_TICKS( mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) +
+                       ( uxRand() % 0xff );
+        vTaskDelay( xTicksToDelay );
     }
 
     /* Delete the task if it is complete. */

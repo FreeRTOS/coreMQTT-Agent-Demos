@@ -24,10 +24,12 @@
  */
 
 /*
- * This file demonstrates MQTT packets that contain a payload nearly equal to
- * the buffer sized used to serialise and deserialise MQTT packets.  It can be
- * used to test behaviour when the MQTT packet is larger than the TCP/IP
- * buffers.
+ * This file demonstrates using the MQTT agent API to send MQTT packets that
+ * contain a payload nearly equal to the buffer size used to serialise and
+ * deserialise MQTT packets.  It can be used to test behaviour when the MQTT
+ * packet is larger than the TCP/IP buffers.  The task can run simultaneously
+ * to other demo tasks that also use the MQTT agent API to interact over the
+ * same MQTT connection to the same MQTT broker.
  *
  * prvLargeMessageSubscribePublishTask() implements the demo task, which
  * subscribes to a topic then periodically publishes large payloads to the
