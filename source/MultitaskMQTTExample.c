@@ -103,6 +103,17 @@
 
 #endif
 
+
+#ifndef democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK
+	#error Please define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK to 1 or 0 in demo_config.h - determines if vStartLargeMessageSubscribePublishTask() gets called or not.
+#endif
+
+#if defined( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK ) && !defined( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE )
+	#error Please define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartLargeMessageSubscribePublishTask().
+#endif
+
+
+
 /**
  * These configuration settings are required to run the demo.
  */
