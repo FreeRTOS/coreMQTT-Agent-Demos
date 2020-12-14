@@ -49,10 +49,10 @@
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\include">
       <UniqueIdentifier>{8c0beedd-c52c-4e7c-ad48-50cd1d41d29f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\Utilities">
+    <Filter Include="Lib\FreeRTOS\utilities">
       <UniqueIdentifier>{d4391c0b-8983-4b8d-a77c-ab0be9e87631}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\Utilities\Logging">
+    <Filter Include="Lib\FreeRTOS\utilities\Logging">
       <UniqueIdentifier>{f8fbc949-d7fb-46cb-b54c-66f10a00ac60}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\ThirdParty">
@@ -82,7 +82,7 @@
     <Filter Include="Lib\ThirdParty\WinPCap">
       <UniqueIdentifier>{5b450bc2-ed00-492a-97bc-f4ba437d902b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS">
+    <Filter Include="Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS">
       <UniqueIdentifier>{9f47bad4-d2b3-4b98-9183-d110330797b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\ThirdParty\mbedTLS">
@@ -91,7 +91,7 @@
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\include">
       <UniqueIdentifier>{294c455c-37f8-4049-879f-a5db60b9d280}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\Utilities\Exponential-Backoff">
+    <Filter Include="Lib\FreeRTOS\utilities\Exponential-Backoff">
       <UniqueIdentifier>{2ac7fe18-2c51-438a-b05b-739a9641c787}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS">
@@ -118,10 +118,10 @@
     <Filter Include="Lib\ThirdParty\tinyCBOR">
       <UniqueIdentifier>{7700122a-9e03-4471-b366-387347514071}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\Utilities\IoT-Crypto">
+    <Filter Include="Lib\FreeRTOS\utilities\IoT-Crypto">
       <UniqueIdentifier>{a9df260b-5035-49af-8e6a-7be077672655}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\Utilities\IoT-Crypto\include">
+    <Filter Include="Lib\FreeRTOS\utilities\IoT-Crypto\include">
       <UniqueIdentifier>{1f14e829-6c1e-4c8e-9164-e34c5b684c28}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\AWS\OTA-PAL">
@@ -210,25 +210,25 @@
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-Plaintext</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\mbedtls_error.c">
-      <Filter>Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_error.c">
+      <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\mbedtls_freertos_port.c">
-      <Filter>Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c">
+      <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\MultitaskMQTTExample.c">
+    <ClCompile Include="..\..\source\ConnectAndCreateDemoTasks.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.c">
-      <Filter>Lib\FreeRTOS\Utilities\Exponential-Backoff</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\utilities\exponential_backoff\exponential_backoff.c">
+      <Filter>Lib\FreeRTOS\utilities\Exponential-Backoff</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\LargeMessageSubscribePublish.c">
+    <ClCompile Include="..\..\source\LargeMessageSubscribePublishDemo.c">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\AWS\ota\source\ota.c">
@@ -279,16 +279,16 @@
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborvalidation.c">
       <Filter>Lib\ThirdParty\tinyCBOR</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\Utilities\crypto\src\iot_crypto.c">
-      <Filter>Lib\FreeRTOS\Utilities\IoT-Crypto</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\utilities\crypto\src\iot_crypto.c">
+      <Filter>Lib\FreeRTOS\utilities\IoT-Crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.c">
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ota_demo_core_mqtt.c">
+    <ClCompile Include="..\..\source\OTAOverMQTTDemo.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\SimpleSubscribePublish.c" />
+    <ClCompile Include="..\..\source\SimpleSubscribePublishDemo.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">
@@ -393,14 +393,14 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\NetworkInterface.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging.h">
-      <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging.h">
+      <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging_levels.h">
-      <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_levels.h">
+      <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\logging\logging_stack.h">
-      <Filter>Lib\FreeRTOS\Utilities\Logging</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_stack.h">
+      <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
@@ -423,11 +423,11 @@
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.h">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-Plaintext</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\mbedtls_error.h">
-      <Filter>Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_error.h">
+      <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\mbedtls_freertos\threading_alt.h">
-      <Filter>Lib\FreeRTOS\Utilities\mbedTLS-FreeRTOS</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\threading_alt.h">
+      <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\core_mqtt_config.h">
       <Filter>Configuration Files</Filter>
@@ -444,8 +444,8 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\exponential_backoff\exponential_backoff.h">
-      <Filter>Lib\FreeRTOS\Utilities\Exponential-Backoff</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\exponential_backoff\exponential_backoff.h">
+      <Filter>Lib\FreeRTOS\utilities\Exponential-Backoff</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.h">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
@@ -471,8 +471,8 @@
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\utf8_p.h">
       <Filter>Lib\ThirdParty\tinyCBOR</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\Utilities\crypto\include\iot_crypto.h">
-      <Filter>Lib\FreeRTOS\Utilities\IoT-Crypto\include</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\crypto\include\iot_crypto.h">
+      <Filter>Lib\FreeRTOS\utilities\IoT-Crypto\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h">
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>

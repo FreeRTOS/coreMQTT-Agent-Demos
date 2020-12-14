@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * Lab-Project-coreMQTT-Agent 201206
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -137,7 +137,7 @@
  * results in the wired network being used, while setting
  * configNETWORK_INTERFACE_TO_USE to 2 results in the wireless network being
  * used. */
-#define configNETWORK_INTERFACE_TO_USE      ( 6L )
+#define configNETWORK_INTERFACE_TO_USE      ( 5L ) /* 6 for virtual box */
 
 /* The address to which logging is sent should UDP logging be enabled. */
 #define configUDP_LOGGING_ADDR0             192
@@ -159,16 +159,16 @@
 
 /* Default IP address configuration.  Used in ipconfigUSE_DNS is set to 0, or
  * ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
-#define configIP_ADDR0                      10
-#define configIP_ADDR1                      10
-#define configIP_ADDR2                      10
+#define configIP_ADDR0                      192
+#define configIP_ADDR1                      168
+#define configIP_ADDR2                      56
 #define configIP_ADDR3                      200
 
 /* Default gateway IP address configuration.  Used in ipconfigUSE_DNS is set to
  * 0, or ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
-#define configGATEWAY_ADDR0                 10
-#define configGATEWAY_ADDR1                 10
-#define configGATEWAY_ADDR2                 10
+#define configGATEWAY_ADDR0                 192
+#define configGATEWAY_ADDR1                 168
+#define configGATEWAY_ADDR2                 56
 #define configGATEWAY_ADDR3                 1
 
 /* Default DNS server configuration.  OpenDNS addresses are 208.67.222.222 and
@@ -182,8 +182,8 @@
 /* Default netmask configuration.  Used in ipconfigUSE_DNS is set to 0, or
  * ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
 #define configNET_MASK0                     255
-#define configNET_MASK1                     0
-#define configNET_MASK2                     0
+#define configNET_MASK1                     255
+#define configNET_MASK2                     255
 #define configNET_MASK3                     0
 
 /* The UDP port to which print messages are sent. */
