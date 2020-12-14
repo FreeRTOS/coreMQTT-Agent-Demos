@@ -114,7 +114,7 @@ struct CommandContext
  * xReturnStatus parameter - which enables the task to check the status of the
  * operation.
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
@@ -130,7 +130,7 @@ static void prvSubscribeCommandCallback( void *pxCommandContext,
  * subscribes to the same topic that it publishes to, so any outgoing data on
  * that topic is also received back from the MQTT broker).
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxSubscriptionContext Context of the initial command.
@@ -143,7 +143,7 @@ static void prvIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
  * after the task first executes either MQTTAgent_Publish()* or
  * MQTTAgent_Subscribe().
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  *

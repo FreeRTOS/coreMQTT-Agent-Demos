@@ -120,7 +120,7 @@ struct CommandContext
  * xReturnStatus parameter - which enables the task to check the status of the
  * operation.
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
@@ -137,7 +137,7 @@ static void prvSubscribeCommandCallback( void *pxCommandContext,
  * xReturnStatus parameter - which enables the task to check the status of the
  * operation.
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
@@ -150,7 +150,7 @@ static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
  * after the task first executes either MQTTAgent_Publish()* or
  * MQTTAgent_Subscribe().
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  * @param[out] pulNotifiedValue The task's notification value after it receives
@@ -166,7 +166,7 @@ static BaseType_t prvWaitForCommandAcknowledgment( uint32_t * pulNotifiedValue )
  * implementation just logs information about the incoming publish including
  * the publish messages source topic and payload.
  *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html?#example_mqtt_api_call
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxSubscriptionContext Context of the initial command.
