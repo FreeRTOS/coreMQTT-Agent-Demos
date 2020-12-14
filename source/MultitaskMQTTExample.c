@@ -664,7 +664,7 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     #if( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
     {
         vStartOTACodeSigningDemo(democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE,
-            tskIDLE_PRIORITY);
+            tskIDLE_PRIORITY + 1);
     }
     #endif
 
