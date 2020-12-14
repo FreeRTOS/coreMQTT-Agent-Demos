@@ -25,6 +25,9 @@ If you have downloaded the repo without using the `--recurse-submodules` argumen
 git submodule update --init --recursive
 ```
 
+### Getting help
+You can use your Github login to get support from both the FreeRTOS community and directly from the primary FreeRTOS developers on our [active support forum](https://forums.freertos.org).  The [FAQ](https://www.freertos.org/FAQ.html) provides another support resource.
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
