@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * Lab-Project-coreMQTT-Agent 201206
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -66,6 +66,21 @@ extern void vLoggingPrintf( const char * pcFormatString,
 
 /************ End of logging configuration ****************/
 
+
+
+/* Constants that select which demos to build into the project:
+ * Set the following to 1 to include the demo in the build, or 0 to exclude the
+ * demo. */
+#define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK     0
+#define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE )
+
+#define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE    0
+#define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE        ( configMINIMAL_STACK_SIZE )
+
+#define democonfigCREATE_CODE_SIGNING_OTA_DEMO          1
+#define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE      ( configMINIMAL_STACK_SIZE )
+
+
 /**
  * @brief The MQTT client identifier used in this example.  Each client identifier
  * must be unique so edit as required to ensure no two clients connecting to the
@@ -77,7 +92,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *!!! hard coded constant.
  *
  */
-#define democonfigCLIENT_IDENTIFIER    "...insert here..."
+#define democonfigCLIENT_IDENTIFIER              "...insert here..."
 
 /**
  * @brief Endpoint of the MQTT broker to connect to.
@@ -93,7 +108,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * AWS CLI command line tool).
  *
  */
-#define democonfigMQTT_BROKER_ENDPOINT                  "...insert here..."
+#define democonfigMQTT_BROKER_ENDPOINT           "...insert here..."
 
 /**
  * @brief The port to use for the demo.
@@ -130,7 +145,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigROOT_CA_PEM    "...insert here..."
  */
-#define democonfigROOT_CA_PEM             "...insert here..."
+#define democonfigROOT_CA_PEM                    "...insert here..."
 
 /**
  * @brief Client certificate.
@@ -148,7 +163,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
  */
-#define democonfigCLIENT_CERTIFICATE_PEM             "...insert here..."
+#define democonfigCLIENT_CERTIFICATE_PEM         "...insert here..."
 
 /**
  * @brief Client's private key.
@@ -174,7 +189,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
  */
-#define democonfigCLIENT_PRIVATE_KEY_PEM            "...insert here..."
+#define democonfigCLIENT_PRIVATE_KEY_PEM         "...insert here..."
 
 
 

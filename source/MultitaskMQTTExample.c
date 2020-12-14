@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * Lab-Project-coreMQTT-Agent 201206
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -91,7 +91,7 @@
     #error Please define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK to 1 or 0 in demo_config.h - determines if vStartLargeMessageSubscribePublishTask() gets called or not.
 #endif
 
-#if defined( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK ) && !defined( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE )
+#if ( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK != 0 ) && !defined( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE )
     #error Please define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartLargeMessageSubscribePublishTask().
 #endif
 
@@ -99,7 +99,7 @@
     #error Please set democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE to the number of tasks to create in vStartSimpleSubscribePublishTask().  Can be zero.
 #endif
 
-#if defined( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ) && ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0 ) && !defined( democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE )
+#if ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0 ) && !defined( democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE )
     #error Please define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the tasks created by vStartSimpleSubscribePublishTask().
 #endif
 
@@ -107,8 +107,8 @@
     #error Please define democonfigCREATE_CODE_SIGNING_OTA_DEMO to 1 or 0 in demo_config.h - determines if vStartOTACodeSigningDemo() gets called or not.
 #endif
 
-#if defined( democonfigCREATE_CODE_SIGNING_OTA_DEMO ) && !defined( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE )
-    #error Please define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartOTACodeSigningDemo().
+#if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO != 0 ) && !defined( democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE )
+    #error Please define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartOTACodeSigningDemo().
 #endif
 
 
@@ -413,6 +413,7 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
     BaseType_t xConnected = pdFAIL;
     RetryUtilsStatus_t xRetryUtilsStatus = RetryUtilsSuccess;
     RetryUtilsParams_t xReconnectParams;
+    const TickType_t xTransportTimeout = 0UL;
 
     #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
         TlsTransportStatus_t xNetworkStatus = TLS_TRANSPORT_CONNECT_FAILURE;
@@ -507,6 +508,12 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
                                       FREERTOS_SO_WAKEUP_CALLBACK,
                                       ( void * ) prvMQTTClientSocketWakeupCallback,
                                       sizeof( &( prvMQTTClientSocketWakeupCallback ) ) );
+
+        ( void ) FreeRTOS_setsockopt( pxNetworkContext->tcpSocket,
+                                      0,
+                                      FREERTOS_SO_RCVTIMEO,
+                                      &xTransportTimeout,
+                                      sizeof( TickType_t ) );
     }
 
     return xConnected;

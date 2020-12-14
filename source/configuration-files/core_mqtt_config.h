@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * Lab-Project-coreMQTT-Agent 201206
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -75,17 +75,17 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * macro sets the limit on how many simultaneous PUBLISH states an MQTT
  * context maintains.
  */
-#define MQTT_STATE_ARRAY_MAX_COUNT    20U
-#define MQTT_RECV_POLLING_TIMEOUT_MS 500
+#define MQTT_STATE_ARRAY_MAX_COUNT          ( 20U )
+#define MQTT_RECV_POLLING_TIMEOUT_MS        ( 500 )
 
 /*_RB_ To document and add to the mqtt config defaults header file. */
-#define MQTT_AGENT_COMMAND_QUEUE_LENGTH 25
-#define MQTT_COMMAND_CONTEXTS_POOL_SIZE 10
+#define MQTT_AGENT_COMMAND_QUEUE_LENGTH     ( 25 )
+#define MQTT_COMMAND_CONTEXTS_POOL_SIZE     ( 10 )
 
 /*
  * The maximum number of bytes that can be used in topic filter strings
  * such as "/my/topicfilter/#".
  */
-#define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH 100
+#define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH ( 100 )
 
 #endif /* ifndef CORE_MQTT_CONFIG_H */
