@@ -50,11 +50,11 @@
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\exponential_backoff\exponential_backoff.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_error.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c" />
-    <ClCompile Include="..\..\source\LargeMessageSubscribePublishDemo.c" />
-    <ClCompile Include="..\..\source\Logging_WinSim.c" />
+    <ClCompile Include="..\..\source\large_message_sub_pub_demo.c" />
+    <ClCompile Include="..\..\source\logging_output_windows.c" />
     <ClCompile Include="..\..\source\main.c" />
-    <ClCompile Include="..\..\source\ConnectAndCreateDemoTasks.c" />
-    <ClCompile Include="..\..\source\SimpleSubscribePublishDemo.c" />
+    <ClCompile Include="..\..\source\connection_manager.c" />
+    <ClCompile Include="..\..\source\simple_sub_pub_demo.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder_close_container_checked.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborerrorstrings.c" />
@@ -63,7 +63,7 @@
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborpretty.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborpretty_stdio.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborvalidation.c" />
-    <ClCompile Include="..\..\source\OTAOverMQTTDemo.c" />
+    <ClCompile Include="..\..\source\ota_over_mqtt_demo.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h" />

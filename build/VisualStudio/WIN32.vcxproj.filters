@@ -159,7 +159,7 @@
     <ClCompile Include="..\..\source\main.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Logging_WinSim.c">
+    <ClCompile Include="..\..\source\logging_output_windows.c">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_ARP.c">
@@ -219,7 +219,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ConnectAndCreateDemoTasks.c">
+    <ClCompile Include="..\..\source\connection_manager.c">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\exponential_backoff\exponential_backoff.c">
@@ -228,7 +228,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\LargeMessageSubscribePublishDemo.c">
+    <ClCompile Include="..\..\source\large_message_sub_pub_demo.c">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\AWS\ota\source\ota.c">
@@ -285,10 +285,10 @@
     <ClCompile Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.c">
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\OTAOverMQTTDemo.c">
+    <ClCompile Include="..\..\source\ota_over_mqtt_demo.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\SimpleSubscribePublishDemo.c" />
+    <ClCompile Include="..\..\source\simple_sub_pub_demo.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">
