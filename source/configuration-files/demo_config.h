@@ -46,7 +46,7 @@
 #endif
 
 #ifndef LIBRARY_LOG_LEVEL
-    #define LIBRARY_LOG_LEVEL    LOG_INFO
+    #define LIBRARY_LOG_LEVEL    LOG_DEBUG
 #endif
 
 /* Prototype for the function used to print to console on Windows simulator
@@ -76,9 +76,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *!!! be read by software, such as a production serial number, instead of a
  *!!! hard coded constant.
  *
- * #define democonfigCLIENT_IDENTIFIER				"insert here."
  */
-#define democonfigCLIENT_IDENTIFIER "myclient123"
+#define democonfigCLIENT_IDENTIFIER    "...insert here..."
 
 /**
  * @brief Endpoint of the MQTT broker to connect to.
@@ -93,10 +92,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * Settings/Custom Endpoint, or using the describe-endpoint REST API (with
  * AWS CLI command line tool).
  *
- * #define democonfigMQTT_BROKER_ENDPOINT				"insert here."
  */
-//#define democonfigMQTT_BROKER_ENDPOINT                  "test.mosquitto.org"
-#define democonfigMQTT_BROKER_ENDPOINT                  "192.168.0.25"
+#define democonfigMQTT_BROKER_ENDPOINT                  "...insert here..."
 
 /**
  * @brief The port to use for the demo.
@@ -111,7 +108,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_PORT    ( insert here. )
  */
-#define democonfigMQTT_BROKER_PORT ( 50000 )
+//#define democonfigMQTT_BROKER_PORT ( 8883 )
 
 /**
  * @brief Server's root CA certificate.
@@ -133,8 +130,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigROOT_CA_PEM    "...insert here..."
  */
-#define democonfigROOT_CA_PEM "_RB_Dummy"
-
+#define democonfigROOT_CA_PEM             "...insert here..."
 
 /**
  * @brief Client certificate.
@@ -152,8 +148,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
  */
-#define democonfigCLIENT_CERTIFICATE_PEM "_RB_ Dummy"
-
+#define democonfigCLIENT_CERTIFICATE_PEM             "...insert here..."
 
 /**
  * @brief Client's private key.
@@ -179,7 +174,9 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
  */
-#define democonfigCLIENT_PRIVATE_KEY_PEM "_RB_Dummy"
+#define democonfigCLIENT_PRIVATE_KEY_PEM            "...insert here..."
+
+
 
 /**
  * @brief An option to disable Server Name Indication.
@@ -200,6 +197,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigUSE_AWS_IOT_CORE_BROKER    ( 1 )
  */
+#define democonfigUSE_AWS_IOT_CORE_BROKER    ( 1 )
 
 /**
  * @brief The username value for authenticating client to the MQTT broker when
@@ -258,7 +256,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * @brief Whether to use mutual authentication. If this macro is not set to 1
  * or not defined, then plaintext TCP will be used instead of TLS over TCP.
  */
-#define democonfigUSE_TLS                   0
+#define democonfigUSE_TLS                   1
 
 /**
  * @brief Set the stack size of the main demo task.
@@ -268,7 +266,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  */
 #define democonfigDEMO_STACKSIZE            configMINIMAL_STACK_SIZE
 
-
+#define mqttexampleNETWORK_BUFFER_SIZE 5000
 
 /**********************************************************************************
 * Error checks and derived values only below here - do not edit below here. -----*
@@ -405,6 +403,12 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * @brief Length of MQTT server host name.
  */
 #define democonfigBROKER_ENDPOINT_LENGTH      ( ( uint16_t ) ( sizeof( democonfigMQTT_BROKER_ENDPOINT ) - 1 ) )
+
+
+/*
+ * @brief Enables Over the Air update demo using coreMQTT agent.
+ */
+#define democonfigENABLE_OTA_UPDATE_DEMO               ( 1 )
 
 
 #endif /* DEMO_CONFIG_H */
