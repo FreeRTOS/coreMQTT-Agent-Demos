@@ -52,7 +52,6 @@
 /* Demo Specific configs. */
 #include "demo_config.h"
 
-
 /*
  * Prototypes for the demos that can be started from this project.  Note the
  * MQTT demo is not actually started until the network is already, which is
@@ -103,6 +102,8 @@ const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, configMAC_
 
 /* Use by the pseudo random number generator. */
 static UBaseType_t ulNextRand;
+
+
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -340,3 +341,4 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
 /*-----------------------------------------------------------*/
+

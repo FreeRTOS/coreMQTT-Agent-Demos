@@ -103,6 +103,15 @@
     #error Please define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the tasks created by vStartSimpleSubscribePublishTask().
 #endif
 
+#ifndef democonfigCREATE_CODE_SIGNING_OTA_DEMO
+    #error Please define democonfigCREATE_CODE_SIGNING_OTA_DEMO to 1 or 0 in demo_config.h - determines if vStartOTACodeSigningDemo() gets called or not.
+#endif
+
+#if defined( democonfigCREATE_CODE_SIGNING_OTA_DEMO ) && !defined( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE )
+    #error Please define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartOTACodeSigningDemo().
+#endif
+
+
 /**
  * These configuration settings are required to run the demo.
  */
@@ -139,10 +148,10 @@
  * @brief The MQTT agent manages the MQTT contexts.  This set the handle to the
  * context used by this demo.
  */
-#define mqttexampleMQTT_CONTEXT_HANDLE              ( ( MQTTContextHandle_t ) 0 )
+#define mqttexampleMQTT_CONTEXT_HANDLE               ( ( MQTTContextHandle_t ) 0 )
+
 
 /*-----------------------------------------------------------*/
-
 
 /**
  * @brief Initializes an MQTT context, including transport interface and
@@ -203,6 +212,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 static void prvUnsolicitedIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
                                                    void * pvContext );
 
+
 /**
  * @brief Task used to run the MQTT agent.  In this example the first task that
  * is created is responsible for creating all the other demo tasks.  Then,
@@ -247,13 +257,17 @@ static void prvConnectToMQTTBroker( void );
 /*
  * Functions that start the tasks demonstrated by this project.
  */
+
 extern void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
                                                     UBaseType_t uxPriority );
 extern void vStartSimpleSubscribePublishTask( uint32_t ulTaskNumber,
-                                             configSTACK_DEPTH_TYPE uxStackSize,
-                                             UBaseType_t uxPriority );
+                                              configSTACK_DEPTH_TYPE uxStackSize,
+                                              UBaseType_t uxPriority );
 
-
+extern void vStartOTACodeSigningDemo( configSTACK_DEPTH_TYPE uxStackSize,
+                                      UBaseType_t uxPriority );
+extern void vSuspendOTACodeSigningDemo( void );
+extern void vResumeOTACodeSigningDemo( void );
 /*-----------------------------------------------------------*/
 
 /**
@@ -280,12 +294,12 @@ void vStartSimpleMQTTDemo( void )
     /* prvConnectAndCreateDemoTasks() connects to the MQTT broker, creates the
      * tasks that will interact with the broker via the MQTT agent, then turns
      * itself into the MQTT agent task. */
-    xTaskCreate( prvConnectAndCreateDemoTasks,  /* Function that implements the task. */
-                 "ConnectManager",              /* Text name for the task - only used for debugging. */
-                 democonfigDEMO_STACKSIZE,      /* Size of stack (in words, not bytes) to allocate for the task. */
-                 NULL,                          /* Optional - task parameter - not used in this case. */
-                 tskIDLE_PRIORITY + 1,          /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
-                 NULL );                        /* Optional - used to pass out a handle to the created task. */
+    xTaskCreate( prvConnectAndCreateDemoTasks, /* Function that implements the task. */
+                 "ConnectManager",             /* Text name for the task - only used for debugging. */
+                 democonfigDEMO_STACKSIZE,     /* Size of stack (in words, not bytes) to allocate for the task. */
+                 NULL,                         /* Optional - task parameter - not used in this case. */
+                 tskIDLE_PRIORITY + 1,         /* Task priority, must be between 0 and configMAX_PRIORITIES - 1. */
+                 NULL );                       /* Optional - used to pass out a handle to the created task. */
 }
 
 /*-----------------------------------------------------------*/
@@ -310,8 +324,9 @@ static MQTTStatus_t prvMQTTInit( void )
     xReturn = MQTTAgent_Init( xGlobalMQTTContextHandle,
                               &xTransport,
                               prvGetTimeMs,
+
                               /* Callback to execute if receiving publishes on
-                              topics for which there is no subscription. */
+                               * topics for which there is no subscription. */
                               prvUnsolicitedIncomingPublishCallback,
                               /* Context to pass into the callback.  Not used. */
                               NULL );
@@ -545,7 +560,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 static void prvUnsolicitedIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
                                                    void * pvNotUsed )
 {
-    char cOriginalChar, *pcLocation;
+    char cOriginalChar, * pcLocation;
 
     ( void ) pvNotUsed;
 
@@ -578,9 +593,15 @@ static void prvMQTTAgentTask( void * pvParameters )
         pMqttContext = MQTTAgent_CommandLoop();
 
         /* Context is only returned if error occurred which will may have
-        disconnected the socket from the MQTT broker already. */
+         * disconnected the socket from the MQTT broker already. */
         if( pMqttContext != NULL )
         {
+            #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
+                {
+                    vSuspendOTACodeSigningDemo();
+                }
+            #endif
+
             /* Reconnect TCP. */
             xNetworkResult = prvSocketDisconnect( &xNetworkContext );
             configASSERT( xNetworkResult == pdPASS );
@@ -589,6 +610,15 @@ static void prvMQTTAgentTask( void * pvParameters )
             pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
             xMQTTStatus = prvMQTTConnect( false );
+
+            #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
+                {
+                    if( xMQTTStatus == MQTTSuccess )
+                    {
+                        vResumeOTACodeSigningDemo();
+                    }
+                }
+            #endif
         }
     } while( pMqttContext );
 }
@@ -616,7 +646,6 @@ static void prvConnectToMQTTBroker( void )
 
 static void prvConnectAndCreateDemoTasks( void * pvParameters )
 {
-
     ( void ) pvParameters;
 
     /* Miscellaneous initialisation. */
@@ -627,28 +656,35 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
     prvConnectToMQTTBroker();
 
     /* Selectively create demo tasks as per the compile time constant settings. */
-    #if( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK == 1 )
-    {
-        vStartLargeMessageSubscribePublishTask( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE,
-                                                tskIDLE_PRIORITY );
-    }
+    #if ( democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK == 1 )
+        {
+            vStartLargeMessageSubscribePublishTask( democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE,
+                                                    tskIDLE_PRIORITY );
+        }
     #endif
 
-    #if( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0 )
-    {
-        vStartSimpleSubscribePublishTask( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE,
-                                          democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE,
-                                          tskIDLE_PRIORITY );
-    }
+    #if ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0 )
+        {
+            vStartSimpleSubscribePublishTask( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE,
+                                              democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE,
+                                              tskIDLE_PRIORITY );
+        }
+    #endif
+
+    #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
+        {
+            vStartOTACodeSigningDemo( democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE,
+                                      tskIDLE_PRIORITY + 1 );
+        }
     #endif
 
     /* This task has nothing left to do, so rather than create the MQTT
-     agent as a separate thread, it simply calls the function that implements
-     the agent - in effect turning itself into the agent. */
+     * agent as a separate thread, it simply calls the function that implements
+     * the agent - in effect turning itself into the agent. */
     prvMQTTAgentTask( NULL );
 
     /* Should not get here.  Force an assert if the task returns from
-    prvMQTTAgentTask(). */
+     * prvMQTTAgentTask(). */
     configASSERT( pvParameters == ( void * ) ~1 );
 }
 
