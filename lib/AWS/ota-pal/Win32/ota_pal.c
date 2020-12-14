@@ -460,7 +460,7 @@ OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pFileConte
 {
 	(void)pFileContext;
 
-    OtaPalMainStatus_t mainErr = OtaPalUninitialized;
+    OtaPalMainStatus_t mainErr = OtaPalSuccess;
     OtaPalSubStatus_t subErr = 0;
     FILE * pstPlatformImageState;
 
