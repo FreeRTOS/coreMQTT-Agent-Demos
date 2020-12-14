@@ -26,7 +26,8 @@
  */
 
 /***
- * See https://www.FreeRTOS.org/coremqtt for configuration and usage instructions.
+ * See https://www.FreeRTOS.org/mqtt/mqtt-agent-demo.html for configuration and usage
+ * instructions.
  ***/
 
 /* Standard includes. */
