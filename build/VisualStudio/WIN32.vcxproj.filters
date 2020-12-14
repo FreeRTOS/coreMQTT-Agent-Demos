@@ -22,9 +22,6 @@
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang">
       <UniqueIdentifier>{5283c930-fc40-4087-9aca-abf32f22c3ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang\MSVC-MingW">
-      <UniqueIdentifier>{46bb81fc-68bc-48a5-a8c6-d578ea8db98e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP">
       <UniqueIdentifier>{c5f84545-b323-4582-b039-4ca4f5dcc089}</UniqueIdentifier>
     </Filter>
@@ -130,6 +127,9 @@
     <Filter Include="Lib\AWS\OTA-PAL\Win32">
       <UniqueIdentifier>{8d582a10-0114-489a-9db0-e948e1915081}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable\MSVC-MingW">
+      <UniqueIdentifier>{46bb81fc-68bc-48a5-a8c6-d578ea8db98e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c">
@@ -154,7 +154,7 @@
       <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\port.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang\MSVC-MingW</Filter>
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MSVC-MingW</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\main.c">
       <Filter>Source</Filter>
@@ -291,62 +291,8 @@
     <ClCompile Include="..\..\source\simple_sub_pub_demo.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\atomic.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\croutine.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\deprecated_definitions.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\FreeRTOS.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\list.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\message_buffer.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\mpu_prototypes.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\mpu_wrappers.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\portable.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\projdefs.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\queue.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\semphr.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\StackMacros.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\stack_macros.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\stream_buffer.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\task.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\timers.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MemMang\MSVC-MingW</Filter>
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MSVC-MingW</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\FreeRTOSConfig.h">
       <Filter>Configuration Files</Filter>
@@ -482,6 +428,33 @@
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\aws_ota_codesigner_certificate.h">
       <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\timers.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\task.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\stream_buffer.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\semphr.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\queue.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\projdefs.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\message_buffer.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\FreeRTOS.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

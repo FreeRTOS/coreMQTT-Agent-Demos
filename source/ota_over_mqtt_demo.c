@@ -137,8 +137,8 @@
  * version number to perform anti-rollback validations.
  */
 #define APP_VERSION_MAJOR                  0
-#define APP_VERSION_MINOR                  9
-#define APP_VERSION_BUILD                  2
+#define APP_VERSION_MINOR                  1
+#define APP_VERSION_BUILD                  1
 
 /**
  * @brief Function is used by OTA agent to publish a control packet to the MQTT broker.
