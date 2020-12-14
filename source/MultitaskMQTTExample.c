@@ -139,58 +139,8 @@
  * @brief The MQTT agent manages the MQTT contexts.  This set the handle to the
  * context used by this demo.
  */
-<<<<<<< HEAD
-#define mqttexamplePROCESS_LOOP_TIMEOUT_MS           ( 0U )
-
-/**
- * @brief Size of statically allocated buffers for holding topic names and payloads.
- */
-#define mqttexampleDEMO_BUFFER_SIZE                  1024
-
-/**
- * @brief The maximum number of loop iterations to wait before declaring failure.
- *
- * Each `while` loop waiting for a task notification will wait for a total
- * number of ticks equal to `mqttexampleDEMO_TICKS_TO_WAIT` * this number of
- * iterations before the loop exits.
- *
- * @note This value should not be too small, as the reason for a long loop
- * may be a loss of network connection.
- */
-#define mqttexampleMAX_WAIT_ITERATIONS               ( 20 )
-
-/**
- * @brief The number of subscribe-publish tasks to create.
- */
-#define mqttexampleNUM_SUBSCRIBE_PUBLISH_TASKS       3
-
-/*-----------------------------------------------------------*/
-
-struct CommandContext
-{
-    MQTTStatus_t xReturnStatus;
-    TaskHandle_t xTaskToNotify;
-    uint32_t ulNotificationValue;
-};
-
-/**
- * @brief An element for a task's response queue for received publishes.
- *
- * @note Since elements are copied to queues, this struct needs to hold
- * buffers for the payload and topic of incoming publishes, as the original
- * pointers are out of scope. When processing a publish from this struct,
- * the `pcTopicNameBuf` and `pcPayloadBuf` pointers need to be set to point to the
- * static buffers in this struct.
- */
-typedef struct publishElement
-{
-    MQTTPublishInfo_t xPublishInfo;
-    uint8_t pcPayloadBuf[ mqttexampleDEMO_BUFFER_SIZE ];
-    uint8_t pcTopicNameBuf[ mqttexampleDEMO_BUFFER_SIZE ];
-} PublishElement_t;
-=======
 #define mqttexampleMQTT_CONTEXT_HANDLE              ( ( MQTTContextHandle_t ) 0 )
->>>>>>> origin/main
+
 
 /*-----------------------------------------------------------*/
 
@@ -291,35 +241,24 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters );
  */
 static uint32_t prvGetTimeMs( void );
 
-<<<<<<< HEAD
-/*_RB_ To document. */
-static BaseType_t prvCreateMQTTAgent( void );
-=======
 /**
  * @brief Connects a TCP socket to the MQTT broker, then creates and MQTT
  * connection to the same.
  */
 static void prvConnectToMQTTBroker( void );
->>>>>>> origin/main
 
 /*
  * Functions that start the tasks demonstrated by this project.
  */
-<<<<<<< HEAD
-extern void vLargeMessageSubscribePublishTask( void * pvParameters );
-extern void vSimpleSubscribePublishTask( void * pvParameters );
-extern void vOTAUpdateTask( void * pvParameters );
-extern void vSuspendOTAUpdate( void );
-extern void vResumeOTAUpdate( void );
-=======
+
 extern void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
                                                     UBaseType_t uxPriority );
 extern void vStartSimpleSubscribePublishTask( uint32_t ulTaskNumber,
                                              configSTACK_DEPTH_TYPE uxStackSize,
                                              UBaseType_t uxPriority );
 
->>>>>>> origin/main
-
+extern void vStartOTACodeSigningDemo(configSTACK_DEPTH_TYPE uxStackSize,
+    UBaseType_t uxPriority);
 /*-----------------------------------------------------------*/
 
 /**
@@ -719,6 +658,13 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
         vStartSimpleSubscribePublishTask( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE,
                                           democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE,
                                           tskIDLE_PRIORITY );
+    }
+    #endif
+
+    #if( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
+    {
+        vStartOTACodeSigningDemo(democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE,
+            tskIDLE_PRIORITY);
     }
     #endif
 

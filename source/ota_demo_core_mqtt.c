@@ -312,7 +312,7 @@ const AppVersion32_t appFirmwareVersion =
 /**
  * @brief The static callbacks for the topic filter types.
  */
-static PublishCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { mqttJobCallback, mqttDataCallback };
+static IncomingPublishCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { mqttJobCallback, mqttDataCallback };
 /*-----------------------------------------------------------*/
 
 static void otaEventBufferFree( OtaEventData_t * const pxBuffer )
@@ -363,6 +363,39 @@ static void otaAgentTaskWrapper( void * pvParam )
     OTA_EventProcessingTask( pvParam );
     vTaskDelete( NULL );
 }
+
+static void prvOTADemoTask(void* pvParam)
+{
+    /* OTA library packet statistics per job.*/
+    OtaAgentStatistics_t otaStatistics = { 0 };
+
+    /* OTA Agent state returned from calling OTA_GetAgentState.*/
+    OtaState_t state = OtaAgentStateStopped;
+
+
+    /*
+     * Loops as long as OTA agent is active. Suspends the OTA download if it
+     * identifies a network disconnect, and resumes OTA session once the network
+     * is reconnected.
+     */
+    while (((state = OTA_GetState()) != OtaAgentStateStopped))
+    {
+        /* Get OTA statistics for currently executing job. */
+        OTA_GetStatistics(&otaStatistics);
+        LogInfo((" Received: %u   Queued: %u   Processed: %u   Dropped: %u",
+            otaStatistics.otaPacketsReceived,
+            otaStatistics.otaPacketsQueued,
+            otaStatistics.otaPacketsProcessed,
+            otaStatistics.otaPacketsDropped));
+
+        vTaskDelay(pdMS_TO_TICKS(otaexampleTASK_DELAY_MS));
+    }
+
+    LogError(("OTA agent task stopped. Exiting OTA demo."));
+
+    vTaskDelete(NULL);
+}
+
 
 /*-----------------------------------------------------------*/
 static OtaMessageType_t getOtaMessageType( const char * pTopicFilter,
@@ -621,7 +654,7 @@ static void prvCommandCallback( void * pCommandContext,
 /*-----------------------------------------------------------*/
 static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
                                          char * pcTopicFilter,
-                                         PublishCallback_t pCallback )
+                                         IncomingPublishCallback_t pCallback )
 {
     MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
@@ -878,9 +911,9 @@ static void setOtaInterfaces( OtaInterfaces_t * pOtaInterfaces )
     pOtaInterfaces->pal.createFile = otaPal_CreateFileForRx;
 }
 
-void vOTAUpdateTask( void * pvParmeters )
+void vStartOTACodeSigningDemo(configSTACK_DEPTH_TYPE uxStackSize,
+    UBaseType_t uxPriority)
 {
-    ( void ) pvParmeters;
 
     /* FreeRTOS APIs return status. */
     BaseType_t xResult = pdPASS;
@@ -888,95 +921,84 @@ void vOTAUpdateTask( void * pvParmeters )
     /* OTA library return status. */
     OtaErr_t otaRet = OtaErrNone;
 
-    /* OTA Agent state returned from calling OTA_GetAgentState.*/
-    OtaState_t state = OtaAgentStateStopped;
-
     /* OTA event message used for sending event to OTA Agent.*/
     OtaEventMsg_t eventMsg = { 0 };
 
-    /* OTA library packet statistics per job.*/
-    OtaAgentStatistics_t otaStatistics = { 0 };
     /* OTA interface context required for library interface functions.*/
     OtaInterfaces_t otaInterfaces;
 
     /* Set OTA Library interfaces.*/
-    setOtaInterfaces( &otaInterfaces );
+    setOtaInterfaces(&otaInterfaces);
 
-    LogInfo( ( "OTA over MQTT demo, Application version %u.%u.%u",
-               appFirmwareVersion.u.x.major,
-               appFirmwareVersion.u.x.minor,
-               appFirmwareVersion.u.x.build ) );
-    /****************************** Init OTA Library. ******************************/
+    LogInfo(("OTA over MQTT demo, Application version %u.%u.%u",
+        appFirmwareVersion.u.x.major,
+        appFirmwareVersion.u.x.minor,
+        appFirmwareVersion.u.x.build));
+
 
     xBufferSemaphore = xSemaphoreCreateMutex();
 
-    if( xBufferSemaphore == NULL )
+    if (xBufferSemaphore == NULL)
     {
         xResult = pdFAIL;
     }
 
-    if( xResult == pdPASS )
+    if (xResult == pdPASS)
     {
-        memset( eventBuffer, 0x00, sizeof( eventBuffer ) );
+        memset(eventBuffer, 0x00, sizeof(eventBuffer));
 
-        if( ( otaRet = OTA_Init( &otaBuffer,
-                                 &otaInterfaces,
-                                 ( const uint8_t * ) ( democonfigCLIENT_IDENTIFIER ),
-                                 otaAppCallback ) ) != OtaErrNone )
+        if ((otaRet = OTA_Init(&otaBuffer,
+            &otaInterfaces,
+            (const uint8_t*)(democonfigCLIENT_IDENTIFIER),
+            otaAppCallback)) != OtaErrNone)
         {
-            LogError( ( "Failed to initialize OTA Agent, exiting = %u.",
-                        otaRet ) );
+            LogError(("Failed to initialize OTA Agent, exiting = %u.",
+                otaRet));
             xResult = pdFAIL;
         }
     }
 
     /****************************** Create OTA Task. ******************************/
 
-    if( xResult == pdPASS )
+    if (xResult == pdPASS)
     {
-        if( ( xResult = xTaskCreate( otaAgentTaskWrapper,
-                                     "OTA Agent Task",
-                                     otaexampleSTACK_SIZE,
-                                     NULL,
-                                     OTA_AGENT_TASK_PRIORITY,
-                                     NULL ) ) != pdPASS )
+        if ((xResult = xTaskCreate(otaAgentTaskWrapper,
+            "OTA Agent Task",
+            otaexampleSTACK_SIZE,
+            NULL,
+            OTA_AGENT_TASK_PRIORITY,
+            NULL)) != pdPASS)
         {
-            LogError( ( "Failed to start OTA task: "
-                        ",errno=%d",
-                        xResult ) );
+            LogError(("Failed to start OTA task: "
+                ",errno=%d",
+                xResult));
         }
     }
 
     /***************************Start OTA demo loop. ******************************/
 
-    if( xResult == pdPASS )
+    if (xResult == pdPASS)
     {
         /* Start the OTA Agent.*/
         eventMsg.eventId = OtaAgentEventStart;
-        OTA_SignalEvent( &eventMsg );
+        OTA_SignalEvent(&eventMsg);
+    }
 
-        /*
-         * Loops as long as OTA agent is active. Suspends the OTA download if it
-         * identifies a network disconnect, and resumes OTA session once the network
-         * is reconnected.
-         */
-        while( ( ( state = OTA_GetState() ) != OtaAgentStateStopped ) )
+    if (xResult == pdPASS)
+    {
+        if ((xResult = xTaskCreate(prvOTADemoTask,
+            "OTA Agent Task",
+            uxStackSize,
+            NULL,
+            uxPriority,
+            NULL)) != pdPASS)
         {
-            /* Get OTA statistics for currently executing job. */
-            OTA_GetStatistics( &otaStatistics );
-            LogInfo( ( " Received: %u   Queued: %u   Processed: %u   Dropped: %u",
-                       otaStatistics.otaPacketsReceived,
-                       otaStatistics.otaPacketsQueued,
-                       otaStatistics.otaPacketsProcessed,
-                       otaStatistics.otaPacketsDropped ) );
-
-            vTaskDelay( pdMS_TO_TICKS( otaexampleTASK_DELAY_MS ) );
+            LogError(("Failed to start OTA demo task: "
+                ",errno=%d",
+                xResult));
         }
     }
 
-    LogError( ( "OTA agent task stopped. Exiting OTA demo." ) );
-
-    vTaskDelete( NULL );
 }
 
 void vSuspendOTAUpdate( void )
