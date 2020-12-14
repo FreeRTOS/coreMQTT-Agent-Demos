@@ -212,8 +212,6 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 static void prvUnsolicitedIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
                                                    void * pvContext );
 
-static void prvDisplayUnsolicitedMessage( MQTTPublishInfo_t * pxPublishInfo,
-                                          void * pvContext );
 
 /**
  * @brief Task used to run the MQTT agent.  In this example the first task that
@@ -573,16 +571,6 @@ static void prvUnsolicitedIncomingPublishCallback( MQTTPublishInfo_t * pxPublish
     *pcLocation = 0x00;
     LogWarn( ( "WARN:  Received an unsolicited publish from topic %s", pxPublishInfo->pTopicName ) );
     *pcLocation = cOriginalChar;
-}
-
-
-static void prvDisplayUnsolicitedMessage( MQTTPublishInfo_t * pxPublishInfo, /*_RB_ Are these parameters the other way round in the coreMQTT library? */
-                                          void * pvContext )
-{
-    LogInfo( ( "Unsolicited publish on topic %.*s payload %.*s.", pxPublishInfo->topicNameLength,
-               pxPublishInfo->pTopicName,
-               pxPublishInfo->payloadLength,
-               pxPublishInfo->pPayload ) );
 }
 
 /*-----------------------------------------------------------*/
