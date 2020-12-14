@@ -281,8 +281,6 @@ extern void vLoggingPrintf( const char * pcFormatString,
  */
 #define democonfigDEMO_STACKSIZE            configMINIMAL_STACK_SIZE
 
-#define mqttexampleNETWORK_BUFFER_SIZE 5000
-
 /**********************************************************************************
 * Error checks and derived values only below here - do not edit below here. -----*
 **********************************************************************************/
