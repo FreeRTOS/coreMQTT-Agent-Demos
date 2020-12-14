@@ -27,12 +27,12 @@
  * @file ota_demo_core_mqtt.c
  * @brief OTA Update example.
  *
- * The example shows how to perform OTA update using OTA agent and coreMQTT
- * library. The example creates the OTA agent task and then spins in its own task
- * publishing OTA statistics periodically within a configured interval.
- * The OTA agent MQTT handlers are implemented using MQTT agent APIs, which
- * allows OTA application to be run concurrently with other MQTT application
- * tasks.
+ * The example shows how to perform an OTA update using OTA agent and the
+ * coreMQTT agent.  The example creates the OTA agent task and then spins in
+ * its own task publishing OTA statistics periodically within a configured
+ * interval.  The OTA agent MQTT handlers are implemented using MQTT agent APIs,
+ * which allows OTA application to be run concurrently with other MQTT
+ * application tasks.  See https://freertos.org/mqtt/mqtt-agent-demo.html
  */
 
 /* Standard includes. */
