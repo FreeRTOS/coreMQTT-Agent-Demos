@@ -288,7 +288,9 @@
     <ClCompile Include="..\..\source\ota_over_mqtt_demo.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\simple_sub_pub_demo.c" />
+    <ClCompile Include="..\..\source\simple_sub_pub_demo.c">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h">
