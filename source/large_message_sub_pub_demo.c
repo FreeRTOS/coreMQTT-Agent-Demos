@@ -392,12 +392,12 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
 
         if( x == 0 )
         {
-            LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.",
+            LogInfo( ( "Received echoed message from publishing to topic %s. Sleeping for %d ms.",
                         pcTopicFilter, mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
         else
         {
-            LogError( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.",
+            LogError( ( "Error - Timed out or didn't receive echoed message from publishing to topic %s Sleeping for %d ms.",
                          pcTopicFilter,
                          mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }

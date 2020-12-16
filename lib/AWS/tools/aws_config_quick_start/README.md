@@ -5,7 +5,7 @@ This script automates the process of [Prerequisites](https://docs.aws.amazon.com
 Make sure you have `aws cli` configured on your machine with access_key, secret_key and region.
 
 Open the file `configure.json` and fill in the following details:
-* FreeRTOS_source_dir : The path of the FreeRTOS directory. By default, this is set to the top level of this repo (../..).
+* FreeRTOS_source_dir : Just enter "." to output demo_config.h into this directory then copy into your project
 * thing_name : Name of the thing you want to create
 
 **Options to use with the script**

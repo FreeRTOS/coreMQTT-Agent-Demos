@@ -62,12 +62,7 @@ def write_client_credentials(
         client_private_key_pem='',
         cleanup=False):
 
-    file_to_modify = os.path.join(source_dir,
-                                  'FreeRTOS-Plus',
-                                  'Demo',
-                                  'coreMQTT_Windows_Simulator',
-                                  'MQTT_Mutual_Auth',
-                                  'demo_config.h')
+    file_to_modify = os.path.join('demo_config.h')
     file_text = ''
 
     if cleanup:
