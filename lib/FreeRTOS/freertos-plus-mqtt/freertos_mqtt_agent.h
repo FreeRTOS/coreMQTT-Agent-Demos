@@ -169,7 +169,7 @@ MQTTStatus_t MQTTAgent_ResumeSession( MQTTContextHandle_t mqttContextHandle,
  * @param[in] incomingPublishCallbackContext Context for the publish callback.
  * @param[in] commandCompleteCallback Optional callback to invoke when the command completes.
  * @param[in] commandCompleteCallbackContext Optional completion callback context.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -182,7 +182,7 @@ MQTTStatus_t MQTTAgent_Subscribe( MQTTContextHandle_t mqttContextHandle,
                                   void * incomingPublishCallbackContext,
                                   CommandCallback_t commandCompleteCallback,
                                   void * commandCompleteCallbackContext,
-                                  uint32_t blockTimeMS );
+                                  uint32_t blockTimeMs );
 
 /**
  * @brief Add a command to call MQTT_Unsubscribe() for an MQTT connection.
@@ -191,7 +191,7 @@ MQTTStatus_t MQTTAgent_Subscribe( MQTTContextHandle_t mqttContextHandle,
  * @param[in] pSubscriptionList List of topics to unsubscribe from.
  * @param[in] cmdCompleteCallback Optional callback to invoke when the command completes.
  * @param[in] pCommandCompleteCallbackContext Optional completion callback context.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -202,7 +202,7 @@ MQTTStatus_t MQTTAgent_Unsubscribe( MQTTContextHandle_t mqttContextHandle,
                                     MQTTSubscribeInfo_t * pSubscriptionList,
                                     CommandCallback_t cmdCompleteCallback,
                                     CommandContext_t * pCommandCompleteCallbackContext,
-                                    uint32_t blockTimeMS );
+                                    uint32_t blockTimeMs );
 
 /**
  * @brief Add a command to call MQTT_Publish() for an MQTT connection.
@@ -211,7 +211,7 @@ MQTTStatus_t MQTTAgent_Unsubscribe( MQTTContextHandle_t mqttContextHandle,
  * @param[in] pPublishInfo MQTT PUBLISH information.
  * @param[in] commandCompleteCallback Optional callback to invoke when the command completes.
  * @param[in] commandCompleteCallbackContext Optional completion callback context.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -222,7 +222,7 @@ MQTTStatus_t MQTTAgent_Publish( MQTTContextHandle_t mqttContextHandle,
                                 MQTTPublishInfo_t * pPublishInfo,
                                 CommandCallback_t commandCompleteCallback,
                                 CommandContext_t * commandCompleteCallbackContext,
-                                uint32_t blockTimeMS );
+                                uint32_t blockTimeMs );
 
 /**
  * @brief Send a message to the MQTT agent purely to trigger an iteration of its loop,
@@ -231,7 +231,7 @@ MQTTStatus_t MQTTAgent_Publish( MQTTContextHandle_t mqttContextHandle,
  * socket.
  *
  * @param[in] mqttContextHandle Handle of the MQTT connection to use.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -239,7 +239,7 @@ MQTTStatus_t MQTTAgent_Publish( MQTTContextHandle_t mqttContextHandle,
  * Otherwise an enumerated error code.
  */
 MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTContextHandle_t mqttContextHandle,
-                                           uint32_t blockTimeMS );
+                                           uint32_t blockTimeMs );
 
 /**
  * @brief Add a command to call MQTT_Ping() for an MQTT connection.
@@ -247,7 +247,7 @@ MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTContextHandle_t mqttContextHandle
  * @param[in] mqttContextHandle Handle of the MQTT connection to use.
  * @param[in] cmdCompleteCallback Optional callback to invoke when the command completes.
  * @param[in] pCommandCompleteCallbackContext Optional completion callback context.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -265,7 +265,7 @@ MQTTStatus_t MQTTAgent_Ping( MQTTContextHandle_t mqttContextHandle,
  * @param[in] mqttContextHandle Handle of the MQTT connection to use.
  * @param[in] cmdCompleteCallback Optional callback to invoke when the command completes.
  * @param[in] pCommandCompleteCallbackContext Optional completion callback context.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -275,7 +275,7 @@ MQTTStatus_t MQTTAgent_Ping( MQTTContextHandle_t mqttContextHandle,
 MQTTStatus_t MQTTAgent_Disconnect( MQTTContextHandle_t mqttContextHandle,
                                    CommandCallback_t cmdCompleteCallback,
                                    CommandContext_t * pCommandCompleteCallbackContext,
-                                   uint32_t blockTimeMS );
+                                   uint32_t blockTimeMs );
 
 /**
  * @brief Add a command to clear memory associated with an MQTT connection.
@@ -283,7 +283,7 @@ MQTTStatus_t MQTTAgent_Disconnect( MQTTContextHandle_t mqttContextHandle,
  * @param[in] mqttContextHandle Handle of the MQTT context to clear.
  * @param[in] cmdCompleteCallback Optional callback to invoke when the command completes.
  * @param[in] pCommandCompleteCallbackContext Optional completion callback context.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *
@@ -293,11 +293,11 @@ MQTTStatus_t MQTTAgent_Disconnect( MQTTContextHandle_t mqttContextHandle,
 MQTTStatus_t MQTTAgent_Free( MQTTContextHandle_t mqttContextHandle,
                              CommandCallback_t cmdCompleteCallback,
                              CommandContext_t * pCommandCompleteCallbackContext,
-                             uint32_t blockTimeMS );
+                             uint32_t blockTimeMs );
 
 /**
  * @brief Add a termination command to the command queue.
- * @param[in] blockTimeMS The maximum amount of time in milliseconds to wait for the
+ * @param[in] blockTimeMs The maximum amount of time in milliseconds to wait for the
  * command to be posted to the MQTT agent should the MQTT agent's event queue be
  * full.  Tasks wait in the Blocked state so don't use any CPU time.
  *

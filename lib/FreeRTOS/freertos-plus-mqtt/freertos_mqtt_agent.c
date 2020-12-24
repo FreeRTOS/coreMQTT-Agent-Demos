@@ -92,7 +92,7 @@ typedef struct Command
     CommandType_t commandType;
     MQTTContext_t * pMqttContext;
     CommandCallback_t pCommandCompleteCallback;
-    CommandContext_t * pxCmdContext;
+    CommandContext_t * pCmdContext;
     IncomingPublishCallback_t pIncomingPublishCallback;
     void * pIncomingPublishCallbackContext;
     MqttOperationInfo_t mqttOperationInfo;
@@ -227,7 +227,7 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
  * @brief Add a command to the global command queue.
  *
  * @param[in] pCommand Pointer to command to copy to queue.
- * @param[in] blockTimeMS The maximum amount of time to milliseconds to wait in the
+ * @param[in] blockTimeMs The maximum amount of time to milliseconds to wait in the
  * Blocked state (so not consuming any CPU time) for the command to be posted to the
  * queue should the queue already be full.
  *
@@ -235,7 +235,7 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
  * error code.
  */
 static MQTTStatus_t addCommandToQueue( Command_t * pCommand,
-                                       uint32_t blockTimeMS );
+                                       uint32_t blockTimeMs );
 
 /**
  * @brief Process a #Command_t.
@@ -323,7 +323,7 @@ static MQTTAgentContext_t * getAgentFromMQTTContext( MQTTContext_t * pMQTTContex
  * @param[in] incomingPublishCallback Subscription callback function for incoming
  *            publishes.
  * @param[in] pIncomingPublishCallbackContext Subscription callback context.
- * @param[in] blockTimeMS Maximum amount of time in milliseconds to wait (in the
+ * @param[in] blockTimeMs Maximum amount of time in milliseconds to wait (in the
  * Blocked state, so not consuming any CPU time) for the command to be posted to the
  * MQTT agent should the MQTT agent's event queue be full.
  *
@@ -337,7 +337,7 @@ static MQTTStatus_t createAndAddCommand( CommandType_t commandType,
                                          CommandContext_t * pCommandCompleteCallbackContext,
                                          IncomingPublishCallback_t incomingPublishCallback,
                                          void * pIncomingPublishCallbackContext,
-                                         uint32_t blockTimeMS );
+                                         uint32_t blockTimeMs );
 
 
 /**
@@ -394,7 +394,7 @@ static void resubscribeCallback( void * pResubscribeContext,
 /**
  * @brief Called before accepting any PUBLISH or SUBSCRIBE messages to check
  * there is space in the pending ACK list for the outgoing PUBLISH or SUBSCRIBE.
- * 
+ *
  * @note Because the MQTT agent is inherently multi threaded, and this function
  * is called from the context of the application task and not the MQTT agent
  * task, this function can only return a best effort result.  It can definitely
@@ -533,11 +533,11 @@ static bool isSpaceInPendingAckList( MQTTContext_t * pMQTTContext )
 {
     AckInfo_t * pendingAcks;
     bool spaceFound = false;
-    MQTTAgentContext_t *pAgentContext;
+    MQTTAgentContext_t * pAgentContext;
     size_t i;
 
     pAgentContext = getAgentFromMQTTContext( pMQTTContext );
-    
+
     if( pAgentContext != NULL )
     {
         pendingAcks = pAgentContext->pPendingAcks;
@@ -545,7 +545,7 @@ static bool isSpaceInPendingAckList( MQTTContext_t * pMQTTContext )
         /* Are there any open slots? */
         for( i = 0; i < MQTT_AGENT_MAX_OUTSTANDING_ACKS; i++ )
         {
-            /* If the packetId is MQTT_PACKET_ID_INVALID then the array space is 
+            /* If the packetId is MQTT_PACKET_ID_INVALID then the array space is
              * not in use. */
             if( pendingAcks[ i ].packetId == MQTT_PACKET_ID_INVALID )
             {
@@ -597,7 +597,7 @@ static AckInfo_t getAwaitingOperation( MQTTAgentContext_t * pAgentContext,
     AckInfo_t * pendingAcks = pAgentContext->pPendingAcks;
 
     /* Look through the array of packet IDs that are still waiting to be acked to
-     * find one with incomginPacketId. */
+     * find one with incomingPacketId. */
     for( i = 0; i < MQTT_AGENT_MAX_OUTSTANDING_ACKS; i++ )
     {
         if( pendingAcks[ i ].packetId == incomingPacketId )
@@ -712,7 +712,7 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
     MQTTSubscribeInfo_t * pSubscribeInfo;
     MQTTPublishInfo_t * pPublishInfo;
     size_t uxHeaderBytes;
-    const size_t uxControlAndLengthBytes = ( size_t ) 4;  /* Control, remaining length and length bytes. */
+    const size_t uxControlAndLengthBytes = ( size_t ) 4; /* Control, remaining length and length bytes. */
 
     memset( pCommand, 0x00, sizeof( Command_t ) );
 
@@ -720,8 +720,8 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
     switch( commandType )
     {
         case SUBSCRIBE:
-            /* This message type results in the broker returning an ACK.  The 
-             * agent maintains an array of outstanding ACK messages.  See if 
+            /* This message type results in the broker returning an ACK.  The
+             * agent maintains an array of outstanding ACK messages.  See if
              * the array contains space for another outstanding ack. */
             isSpace = isSpaceInPendingAckList( pMqttContext );
 
@@ -730,16 +730,16 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
                       ( pMqttContext != NULL ) &&
                       ( pSubscribeInfo->topicFilterLength < MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH ) &&
                       ( isSpace == true );
-            
+
             break;
 
         case UNSUBSCRIBE:
-            /* This message type results in the broker returning an ACK.  The 
-             * agent maintains an array of outstanding ACK messages.  See if 
+            /* This message type results in the broker returning an ACK.  The
+             * agent maintains an array of outstanding ACK messages.  See if
              * the array contains space for another outstanding ack. */
             isSpace = isSpaceInPendingAckList( pMqttContext );
 
-            isValid = ( pMqttContext != NULL ) && 
+            isValid = ( pMqttContext != NULL ) &&
                       ( pMqttInfoParam != NULL ) &&
                       ( isSpace == true );
             break;
@@ -748,7 +748,7 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
             pPublishInfo = ( MQTTPublishInfo_t * ) pMqttInfoParam;
 
             /* Calculate the space consumed by everything other than the
-            payload. */
+             * payload. */
             if( pPublishInfo == NULL )
             {
                 isValid = false;
@@ -758,19 +758,19 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
                 uxHeaderBytes = uxControlAndLengthBytes;
                 uxHeaderBytes += pPublishInfo->topicNameLength;
 
-                /* This message type results in the broker returning an ACK. The 
-                 * agent maintains an array of outstanding ACK messages.  See if 
-                 * the array contains space for another outstanding ack.  QoS0 
-                 * publish does not result in an ack so it doesn't matter if 
+                /* This message type results in the broker returning an ACK. The
+                 * agent maintains an array of outstanding ACK messages.  See if
+                 * the array contains space for another outstanding ack.  QoS0
+                 * publish does not result in an ack so it doesn't matter if
                  * there is no space in the ACK array. */
                 if( pPublishInfo->qos != MQTTQoS0 )
                 {
                     isSpace = isSpaceInPendingAckList( pMqttContext );
                 }
 
-                isValid = ( pMqttContext != NULL ) && 
+                isValid = ( pMqttContext != NULL ) &&
                           /* Will the message fit in the defined buffer? */
-                          ( ( pPublishInfo->payloadLength + uxHeaderBytes ) < MQTT_AGENT_NETWORK_BUFFER_SIZE ) && 
+                          ( ( pPublishInfo->payloadLength + uxHeaderBytes ) < MQTT_AGENT_NETWORK_BUFFER_SIZE ) &&
                           ( isSpace == true );
             }
             break;
@@ -796,21 +796,21 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
         {
             pCommand->mqttOperationInfo.subscribeInfo = *( ( MQTTSubscribeInfo_t * ) pMqttInfoParam );
 
-            /* A subscription without a callback is not valid, but create the 
+            /* A subscription without a callback is not valid, but create the
              * command anyway in case of a resubscribe. */
             isValid = ( incomingPublishCallback != NULL );
         }
 
         if( commandType == UNSUBSCRIBE )
         {
-            /* Copy subscribe details into command structure for future 
+            /* Copy subscribe details into command structure for future
              * reference. */
             pCommand->mqttOperationInfo.subscribeInfo = *( ( MQTTSubscribeInfo_t * ) pMqttInfoParam );
         }
 
         if( commandType == PUBLISH )
         {
-            /* Copy publish details into command structure for future 
+            /* Copy publish details into command structure for future
              * reference. */
             pCommand->mqttOperationInfo.publishInfo = *( ( MQTTPublishInfo_t * ) pMqttInfoParam );
         }
@@ -819,7 +819,7 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
         pCommand->pMqttContext = pMqttContext;
         pCommand->pIncomingPublishCallback = incomingPublishCallback;
         pCommand->pIncomingPublishCallbackContext = pIncomingPublishCallbackContext;
-        pCommand->pxCmdContext = pCommandCompleteCallbackContext;
+        pCommand->pCmdContext = pCommandCompleteCallbackContext;
         pCommand->pCommandCompleteCallback = commandCompleteCallback;
     }
 
@@ -840,7 +840,7 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
 /*-----------------------------------------------------------*/
 
 static MQTTStatus_t addCommandToQueue( Command_t * pCommand,
-                                       uint32_t blockTimeMS )
+                                       uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
     BaseType_t queueStatus;
@@ -854,7 +854,7 @@ static MQTTStatus_t addCommandToQueue( Command_t * pCommand,
     }
     else
     {
-        queueStatus = xQueueSendToBack( commandQueue, &pCommand, pdMS_TO_TICKS( ( TickType_t ) blockTimeMS ) );
+        queueStatus = xQueueSendToBack( commandQueue, &pCommand, pdMS_TO_TICKS( ( TickType_t ) blockTimeMs ) );
 
         if( queueStatus != pdFAIL )
         {
@@ -978,7 +978,7 @@ static MQTTStatus_t processCommand( Command_t * pCommand,
             {
                 LogError( ( "No memory to wait for acknowledgment for packet %u\n", packetId ) );
 
-                /* All operations that can wait for acks (publish, subscribe, 
+                /* All operations that can wait for acks (publish, subscribe,
                  * unsubscribe) require a context. */
                 operationStatus = MQTTNoMemory;
             }
@@ -989,7 +989,7 @@ static MQTTStatus_t processCommand( Command_t * pCommand,
             /* The command is complete, call the callback. */
             if( pCommand->pCommandCompleteCallback != NULL )
             {
-                pCommand->pCommandCompleteCallback( pCommand->pxCmdContext, operationStatus );
+                pCommand->pCommandCompleteCallback( pCommand->pCmdContext, operationStatus );
             }
 
             releaseCommandStructureToPool( pCommand );
@@ -1103,7 +1103,7 @@ static void handleSubscriptionAcks( MQTTAgentContext_t * pAgentContext,
 
     configASSERT( pAckInfo != NULL );
 
-    pAckContext = pAckInfo->pOriginalCommand->pxCmdContext;
+    pAckContext = pAckInfo->pOriginalCommand->pCmdContext;
     ackCallback = pAckInfo->pOriginalCommand->pCommandCompleteCallback;
     pSubscribeInfo = &( pAckInfo->pOriginalCommand->mqttOperationInfo.subscribeInfo );
     pSubackCodes = pPacketInfo->pRemainingData + 2U; /*_RB_ Where does 2 come from? */
@@ -1245,7 +1245,7 @@ static void mqttEventCallback( MQTTContext_t * pMqttContext,
 
                     if( ackCallback != NULL )
                     {
-                        ackCallback( ackInfo.pOriginalCommand->pxCmdContext,
+                        ackCallback( ackInfo.pOriginalCommand->pCmdContext,
                                      pDeserializedInfo->deserializationResult );
                     }
                 }
@@ -1302,7 +1302,7 @@ static MQTTStatus_t createAndAddCommand( CommandType_t commandType,
                                          CommandContext_t * pCommandCompleteCallbackContext,
                                          IncomingPublishCallback_t incomingPublishCallback,
                                          void * pIncomingPublishCallbackContext,
-                                         uint32_t blockTimeMS )
+                                         uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn = MQTTSuccess;
     Command_t * pCommand;
@@ -1322,7 +1322,7 @@ static MQTTStatus_t createAndAddCommand( CommandType_t commandType,
         }
         else
         {
-            pCommand = getCommandStructureFromPool( blockTimeMS );
+            pCommand = getCommandStructureFromPool( blockTimeMs );
         }
 
         if( pCommand != NULL )
@@ -1338,7 +1338,7 @@ static MQTTStatus_t createAndAddCommand( CommandType_t commandType,
 
             if( statusReturn == MQTTSuccess )
             {
-                statusReturn = addCommandToQueue( pCommand, blockTimeMS );
+                statusReturn = addCommandToQueue( pCommand, blockTimeMs );
             }
 
             if( statusReturn != MQTTSuccess )
@@ -1571,7 +1571,7 @@ MQTTStatus_t MQTTAgent_ResumeSession( MQTTContextHandle_t mqttContextHandle,
                     if( pendingAcks[ i ].pOriginalCommand->pCommandCompleteCallback != NULL )
                     {
                         /* Bad response to indicate network error. */
-                        pendingAcks[ i ].pOriginalCommand->pCommandCompleteCallback( pendingAcks[ i ].pOriginalCommand->pxCmdContext, MQTTBadResponse );
+                        pendingAcks[ i ].pOriginalCommand->pCommandCompleteCallback( pendingAcks[ i ].pOriginalCommand->pCmdContext, MQTTBadResponse );
                     }
 
                     /* Now remove it from the list. */
@@ -1597,7 +1597,7 @@ MQTTStatus_t MQTTAgent_ResumeSession( MQTTContextHandle_t mqttContextHandle,
                     * maximum allowed by AWS IoT, and any QoS 0 publishes will still be QoS 0. */
                     pResendSubscription.qos = MQTTQoS1;
 
-                    /* We cannot add the commmand to the queue since the command loop
+                    /* We cannot add the command to the queue since the command loop
                      * should not be running during a reconnect. */
                     statusResult = createCommand( SUBSCRIBE, pMqttContext, &pResendSubscription, NULL, NULL, resubscribeCallback, NULL, &xResubscribeCommand );
 
@@ -1685,7 +1685,7 @@ MQTTStatus_t MQTTAgent_Subscribe( MQTTContextHandle_t mqttContextHandle,
                                   void * incomingPublishCallbackContext,
                                   CommandCallback_t commandCompleteCallback,
                                   void * commandCompleteCallbackContext,
-                                  uint32_t blockTimeMS )
+                                  uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
 
@@ -1696,7 +1696,7 @@ MQTTStatus_t MQTTAgent_Subscribe( MQTTContextHandle_t mqttContextHandle,
                                         commandCompleteCallbackContext, /* pCommandCompleteCallbackContext */
                                         incomingPublishCallback,        /* incomingPublishCallback */
                                         incomingPublishCallbackContext, /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
     return statusReturn;
 }
 
@@ -1706,7 +1706,7 @@ MQTTStatus_t MQTTAgent_Unsubscribe( MQTTContextHandle_t mqttContextHandle,
                                     MQTTSubscribeInfo_t * pSubscriptionList,
                                     CommandCallback_t cmdCompleteCallback,
                                     CommandContext_t * pCommandCompleteCallbackContext,
-                                    uint32_t blockTimeMS )
+                                    uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
 
@@ -1717,7 +1717,7 @@ MQTTStatus_t MQTTAgent_Unsubscribe( MQTTContextHandle_t mqttContextHandle,
                                         pCommandCompleteCallbackContext, /* pCommandCompleteCallbackContext */
                                         NULL,                            /* incomingPublishCallback */
                                         NULL,                            /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
 
     return statusReturn;
 }
@@ -1728,7 +1728,7 @@ MQTTStatus_t MQTTAgent_Publish( MQTTContextHandle_t mqttContextHandle,
                                 MQTTPublishInfo_t * pPublishInfo,
                                 CommandCallback_t commandCompleteCallback,
                                 CommandContext_t * commandCompleteCallbackContext,
-                                uint32_t blockTimeMS )
+                                uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
 
@@ -1739,7 +1739,7 @@ MQTTStatus_t MQTTAgent_Publish( MQTTContextHandle_t mqttContextHandle,
                                         commandCompleteCallbackContext, /* pCommandCompleteCallbackContext */
                                         NULL,                           /* incomingPublishCallback */
                                         NULL,                           /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
 
     return statusReturn;
 }
@@ -1747,7 +1747,7 @@ MQTTStatus_t MQTTAgent_Publish( MQTTContextHandle_t mqttContextHandle,
 /*-----------------------------------------------------------*/
 
 MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTContextHandle_t mqttContextHandle,
-                                           uint32_t blockTimeMS )
+                                           uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
 
@@ -1758,7 +1758,7 @@ MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTContextHandle_t mqttContextHandle
                                         NULL,              /* pCommandCompleteCallbackContext */
                                         NULL,              /* incomingPublishCallback */
                                         NULL,              /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
 
     return statusReturn;
 }
@@ -1769,7 +1769,7 @@ MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTContextHandle_t mqttContextHandle
 MQTTStatus_t MQTTAgent_Ping( MQTTContextHandle_t mqttContextHandle,
                              CommandCallback_t cmdCompleteCallback,
                              CommandContext_t * pCommandCompleteCallbackContext,
-                             uint32_t blockTimeMS )
+                             uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
 
@@ -1780,7 +1780,7 @@ MQTTStatus_t MQTTAgent_Ping( MQTTContextHandle_t mqttContextHandle,
                                         pCommandCompleteCallbackContext, /* pCommandCompleteCallbackContext */
                                         NULL,                            /* incomingPublishCallback */
                                         NULL,                            /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
 
     return statusReturn;
 }
@@ -1790,7 +1790,7 @@ MQTTStatus_t MQTTAgent_Ping( MQTTContextHandle_t mqttContextHandle,
 MQTTStatus_t MQTTAgent_Disconnect( MQTTContextHandle_t mqttContextHandle,
                                    CommandCallback_t cmdCompleteCallback,
                                    CommandContext_t * pCommandCompleteCallbackContext,
-                                   uint32_t blockTimeMS )
+                                   uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn;
 
@@ -1801,7 +1801,7 @@ MQTTStatus_t MQTTAgent_Disconnect( MQTTContextHandle_t mqttContextHandle,
                                         pCommandCompleteCallbackContext, /* pCommandCompleteCallbackContext */
                                         NULL,                            /* incomingPublishCallback */
                                         NULL,                            /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
 
     return statusReturn;
 }
@@ -1811,7 +1811,7 @@ MQTTStatus_t MQTTAgent_Disconnect( MQTTContextHandle_t mqttContextHandle,
 MQTTStatus_t MQTTAgent_Free( MQTTContextHandle_t mqttContextHandle,
                              CommandCallback_t cmdCompleteCallback,
                              CommandContext_t * pCommandCompleteCallbackContext,
-                             uint32_t blockTimeMS )
+                             uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn = MQTTSuccess;
 
@@ -1822,17 +1822,17 @@ MQTTStatus_t MQTTAgent_Free( MQTTContextHandle_t mqttContextHandle,
                                         pCommandCompleteCallbackContext, /* pCommandCompleteCallbackContext */
                                         NULL,                            /* incomingPublishCallback */
                                         NULL,                            /* pIncomingPublishCallbackContext */
-                                        blockTimeMS );
+                                        blockTimeMs );
     return statusReturn;
 }
 
 /*-----------------------------------------------------------*/
 
-MQTTStatus_t MQTTAgent_Terminate( uint32_t blockTimeMS )
+MQTTStatus_t MQTTAgent_Terminate( uint32_t blockTimeMs )
 {
     MQTTStatus_t statusReturn = MQTTSuccess;
 
-    statusReturn = createAndAddCommand( TERMINATE, 0, NULL, NULL, NULL, NULL, NULL, blockTimeMS );
+    statusReturn = createAndAddCommand( TERMINATE, 0, NULL, NULL, NULL, NULL, NULL, blockTimeMs );
 
     return statusReturn;
 }
