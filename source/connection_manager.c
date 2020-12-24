@@ -614,22 +614,31 @@ static void prvMQTTAgentTask( void * pvParameters )
     BaseType_t xNetworkResult = pdFAIL;
     MQTTStatus_t xMQTTStatus = MQTTSuccess;
     MQTTContext_t * pMqttContext = NULL;
+    MQTTContextHandle_t xErrHandle = MQTT_AGENT_MAX_SIMULTANEOUS_CONNECTIONS;
 
     ( void ) pvParameters;
 
     do
     {
+        xErrHandle = MQTT_AGENT_MAX_SIMULTANEOUS_CONNECTIONS;
         /* MQTTAgent_CommandLoop() is effectively the agent implementation.  It
          * will manage the MQTT protocol until such time that an error occurs,
          * which could be a disconnect.  If an error occurs the MQTT context on
          * which the error happened is returned so there can be an attempt to
          * clean up and reconnect however the application writer prefers. */
-        pMqttContext = MQTTAgent_CommandLoop();
+        xMQTTStatus = MQTTAgent_CommandLoop( &xErrHandle, &pMqttContext );
 
-        /* Context is only returned if error occurred which will may have
-         * disconnected the socket from the MQTT broker already. */
-        if( pMqttContext != NULL )
+        /* Context is returned for disconnects or errors. The socket should
+         * be disconnected. */
+        if( ( xMQTTStatus == MQTTSuccess ) && ( pMqttContext != NULL ) )
         {
+            /* MQTT Disconnect. Disconnect the socket. */
+            xNetworkResult = prvSocketDisconnect( &xNetworkContext );
+        }
+        /* Error. */
+        else if( pMqttContext != NULL )
+        {
+            configASSERT( xErrHandle == mqttexampleMQTT_CONTEXT_HANDLE );
             #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
                 {
                     vSuspendOTACodeSigningDemo();
