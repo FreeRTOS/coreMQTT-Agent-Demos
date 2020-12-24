@@ -16,3 +16,6 @@
 [submodule "lib/AWS/ota"]
 	path = lib/AWS/ota
 	url = https://github.com/aws/OTA-for-AWS-IoT-embedded-SDK
+[submodule "lib/FreeRTOS/utilities/backoffAlgorithm"]
+	path = lib/FreeRTOS/utilities/backoffAlgorithm
+	url = https://github.com/FreeRTOS/backoffAlgorithm

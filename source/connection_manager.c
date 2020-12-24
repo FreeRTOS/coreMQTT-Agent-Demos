@@ -74,7 +74,7 @@
 #include "freertos_mqtt_agent.h"
 
 /* Exponential backoff retry include. */
-#include "exponential_backoff.h"
+#include "backoff_algorithm.h"
 
 
 /* Transport interface include. */
@@ -121,6 +121,23 @@
  * Defined in milliseconds.
  */
 #define mqttexampleCONNACK_RECV_TIMEOUT_MS           ( 1000U )
+
+/**
+ * @brief The maximum number of retries for network operation with server.
+ */
+#define RETRY_MAX_ATTEMPTS                           ( 5U )
+
+/**
+ * @brief The maximum back-off delay (in milliseconds) for retrying failed operation
+ *  with server.
+ */
+#define RETRY_MAX_BACKOFF_DELAY_MS                   ( 5000U )
+
+/**
+ * @brief The base back-off delay (in milliseconds) to use for network operation retry
+ * attempts.
+ */
+#define RETRY_BACKOFF_BASE_MS                        ( 500U )
 
 /**
  * @brief The maximum time interval in seconds which is allowed to elapse
@@ -411,8 +428,9 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
 static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
 {
     BaseType_t xConnected = pdFAIL;
-    RetryUtilsStatus_t xRetryUtilsStatus = RetryUtilsSuccess;
-    RetryUtilsParams_t xReconnectParams;
+    BackoffAlgorithmStatus_t xBackoffAlgStatus = BackoffAlgorithmSuccess;
+    BackoffAlgorithmContext_t xReconnectParams = { 0 };
+    uint16_t usNextRetryBackOff = 0U;
     const TickType_t xTransportTimeout = 0UL;
 
     #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
@@ -453,8 +471,10 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
      * jitter.  That is done to prevent a fleet of IoT devices all trying to
      * reconnect at exactly the same time should they become disconnected at
      * the same time. We initialize reconnect attempts and interval here. */
-    xReconnectParams.maxRetryAttempts = MAX_RETRY_ATTEMPTS;
-    RetryUtils_ParamsReset( &xReconnectParams );
+    BackoffAlgorithm_InitializeParams( &xReconnectParams,
+                                       RETRY_BACKOFF_BASE_MS,
+                                       RETRY_MAX_BACKOFF_DELAY_MS,
+                                       RETRY_MAX_ATTEMPTS );
 
     /* Attempt to connect to MQTT broker. If connection fails, retry after a
      * timeout. Timeout value will exponentially increase until the maximum
@@ -490,15 +510,22 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
 
         if( !xConnected )
         {
-            LogWarn( ( "Connection to the broker failed. Retrying connection with backoff and jitter." ) );
-            xRetryUtilsStatus = RetryUtils_BackoffAndSleep( &xReconnectParams );
+            /* Get back-off value (in milliseconds) for the next connection retry. */
+            xBackoffAlgStatus = BackoffAlgorithm_GetNextBackoff( &xReconnectParams, uxRand(), &usNextRetryBackOff );
+            if( xBackoffAlgStatus == BackoffAlgorithmSuccess )
+            {
+                LogWarn( ( "Connection to the broker failed. "
+                           "Retrying connection in %hu ms.",
+                           usNextRetryBackOff ) );
+                vTaskDelay( pdMS_TO_TICKS( usNextRetryBackOff ) );
+            }
         }
 
-        if( xRetryUtilsStatus == RetryUtilsRetriesExhausted )
+        if( xBackoffAlgStatus == BackoffAlgorithmRetriesExhausted )
         {
-            LogError( ( "Connection to the broker failed. All attempts exhausted." ) );
+            LogError( ( "Connection to the broker failed, all attempts exhausted." ) );
         }
-    } while( ( xConnected != pdPASS ) && ( xRetryUtilsStatus == RetryUtilsSuccess ) );
+    } while( ( xConnected != pdPASS ) && ( xBackoffAlgStatus == BackoffAlgorithmSuccess ) );
 
     /* Set the socket wakeup callback and ensure the read block time. */
     if( xConnected )
