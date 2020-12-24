@@ -88,7 +88,7 @@
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\include">
       <UniqueIdentifier>{294c455c-37f8-4049-879f-a5db60b9d280}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\utilities\Exponential-Backoff">
+    <Filter Include="Lib\FreeRTOS\utilities\Backoff-Algorithm">
       <UniqueIdentifier>{2ac7fe18-2c51-438a-b05b-739a9641c787}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS">
@@ -222,8 +222,8 @@
     <ClCompile Include="..\..\source\connection_manager.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\utilities\exponential_backoff\exponential_backoff.c">
-      <Filter>Lib\FreeRTOS\utilities\Exponential-Backoff</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\backoff_algorithm.c">
+      <Filter>Lib\FreeRTOS\utilities\Backoff-Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
@@ -392,8 +392,8 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\exponential_backoff\exponential_backoff.h">
-      <Filter>Lib\FreeRTOS\utilities\Exponential-Backoff</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include\backoff_algorithm.h">
+      <Filter>Lib\FreeRTOS\utilities\Backoff-Algorithm</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.h">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
