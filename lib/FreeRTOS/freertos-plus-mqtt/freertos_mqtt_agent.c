@@ -1459,8 +1459,8 @@ MQTTStatus_t MQTTAgent_CommandLoop( MQTTContextHandle_t * pOutContextHandle,
         operationStatus = MQTTBadParameter;
     }
 
-    /* Loop until we receive a terminate command. */
-    for( ; operationStatus == MQTTSuccess; )
+    /* Loop until an error or we receive a terminate command. */
+    while( operationStatus == MQTTSuccess )
     {
         /* Wait for the next command, if any. */
         pCommand = NULL;
