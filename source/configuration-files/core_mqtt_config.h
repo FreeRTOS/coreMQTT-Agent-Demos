@@ -82,10 +82,31 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define MQTT_AGENT_COMMAND_QUEUE_LENGTH     ( 25 )
 #define MQTT_COMMAND_CONTEXTS_POOL_SIZE     ( 10 )
 
-/*
- * The maximum number of bytes that can be used in topic filter strings
- * such as "/my/topicfilter/#".
+/**
+ * @brief The maximum number of subscriptions to track for a single connection.
+ *
+ * @note The MQTT agent keeps a record of all existing MQTT subscriptions.
+ * MQTT_AGENT_MAX_SIMULTANEOUS_SUBSCRIPTIONS sets the maximum number of
+ * subscriptions records that can be maintained at one time.  The higher this
+ * number is the greater the agent's RAM consumption will be.
+ */
+#define MQTT_AGENT_MAX_SIMULTANEOUS_SUBSCRIPTIONS    ( 10 )
+
+/**
+ * @brief Size of statically allocated buffers for holding subscription filters.
+ *
+ * @note Subscription filters are strings such as "/my/topicname/#".  These
+ * strings are limited to a maximum of MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH
+ * characters. The higher this number is the greater the agent's RAM consumption
+ * will be.
  */
 #define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH ( 100 )
+
+/**
+ * @brief Dimensions the buffer used to serialise and deserialise MQTT packets.
+ * @note Specified in bytes.  Must be large enough to hold the maximum
+ * anticipated MQTT payload.
+ */
+#define MQTT_AGENT_NETWORK_BUFFER_SIZE    ( 5000 )
 
 #endif /* ifndef CORE_MQTT_CONFIG_H */

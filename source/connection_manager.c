@@ -111,6 +111,15 @@
     #error Please define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartOTACodeSigningDemo().
 #endif
 
+/**
+ * @brief Dimensions the buffer used to serialise and deserialise MQTT packets.
+ * @note Specified in bytes.  Must be large enough to hold the maximum
+ * anticipated MQTT payload.
+ */
+#ifndef MQTT_AGENT_NETWORK_BUFFER_SIZE
+    #define MQTT_AGENT_NETWORK_BUFFER_SIZE    ( 5000 )
+#endif
+
 
 /**
  * These configuration settings are required to run the demo.
@@ -223,11 +232,13 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
  * are no subscriptions.  This can happen if the MQTT broker sends control
  * information to the MQTT client on special control topics.
  *
+ * @param[in] pMqttAgentContext Agent context.
+ * @param[in] packetId Packet ID of publish.
  * @param[in] pxPublishInfo Info of incoming publish.
- * @param[in] The context specified when the MQTT connection was created.
  */
-static void prvUnsolicitedIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
-                                                   void * pvContext );
+static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
+                                                   uint16_t packetId,
+                                                   MQTTPublishInfo_t * pxPublishInfo );
 
 
 /**
@@ -301,6 +312,12 @@ static NetworkContext_t xNetworkContext;
  */
 static uint32_t ulGlobalEntryTimeMs;
 
+MQTTAgentContext_t xGlobalMqttAgentContext;
+
+static uint8_t xNetworkBuffer[ MQTT_AGENT_NETWORK_BUFFER_SIZE ];
+
+static QueueHandle_t pxCommandQueue;
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -325,7 +342,15 @@ static MQTTStatus_t prvMQTTInit( void )
 {
     TransportInterface_t xTransport;
     MQTTStatus_t xReturn;
-    const MQTTContextHandle_t xGlobalMQTTContextHandle = 0;
+    MQTTFixedBuffer_t xFixedBuffer = { .pBuffer = xNetworkBuffer, .size = MQTT_AGENT_NETWORK_BUFFER_SIZE };
+    static uint8_t staticQueueStorageArea[ MQTT_AGENT_COMMAND_QUEUE_LENGTH * sizeof( Command_t * ) ];
+    static StaticQueue_t staticQueueStructure;
+
+    LogDebug( ( "Creating command queue." ) );
+    pxCommandQueue = xQueueCreateStatic( MQTT_AGENT_COMMAND_QUEUE_LENGTH,
+                                         sizeof( Command_t * ),
+                                         staticQueueStorageArea,
+                                         &staticQueueStructure );
 
     /* Fill in Transport Interface send and receive function pointers. */
     xTransport.pNetworkContext = &xNetworkContext;
@@ -338,7 +363,9 @@ static MQTTStatus_t prvMQTTInit( void )
     #endif
 
     /* Initialize MQTT library. */
-    xReturn = MQTTAgent_Init( xGlobalMQTTContextHandle,
+    xReturn = MQTTAgent_Init( &xGlobalMqttAgentContext,
+                              pxCommandQueue,
+                              &xFixedBuffer,
                               &xTransport,
                               prvGetTimeMs,
 
@@ -406,18 +433,18 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
 
     /* Send MQTT CONNECT packet to broker. MQTT's Last Will and Testament feature
      * is not used in this demo, so it is passed as NULL. */
-    xResult = MQTTAgent_Connect( mqttexampleMQTT_CONTEXT_HANDLE,
-                                 &xConnectInfo,
-                                 NULL,
-                                 mqttexampleCONNACK_RECV_TIMEOUT_MS,
-                                 &xSessionPresent );
+    xResult = MQTT_Connect( &( xGlobalMqttAgentContext.mqttContext ),
+                            &xConnectInfo,
+                            NULL,
+                            mqttexampleCONNACK_RECV_TIMEOUT_MS,
+                            &xSessionPresent );
 
     LogInfo( ( "Session present: %d\n", xSessionPresent ) );
 
     /* Resume a session if desired. */
     if( ( xResult == MQTTSuccess ) && !xCleanSession )
     {
-        xResult = MQTTAgent_ResumeSession( mqttexampleMQTT_CONTEXT_HANDLE, xSessionPresent );
+        xResult = MQTTAgent_ResumeSession( &xGlobalMqttAgentContext, xSessionPresent );
     }
 
     return xResult;
@@ -582,21 +609,23 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 
     /* A socket used by the MQTT task may need attention.  Send an event
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
-    if( ( MQTTAgent_GetNumWaiting() == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
+    if( ( uxQueueMessagesWaiting( pxCommandQueue ) == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
     {
         /* Don't block as this is called from the context of the IP task. */
-        MQTTAgent_TriggerProcessLoop( mqttexampleMQTT_CONTEXT_HANDLE, 0 );
+        MQTTAgent_TriggerProcessLoop( &xGlobalMqttAgentContext, 0 );
     }
 }
 
 /*-----------------------------------------------------------*/
 
-static void prvUnsolicitedIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
-                                                   void * pvNotUsed )
+static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
+                                                   uint16_t packetId,
+                                                   MQTTPublishInfo_t * pxPublishInfo )
 {
     char cOriginalChar, * pcLocation;
 
-    ( void ) pvNotUsed;
+    ( void ) pMqttAgentContext;
+    ( void ) packetId;
 
     /* Ensure the topic string is terminated for printing.  This will over-
      * write the message ID, which is restored afterwards. */
@@ -613,32 +642,29 @@ static void prvMQTTAgentTask( void * pvParameters )
 {
     BaseType_t xNetworkResult = pdFAIL;
     MQTTStatus_t xMQTTStatus = MQTTSuccess;
-    MQTTContext_t * pMqttContext = NULL;
-    MQTTContextHandle_t xErrHandle = MQTT_AGENT_MAX_SIMULTANEOUS_CONNECTIONS;
+    MQTTContext_t * pMqttContext = &( xGlobalMqttAgentContext.mqttContext );
 
     ( void ) pvParameters;
 
     do
     {
-        xErrHandle = MQTT_AGENT_MAX_SIMULTANEOUS_CONNECTIONS;
         /* MQTTAgent_CommandLoop() is effectively the agent implementation.  It
          * will manage the MQTT protocol until such time that an error occurs,
          * which could be a disconnect.  If an error occurs the MQTT context on
          * which the error happened is returned so there can be an attempt to
          * clean up and reconnect however the application writer prefers. */
-        xMQTTStatus = MQTTAgent_CommandLoop( &xErrHandle, &pMqttContext );
+        xMQTTStatus = MQTTAgent_CommandLoop( &xGlobalMqttAgentContext );
 
-        /* Context is returned for disconnects or errors. The socket should
+        /* Success is returned for disconnect or termination. The socket should
          * be disconnected. */
-        if( ( xMQTTStatus == MQTTSuccess ) && ( pMqttContext != NULL ) )
+        if( xMQTTStatus == MQTTSuccess )
         {
             /* MQTT Disconnect. Disconnect the socket. */
             xNetworkResult = prvSocketDisconnect( &xNetworkContext );
         }
         /* Error. */
-        else if( pMqttContext != NULL )
+        else
         {
-            configASSERT( xErrHandle == mqttexampleMQTT_CONTEXT_HANDLE );
             #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
                 {
                     vSuspendOTACodeSigningDemo();
@@ -663,7 +689,7 @@ static void prvMQTTAgentTask( void * pvParameters )
                 }
             #endif
         }
-    } while( pMqttContext );
+    } while( xMQTTStatus != MQTTSuccess );
 }
 
 /*-----------------------------------------------------------*/
