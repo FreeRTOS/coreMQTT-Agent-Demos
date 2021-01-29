@@ -147,6 +147,8 @@
 #define APP_VERSION_MINOR                  9
 #define APP_VERSION_BUILD                  2
 
+typedef void ( * PublishCallback_t ) ( MQTTPublishInfo_t *, void * );
+
 /**
  * @brief Function used by OTA agent to publish control messages to the MQTT broker.
  *
@@ -333,7 +335,7 @@ static SemaphoreHandle_t xBufferSemaphore;
 /**
  * @brief Static handle used for MQTT agent context.
  */
-static MQTTContextHandle_t xOTAMQTTContextHandle = 0;
+extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
 /**
  * @brief Structure containing all application allocated buffers used by the OTA agent.
@@ -377,7 +379,7 @@ const AppVersion32_t appFirmwareVersion =
 /**
  * @brief The static callbacks for the topic filter types.
  */
-static IncomingPublishCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { prvProcessIncomingJobMessage, prvProcessIncomingData };
+static PublishCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { prvProcessIncomingJobMessage, prvProcessIncomingData };
 /*-----------------------------------------------------------*/
 
 static void prvOTAEventBufferFree( OtaEventData_t * const pxBuffer )
@@ -710,40 +712,42 @@ static void prvProcessIncomingJobMessage( MQTTPublishInfo_t * pPublishInfo,
 /*-----------------------------------------------------------*/
 
 static void prvCommandCallback( void * pCommandContext,
-                                MQTTStatus_t xReturnStatus )
+                                MQTTAgentReturnInfo_t * pReturnInfo )
 {
     TaskHandle_t xTaskToNotify = ( TaskHandle_t ) pCommandContext;
 
     configASSERT( xTaskToNotify );
-    xTaskNotify( xTaskToNotify, xReturnStatus, eSetValueWithOverwrite );
+    xTaskNotify( xTaskToNotify, pReturnInfo->returnCode, eSetValueWithOverwrite );
 }
 
 /*-----------------------------------------------------------*/
 static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
                                          const char * pcTopicFilter,
-                                         IncomingPublishCallback_t pCallback )
+                                         PublishCallback_t pCallback )
 {
     MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
-    MQTTSubscribeInfo_t xSubscribeInfo[ 1 ] = { 0 };
+    MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
     BaseType_t result;
+    CommandInfo_t xCommandParams = { 0 };
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
-    xSubscribeInfo[ 0 ].pTopicFilter = pcTopicFilter;
-    xSubscribeInfo[ 0 ].topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeInfo[ 0 ].qos = xQoS;
+    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeArgs.subscribeInfo.qos = xQoS;
+    xSubscribeArgs.numSubscriptions = 1;
+
+    xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
+    xCommandParams.cmdCompleteCallback = prvCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = ( void * ) xTaskHandle;
 
     LogInfo( ( " Subscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );
 
-    mqttStatus = MQTTAgent_Subscribe( xOTAMQTTContextHandle,
-                                      xSubscribeInfo,
-                                      pCallback,
-                                      NULL,
-                                      prvCommandCallback,
-                                      ( void * ) xTaskHandle,
-                                      otaexampleMQTT_TIMEOUT_MS );
+    mqttStatus = MQTTAgent_Subscribe( &xGlobalMqttAgentContext,
+                                      &xSubscribeArgs,
+                                      &xCommandParams );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
      * duration of the command. */
@@ -814,6 +818,7 @@ static OtaMqttStatus_t prvMQTTPublish( const char * const pacTopic,
     MQTTPublishInfo_t publishInfo = { 0 };
     TaskHandle_t xTaskHandle;
     uint32_t ulNotifiedValue;
+    CommandInfo_t xCommandParams = { 0 };
 
     publishInfo.pTopicName = pacTopic;
     publishInfo.topicNameLength = topicLen;
@@ -824,11 +829,13 @@ static OtaMqttStatus_t prvMQTTPublish( const char * const pacTopic,
     xTaskHandle = xTaskGetCurrentTaskHandle();
     xTaskNotifyStateClear( NULL );
 
-    mqttStatus = MQTTAgent_Publish( xOTAMQTTContextHandle,
+    xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
+    xCommandParams.cmdCompleteCallback = prvCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = ( void * ) xTaskHandle;
+
+    mqttStatus = MQTTAgent_Publish( &xGlobalMqttAgentContext,
                                     &publishInfo,
-                                    prvCommandCallback,
-                                    ( void * ) xTaskHandle,
-                                    otaexampleMQTT_TIMEOUT_MS );
+                                    &xCommandParams );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
      * duration of the command. */
@@ -868,25 +875,28 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
 {
     MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
-    MQTTSubscribeInfo_t xSubscribeInfo[ 1 ] = { 0 };
-    int index = 0;
+    MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
     BaseType_t result;
+    CommandInfo_t xCommandParams = { 0 };
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
-    xSubscribeInfo[ index ].pTopicFilter = pcTopicFilter;
-    xSubscribeInfo[ index ].topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeInfo[ index ].qos = xQoS;
+    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeArgs.subscribeInfo.qos = xQoS;
+    xSubscribeArgs.numSubscriptions = 1;
+
+    xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
+    xCommandParams.cmdCompleteCallback = prvCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = ( void * ) xTaskHandle;
 
     LogInfo( ( " Unsubscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );
 
 
-    mqttStatus = MQTTAgent_Unsubscribe( xOTAMQTTContextHandle,
-                                        xSubscribeInfo,
-                                        prvCommandCallback,
-                                        ( void * ) xTaskHandle,
-                                        otaexampleMQTT_TIMEOUT_MS );
+    mqttStatus = MQTTAgent_Unsubscribe( &xGlobalMqttAgentContext,
+                                        &xSubscribeArgs,
+                                        &xCommandParams );
 
     /* Wait for command to complete so MQTTSubscribeInfo_t remains in scope for the
      * duration of the command. */

@@ -90,12 +90,6 @@
  */
 #define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS       ( 200 )
 
-/**
- * @brief The MQTT agent manages the MQTT contexts.  This set the handle to the
- * context used by this demo.
- */
-#define mqttexampleMQTT_CONTEXT_HANDLE                  ( ( MQTTContextHandle_t ) 0 )
-
 /*-----------------------------------------------------------*/
 
 /**
@@ -126,7 +120,7 @@ struct CommandContext
  * @param[in].xReturnStatus The result of the command.
  */
 static void prvSubscribeCommandCallback( void *pxCommandContext,
-                                         MQTTStatus_t xReturnStatus );
+                                         MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
  * @brief Passed into MQTTAgent_Publish() as the callback to execute when the
@@ -143,7 +137,7 @@ static void prvSubscribeCommandCallback( void *pxCommandContext,
  * @param[in].xReturnStatus The result of the command.
  */
 static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
-                                       MQTTStatus_t xReturnStatus );
+                                       MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
  * @brief Called by the task to wait for a notification from a callback function
@@ -193,6 +187,14 @@ static void prvSimpleSubscribePublishTask( void * pvParameters );
 
 /*-----------------------------------------------------------*/
 
+/**
+ * @brief The MQTT agent manages the MQTT contexts.  This set the handle to the
+ * context used by this demo.
+ */
+extern MQTTAgentContext_t xGlobalMqttAgentContext;
+
+/*-----------------------------------------------------------*/
+
 void vStartSimpleSubscribePublishTask( uint32_t ulNumberToCreate,
                                        configSTACK_DEPTH_TYPE uxStackSize,
                                        UBaseType_t uxPriority )
@@ -219,11 +221,11 @@ void vStartSimpleSubscribePublishTask( uint32_t ulNumberToCreate,
 /*-----------------------------------------------------------*/
 
 static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
-                                       MQTTStatus_t xReturnStatus )
+                                       MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     /* Store the result in the application defined context so the task that
      * initiated the publish can check the operation's status. */
-    pxCommandContext->xReturnStatus = xReturnStatus;
+    pxCommandContext->xReturnStatus = pxReturnInfo->returnCode;
 
     if( pxCommandContext->xTaskToNotify != NULL )
     {
@@ -239,7 +241,7 @@ static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
 /*-----------------------------------------------------------*/
 
 static void prvSubscribeCommandCallback( void * pxCommandContext,
-                                         MQTTStatus_t xReturnStatus )
+                                         MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
@@ -247,9 +249,9 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
      * initiated the subscribe can check the operation's status.  Also send the
      * status as the notification value.  These things are just done for
      * demonstration purposes. */
-    pxApplicationDefinedContext->xReturnStatus = xReturnStatus;
+    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
     xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
-                 ( uint32_t )xReturnStatus,
+                 ( uint32_t ) ( pxReturnInfo->returnCode ),
                  eSetValueWithOverwrite );
 }
 
@@ -303,9 +305,10 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     MQTTStatus_t xCommandAdded;
     BaseType_t xCommandAcknowledged = pdFALSE;
     uint32_t ulSubscribeMessageID;
-    MQTTSubscribeInfo_t xSubscribeInfo;
+    MQTTAgentSubscribeArgs_t xSubscribeArgs;
     static int32_t ulNextSubscribeMessageID = 0;
     CommandContext_t xApplicationDefinedContext = { 0 };
+    CommandInfo_t xCommandParams = { 0 };
 
     /* Create a unique number of the subscribe that is about to be sent.  The number
      * is used as the command context and is sent back to this task as a notification
@@ -321,15 +324,20 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 
     /* Complete the subscribe information.  The topic string must persist for
      * duration of subscription! */
-    xSubscribeInfo.pTopicFilter = pcTopicFilter;
-    xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeInfo.qos = xQoS;
+    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeArgs.subscribeInfo.qos = xQoS;
+    xSubscribeArgs.numSubscriptions = 1;
 
     /* Complete an application defined context associated with this subscribe message.
      * This gets updated in the callback function so the variable must persist until
      * the callback executes. */
     xApplicationDefinedContext.ulNotificationValue = ulNextSubscribeMessageID;
     xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
+
+    xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
+    xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xApplicationDefinedContext;
 
     /* Loop in case the queue used to communicate with the MQTT agent is full and
      * attempts to post to it time out.  The queue will not become full if the
@@ -341,13 +349,10 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 
     do
     {
-        xCommandAdded = MQTTAgent_Subscribe( mqttexampleMQTT_CONTEXT_HANDLE,
-                                             &( xSubscribeInfo ),
-                                             prvIncomingPublishCallback,
-                                             NULL,
-                                             prvSubscribeCommandCallback,
-                                             ( void * ) &xApplicationDefinedContext,
-                                             mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
+        /* TODO: prvIncomingPublish as publish callback. */
+        xCommandAdded = MQTTAgent_Subscribe( &xGlobalMqttAgentContext,
+                                             &xSubscribeArgs,
+                                             &xCommandParams );
     } while( xCommandAdded != MQTTSuccess );
 
     /* Wait for acks to the subscribe message - this is optional but done here
@@ -388,6 +393,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     uint32_t ulTaskNumber = ( uint32_t ) pvParameters;
     MQTTQoS_t xQoS;
     TickType_t xTicksToDelay;
+    CommandInfo_t xCommandParams = { 0 };
 
     /* Have different tasks use different QoS.  0 and 1.  2 can also be used
      * if supported by the broker. */
@@ -418,6 +424,10 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     memset( ( void * ) &xCommandContext, 0x00, sizeof( xCommandContext ) );
     xCommandContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
 
+    xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
+    xCommandParams.cmdCompleteCallback = prvPublishCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = &xCommandContext;
+
     /* For a finite number of publishes...*/
     for( ulValueToNotify = 0UL; ulValueToNotify < mqttexamplePUBLISH_COUNT; ulValueToNotify++ )
     {
@@ -440,11 +450,9 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
                  payloadBuf,
                  topicBuf ) );
 
-        xCommandAdded = MQTTAgent_Publish( mqttexampleMQTT_CONTEXT_HANDLE,
+        xCommandAdded = MQTTAgent_Publish( &xGlobalMqttAgentContext,
                                            &xPublishInfo,
-                                           prvPublishCommandCallback,
-                                           &xCommandContext,
-                                           mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS );
+                                           &xCommandParams );
         configASSERT( xCommandAdded == MQTTSuccess );
 
         /* To ensure ulNotification doesn't accidentally hold the expected value
