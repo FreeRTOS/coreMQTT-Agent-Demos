@@ -54,19 +54,6 @@
 
 /*-----------------------------------------------------------*/
 
-/**
- * @brief The commands sent from the publish API to the MQTT agent.
- *
- * @note The structure used to pass information from the public facing API into the
- * agent task. */
-struct Command
-{
-    CommandType_t commandType;
-    void * pArgs;
-    CommandCallback_t pCommandCompleteCallback;
-    CommandContext_t * pCmdContext;
-};
-
 #if 0
 
 /**
