@@ -32,7 +32,7 @@
  * @note Implements an MQTT agent (or daemon task) on top of the coreMQTT MQTT client
  * library.  The agent makes coreMQTT usage thread safe by being the only task (or
  * thread) in the system that is allowed to access the native coreMQTT API - and in
- * so doing, serialises all access to coreMQTT even when multiple tasks are using the
+ * so doing, serializes all access to coreMQTT even when multiple tasks are using the
  * same MQTT connection.
  *
  * The agent provides an equivalent API for each coreMQTT API.  Whereas coreMQTT
@@ -46,32 +46,13 @@
 /* Standard includes. */
 #include <string.h>
 #include <stdio.h>
-
-/* Kernel includes. */
-#include "FreeRTOS.h"
-#include "semphr.h"
+#include <assert.h>
 
 /* MQTT agent include. */
 #include "freertos_mqtt_agent.h"
 #include "agent_command_pool.h"
 
 /*-----------------------------------------------------------*/
-
-/**
- * @brief A type of command for interacting with the MQTT API.
- */
-typedef enum CommandType
-{
-    NONE = 0,    /**< @brief No command received.  Must be zero (its memset() value). */
-    PROCESSLOOP, /**< @brief Call MQTT_ProcessLoop(). */
-    PUBLISH,     /**< @brief Call MQTT_Publish(). */
-    SUBSCRIBE,   /**< @brief Call MQTT_Subscribe(). */
-    UNSUBSCRIBE, /**< @brief Call MQTT_Unsubscribe(). */
-    PING,        /**< @brief Call MQTT_Ping(). */
-    CONNECT,     /**< @brief Call MQTT_Connect(). */
-    DISCONNECT,  /**< @brief Call MQTT_Disconnect(). */
-    TERMINATE    /**< @brief Exit the command loop and stop processing commands. */
-} CommandType_t;
 
 /**
  * @brief The commands sent from the publish API to the MQTT agent.
@@ -421,7 +402,7 @@ static bool addSubscription( MQTTAgentContext_t * pAgentContext,
     bool ret = false;
 
     /* The topic filter length was checked when the SUBSCRIBE command was created. */
-    configASSERT( topicFilterLength < MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH );
+    assert( topicFilterLength < MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH );
 
     if( topicFilterLength < MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH )
     {
@@ -602,29 +583,17 @@ static MQTTStatus_t addCommandToQueue( AgentQueue_t * pQueue,
                                        Command_t * pCommand,
                                        uint32_t blockTimeMs )
 {
-    MQTTStatus_t statusReturn;
-    BaseType_t queueStatus;
-    QueueHandle_t commandQueue = ( QueueHandle_t ) pQueue;
+    MQTTStatus_t statusReturn = MQTTIllegalState;
+    bool queueStatus;
 
     /* The application called an API function.  The API function was validated and
      * packed into a Command_t structure.  Now post a reference to the Command_t
      * structure to the MQTT agent for processing. */
-    if( commandQueue == NULL )
+    if( pQueue != NULL )
     {
-        statusReturn = MQTTIllegalState;
-    }
-    else
-    {
-        queueStatus = xQueueSendToBack( commandQueue, &pCommand, pdMS_TO_TICKS( ( TickType_t ) blockTimeMs ) );
+        queueStatus = Agent_QueuePush( pQueue, &pCommand, blockTimeMs );
 
-        if( queueStatus != pdFAIL )
-        {
-            statusReturn = MQTTSuccess;
-        }
-        else
-        {
-            statusReturn = MQTTSendFailed;
-        }
+        statusReturn = ( queueStatus ) ? MQTTSuccess : MQTTSendFailed;
     }
 
     return statusReturn;
@@ -646,7 +615,7 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
     const size_t maxNewSubscriptionsInOneGo = ( size_t ) 1; /* The agent interface only allows one subscription command at a time. */
     MQTTAgentReturnInfo_t returnInfo = { 0 };
 
-    configASSERT( pMqttAgentContext != NULL );
+    assert( pMqttAgentContext != NULL );
 
     pMQTTContext = &( pMqttAgentContext->mqttContext );
 
@@ -838,7 +807,7 @@ static void handleSubscriptionAcks( MQTTAgentContext_t * pAgentContext,
     MQTTStatus_t subscriptionAddStatus = MQTTSuccess;
     MQTTAgentReturnInfo_t returnInfo = { 0 };
 
-    configASSERT( pAckInfo != NULL );
+    assert( pAckInfo != NULL );
 
     pAckContext = pAckInfo->pOriginalCommand->pCmdContext;
     ackCallback = pAckInfo->pOriginalCommand->pCommandCompleteCallback;
@@ -923,8 +892,8 @@ static void mqttEventCallback( MQTTContext_t * pMqttContext,
     MQTTAgentReturnInfo_t returnInfo = { 0 };
     const uint8_t upperNibble = ( uint8_t ) 0xF0;
 
-    configASSERT( pMqttContext != NULL );
-    configASSERT( pPacketInfo != NULL );
+    assert( pMqttContext != NULL );
+    assert( pPacketInfo != NULL );
 
     pAgentContext = getAgentFromMQTTContext( pMqttContext );
 
@@ -1100,10 +1069,9 @@ MQTTStatus_t MQTTAgent_CommandLoop( MQTTAgentContext_t * pMqttAgentContext )
     Command_t * pCommand;
     MQTTStatus_t operationStatus = MQTTSuccess;
     CommandType_t currentCommandType = NONE;
-    QueueHandle_t commandQueue = ( QueueHandle_t ) ( pMqttAgentContext->commandQueue );
 
     /* The command queue should have been created before this task gets created. */
-    configASSERT( commandQueue );
+    assert( pMqttAgentContext->commandQueue );
 
     if( pMqttAgentContext == NULL )
     {
@@ -1115,7 +1083,7 @@ MQTTStatus_t MQTTAgent_CommandLoop( MQTTAgentContext_t * pMqttAgentContext )
     {
         /* Wait for the next command, if any. */
         pCommand = NULL;
-        xQueueReceive( commandQueue, &( pCommand ), pdMS_TO_TICKS( MQTT_AGENT_MAX_EVENT_QUEUE_WAIT_TIME ) );
+        ( void ) Agent_QueuePop( pMqttAgentContext->commandQueue, &( pCommand ), MQTT_AGENT_MAX_EVENT_QUEUE_WAIT_TIME );
         /* Set the command type in case the command is released while processing. */
         currentCommandType = ( pCommand ) ? pCommand->commandType : NONE;
         operationStatus = processCommand( pMqttAgentContext, pCommand );

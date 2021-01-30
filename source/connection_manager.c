@@ -58,6 +58,7 @@
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "task.h"
 
 /* FreeRTOS+TCP includes. */
@@ -176,6 +177,13 @@
  */
 #define mqttexampleMQTT_CONTEXT_HANDLE               ( ( MQTTContextHandle_t ) 0 )
 
+
+/*-----------------------------------------------------------*/
+
+struct AgentQueue
+{
+    QueueHandle_t queue;
+};
 
 /*-----------------------------------------------------------*/
 
@@ -316,7 +324,7 @@ MQTTAgentContext_t xGlobalMqttAgentContext;
 
 static uint8_t xNetworkBuffer[ MQTT_AGENT_NETWORK_BUFFER_SIZE ];
 
-static QueueHandle_t pxCommandQueue;
+static AgentQueue_t xCommandQueue;
 
 /*-----------------------------------------------------------*/
 
@@ -347,10 +355,10 @@ static MQTTStatus_t prvMQTTInit( void )
     static StaticQueue_t staticQueueStructure;
 
     LogDebug( ( "Creating command queue." ) );
-    pxCommandQueue = xQueueCreateStatic( MQTT_AGENT_COMMAND_QUEUE_LENGTH,
-                                         sizeof( Command_t * ),
-                                         staticQueueStorageArea,
-                                         &staticQueueStructure );
+    xCommandQueue.queue = xQueueCreateStatic( MQTT_AGENT_COMMAND_QUEUE_LENGTH,
+                                              sizeof( Command_t * ),
+                                              staticQueueStorageArea,
+                                              &staticQueueStructure );
 
     /* Fill in Transport Interface send and receive function pointers. */
     xTransport.pNetworkContext = &xNetworkContext;
@@ -364,7 +372,7 @@ static MQTTStatus_t prvMQTTInit( void )
 
     /* Initialize MQTT library. */
     xReturn = MQTTAgent_Init( &xGlobalMqttAgentContext,
-                              pxCommandQueue,
+                              &xCommandQueue,
                               &xFixedBuffer,
                               &xTransport,
                               prvGetTimeMs,
@@ -609,7 +617,7 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 
     /* A socket used by the MQTT task may need attention.  Send an event
      * to the MQTT task to make sure the task is not blocked on xCommandQueue. */
-    if( ( uxQueueMessagesWaiting( pxCommandQueue ) == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
+    if( ( uxQueueMessagesWaiting( xCommandQueue.queue ) == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
     {
         /* Don't block as this is called from the context of the IP task. */
         MQTTAgent_TriggerProcessLoop( &xGlobalMqttAgentContext, 0 );
@@ -641,7 +649,7 @@ static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAge
 static void prvMQTTAgentTask( void * pvParameters )
 {
     BaseType_t xNetworkResult = pdFAIL;
-    MQTTStatus_t xMQTTStatus = MQTTSuccess;
+    MQTTStatus_t xMQTTStatus = MQTTSuccess, xConnectStatus = MQTTSuccess;
     MQTTContext_t * pMqttContext = &( xGlobalMqttAgentContext.mqttContext );
 
     ( void ) pvParameters;
@@ -678,7 +686,8 @@ static void prvMQTTAgentTask( void * pvParameters )
             configASSERT( xNetworkResult == pdPASS );
             pMqttContext->connectStatus = MQTTNotConnected;
             /* MQTT Connect with a persistent session. */
-            xMQTTStatus = prvMQTTConnect( false );
+            xConnectStatus = prvMQTTConnect( false );
+            configASSERT( xConnectStatus == MQTTSuccess );
 
             #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
                 {
