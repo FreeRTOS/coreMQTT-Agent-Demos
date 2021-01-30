@@ -100,25 +100,25 @@ typedef struct CommandContext CommandContext_t;
 /**
  * @brief Callback function called when a command completes.
  *
- * @param[in] The callback context passed to the original command.
- * @param[in] A struct of status codes and outputs from the command.
+ * @param[in] pCmdCallbackContext The callback context passed to the original command.
+ * @param[in] pReturnInfo A struct of status codes and outputs from the command.
  *
  * @note A command should not be considered complete until this callback is
  * called, and arguments the command needs MUST stay in scope until such happens.
  */
-typedef void (* CommandCallback_t )( void *,
-                                     MQTTAgentReturnInfo_t * );
+typedef void (* CommandCallback_t )( void * pCmdCallbackContext,
+                                     MQTTAgentReturnInfo_t * pReturnInfo );
 
 /**
  * @brief Callback function called when receiving a publish.
  *
- * @param[in] The context of the MQTT agent.
- * @param[in] The packet ID of the received publish.
- * @param[in] Deserialized publish information.
+ * @param[in] pMqttAgentContext The context of the MQTT agent.
+ * @param[in] packetId The packet ID of the received publish.
+ * @param[in] pxPublishInfo Deserialized publish information.
  */
 typedef void (* IncomingPublishCallback_t )( MQTTAgentContext_t * pMqttAgentContext,
                                              uint16_t packetId,
-                                             MQTTPublishInfo_t * pxPublishInfo );
+                                             MQTTPublishInfo_t * pPublishInfo );
 
 /* Temporary define before platform abstraction. */
 #define AgentQueue_t    void
