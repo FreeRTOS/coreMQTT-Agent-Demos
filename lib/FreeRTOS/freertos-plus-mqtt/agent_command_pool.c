@@ -45,7 +45,7 @@
 /**
  * @brief The pool of command structures used to hold information on commands (such
  * as PUBLISH or SUBSCRIBE) between the command being created by an API call and
- * by either an error or the execution of the commands callback.
+ * completion of the command by the execution of the command's callback.
  */
 static Command_t commandStructurePool[ MQTT_COMMAND_CONTEXTS_POOL_SIZE ];
 
@@ -66,11 +66,19 @@ Command_t * Agent_GetCommand( uint32_t blockTimeMs )
 
     if( !initialized )
     {
-        memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
-        freeCommandStructMutex = xSemaphoreCreateCounting( MQTT_COMMAND_CONTEXTS_POOL_SIZE, MQTT_COMMAND_CONTEXTS_POOL_SIZE );
-        configASSERT( freeCommandStructMutex ); /*_RB_ Create all objects here statically. */
+        taskENTER_CRITICAL();
+        {
+            if( !initialized )
+            {
+                memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
+                freeCommandStructMutex = xSemaphoreCreateCounting( MQTT_COMMAND_CONTEXTS_POOL_SIZE, MQTT_COMMAND_CONTEXTS_POOL_SIZE );
+            }
 
-        initialized = true;
+            initialized = true;
+        }
+        taskEXIT_CRITICAL();
+
+        configASSERT( freeCommandStructMutex ); /*_RB_ Create all objects here statically. */
     }
 
     /* Check counting semaphore has been created. */
@@ -116,10 +124,13 @@ bool Agent_ReleaseCommand( Command_t * pCommandToRelease )
     {
         if( pCommandToRelease == &( commandStructurePool[ i ] ) )
         {
+            taskENTER_CRITICAL();
+
             /* Yes its from the pool.  Clearing it to zero not only removes the old
              * data it also sets the structure's commandType parameter to NONE to
              * mark the structure as free again. */
             memset( ( void * ) pCommandToRelease, 0x00, sizeof( Command_t ) );
+            taskEXIT_CRITICAL();
 
             /* Give back the counting semaphore after returning the structure so the
              * semaphore count equals the number of available structures. */

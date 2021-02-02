@@ -132,7 +132,7 @@ typedef void (* CommandCallback_t )( void * pCmdCallbackContext,
  *
  * @param[in] pMqttAgentContext The context of the MQTT agent.
  * @param[in] packetId The packet ID of the received publish.
- * @param[in] pxPublishInfo Deserialized publish information.
+ * @param[in] pPublishInfo Deserialized publish information.
  */
 typedef void (* IncomingPublishCallback_t )( MQTTAgentContext_t * pMqttAgentContext,
                                              uint16_t packetId,
