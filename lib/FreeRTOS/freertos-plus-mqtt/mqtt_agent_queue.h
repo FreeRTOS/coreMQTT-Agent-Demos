@@ -50,7 +50,7 @@ typedef struct AgentQueue AgentQueue_t;
  *
  * @return `true` if send was successful, else `false`.
  */
-bool Agent_QueuePush( const AgentQueue_t * pQueueHandle,
+bool Agent_QueueSend( const AgentQueue_t * pQueueHandle,
                       const void * pData,
                       uint32_t blockTimeMs );
 
@@ -64,8 +64,8 @@ bool Agent_QueuePush( const AgentQueue_t * pQueueHandle,
  *
  * @return `true` if receive was successful, else `false`.
  */
-bool Agent_QueuePop( const AgentQueue_t * pQueueHandle,
-                     void * pBuffer,
-                     uint32_t blockTimeMs );
+bool Agent_QueueReceive( const AgentQueue_t * pQueueHandle,
+                     	 void * pBuffer,
+                    	 uint32_t blockTimeMs );
 
 #endif /* MQTT_AGENT_QUEUE_H */

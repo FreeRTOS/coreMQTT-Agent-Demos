@@ -112,7 +112,6 @@ Command_t * Agent_GetCommand( uint32_t blockTimeMs )
                     /* If the commandType is NONE then the structure is not in use. */
                     if( commandStructurePool[ i ].commandType == NONE )
                     {
-                        LogDebug( ( "Removed Command Context %d from pool", ( int ) i ) );
                         structToUse = &( commandStructurePool[ i ] );
 
                         /* To show the struct is no longer available to be returned

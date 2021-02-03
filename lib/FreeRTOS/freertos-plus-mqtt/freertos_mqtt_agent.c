@@ -578,7 +578,7 @@ static MQTTStatus_t addCommandToQueue( AgentQueue_t * pQueue,
      * structure to the MQTT agent for processing. */
     if( pQueue != NULL )
     {
-        queueStatus = Agent_QueuePush( pQueue, &pCommand, blockTimeMs );
+        queueStatus = Agent_QueueSend( pQueue, &pCommand, blockTimeMs );
 
         statusReturn = ( queueStatus ) ? MQTTSuccess : MQTTSendFailed;
     }
@@ -1070,7 +1070,7 @@ MQTTStatus_t MQTTAgent_CommandLoop( MQTTAgentContext_t * pMqttAgentContext )
     {
         /* Wait for the next command, if any. */
         pCommand = NULL;
-        ( void ) Agent_QueuePop( pMqttAgentContext->commandQueue, &( pCommand ), MQTT_AGENT_MAX_EVENT_QUEUE_WAIT_TIME );
+        ( void ) Agent_QueueReceive( pMqttAgentContext->commandQueue, &( pCommand ), MQTT_AGENT_MAX_EVENT_QUEUE_WAIT_TIME );
         /* Set the command type in case the command is released while processing. */
         currentCommandType = ( pCommand ) ? pCommand->commandType : NONE;
         operationStatus = processCommand( pMqttAgentContext, pCommand );

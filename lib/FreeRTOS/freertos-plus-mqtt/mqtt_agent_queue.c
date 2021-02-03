@@ -49,7 +49,7 @@ struct AgentQueue
 
 /*-----------------------------------------------------------*/
 
-bool Agent_QueuePush( const AgentQueue_t * pQueueHandle,
+bool Agent_QueueSend( const AgentQueue_t * pQueueHandle,
                       const void * pData,
                       uint32_t blockTimeMs )
 {
@@ -65,9 +65,9 @@ bool Agent_QueuePush( const AgentQueue_t * pQueueHandle,
 
 /*-----------------------------------------------------------*/
 
-bool Agent_QueuePop( const AgentQueue_t * pQueueHandle,
-                     void * pBuffer,
-                     uint32_t blockTimeMs )
+bool Agent_QueueReceive( const AgentQueue_t * pQueueHandle,
+                         void * pBuffer,
+                         uint32_t blockTimeMs )
 {
     BaseType_t queueStatus = pdFAIL;
 
@@ -76,5 +76,5 @@ bool Agent_QueuePop( const AgentQueue_t * pQueueHandle,
         queueStatus = xQueueReceive( pQueueHandle->queue, pBuffer, pdMS_TO_TICKS( blockTimeMs ) );
     }
 
-    return false;
+    return ( queueStatus == pdPASS ) ? true : false;
 }
