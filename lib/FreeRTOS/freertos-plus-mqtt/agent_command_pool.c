@@ -56,28 +56,46 @@ static Command_t commandStructurePool[ MQTT_COMMAND_CONTEXTS_POOL_SIZE ];
  */
 static SemaphoreHandle_t freeCommandStructMutex = NULL;
 
+static volatile bool initializedSemaphore = false;
+
+/*-----------------------------------------------------------*/
+
+static void initializePool()
+{
+    bool destroySemaphore = true;
+    SemaphoreHandle_t tempMutex = xSemaphoreCreateCounting( MQTT_COMMAND_CONTEXTS_POOL_SIZE, MQTT_COMMAND_CONTEXTS_POOL_SIZE );
+
+    taskENTER_CRITICAL();
+    {
+        if( !initializedSemaphore )
+        {
+            memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
+            freeCommandStructMutex = tempMutex;
+            destroySemaphore = false;
+        }
+
+        initializedSemaphore = true;
+    }
+    taskEXIT_CRITICAL();
+
+    /* Destroy the semaphore if it was not used. */
+    if( destroySemaphore )
+    {
+        vSemaphoreDelete( tempMutex );
+    }
+}
+
 /*-----------------------------------------------------------*/
 
 Command_t * Agent_GetCommand( uint32_t blockTimeMs )
 {
     Command_t * structToUse = NULL;
     size_t i;
-    static bool initialized = false;
 
-    if( !initialized )
+    /* Check here so we do not enter a critical section every time. */
+    if( !initializedSemaphore )
     {
-        taskENTER_CRITICAL();
-        {
-            if( !initialized )
-            {
-                memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
-                freeCommandStructMutex = xSemaphoreCreateCounting( MQTT_COMMAND_CONTEXTS_POOL_SIZE, MQTT_COMMAND_CONTEXTS_POOL_SIZE );
-            }
-
-            initialized = true;
-        }
-        taskEXIT_CRITICAL();
-
+        initializePool();
         configASSERT( freeCommandStructMutex ); /*_RB_ Create all objects here statically. */
     }
 
