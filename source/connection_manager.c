@@ -76,6 +76,9 @@
 /* Exponential backoff retry include. */
 #include "backoff_algorithm.h"
 
+/* Subscription manager header include. */
+#include "subscription_manager.h"
+
 
 /* Transport interface include. */
 #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
@@ -242,6 +245,19 @@ static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAge
 
 
 /**
+ * @brief Fan out the incoming publishes to the callbacks registered by different
+ * tasks. If there are no callbacks registered for the incoming publish, it will be
+ * passed to the unsolicited publish handler.
+ *
+ * @param[in] pMqttAgentContext Agent context.
+ * @param[in] packetId Packet ID of publish.
+ * @param[in] pxPublishInfo Info of incoming publish.
+ */
+static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
+                                        uint16_t packetId,
+                                        MQTTPublishInfo_t * pxPublishInfo );
+
+/**
  * @brief Task used to run the MQTT agent.  In this example the first task that
  * is created is responsible for creating all the other demo tasks.  Then,
  * rather than create prvMQTTAgentTask() as a separate task, it simply calls
@@ -368,10 +384,7 @@ static MQTTStatus_t prvMQTTInit( void )
                               &xFixedBuffer,
                               &xTransport,
                               prvGetTimeMs,
-
-                              /* Callback to execute if receiving publishes on
-                               * topics for which there is no subscription. */
-                              prvUnsolicitedIncomingPublishCallback,
+                              prvIncomingPublishCallback,
                               /* Context to pass into the callback.  Not used. */
                               NULL );
 
@@ -539,6 +552,7 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
         {
             /* Get back-off value (in milliseconds) for the next connection retry. */
             xBackoffAlgStatus = BackoffAlgorithm_GetNextBackoff( &xReconnectParams, uxRand(), &usNextRetryBackOff );
+
             if( xBackoffAlgStatus == BackoffAlgorithmSuccess )
             {
                 LogWarn( ( "Connection to the broker failed. "
@@ -634,6 +648,26 @@ static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAge
     *pcLocation = 0x00;
     LogWarn( ( "WARN:  Received an unsolicited publish from topic %s", pxPublishInfo->pTopicName ) );
     *pcLocation = cOriginalChar;
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
+                                        uint16_t packetId,
+                                        MQTTPublishInfo_t * pxPublishInfo )
+{
+    BaseType_t publishHandled = pdFALSE;
+
+    /* Fan out the incoming publishes to the callbacks registered using
+     * subscription manager. */
+    publishHandled = handleIncomingPublishes( pxPublishInfo );
+
+    /* If there are no callbacks to handle the incoming publishes, pass it to
+     * the unsolicited publish handler. */
+    if( publishHandled != pdTRUE )
+    {
+        prvUnsolicitedIncomingPublishCallback( pMqttAgentContext, packetId, pxPublishInfo );
+    }
 }
 
 /*-----------------------------------------------------------*/
