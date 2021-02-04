@@ -25,7 +25,7 @@
  */
 
 /**
- * @file mqtt_agent_queue.c
+ * @file agent_message.c
  * @brief Implements functions to interact with queues.
  */
 
@@ -38,26 +38,26 @@
 #include "semphr.h"
 
 /* Header include. */
-#include "mqtt_agent_queue.h"
+#include "agent_message.h"
 
 /*-----------------------------------------------------------*/
 
-struct AgentQueue
+struct AgentMessageContext
 {
     QueueHandle_t queue;
 };
 
 /*-----------------------------------------------------------*/
 
-bool Agent_QueueSend( const AgentQueue_t * pQueueHandle,
-                      const void * pData,
-                      uint32_t blockTimeMs )
+bool Agent_MessageSend( const AgentMessageContext_t * pMsgCtx,
+                        const void * pData,
+                        uint32_t blockTimeMs )
 {
     BaseType_t queueStatus = pdFAIL;
 
-    if( ( pQueueHandle != NULL ) && ( pData != NULL ) )
+    if( ( pMsgCtx != NULL ) && ( pData != NULL ) )
     {
-        queueStatus = xQueueSendToBack( pQueueHandle->queue, pData, pdMS_TO_TICKS( blockTimeMs ) );
+        queueStatus = xQueueSendToBack( pMsgCtx->queue, pData, pdMS_TO_TICKS( blockTimeMs ) );
     }
 
     return ( queueStatus == pdPASS ) ? true : false;
@@ -65,15 +65,15 @@ bool Agent_QueueSend( const AgentQueue_t * pQueueHandle,
 
 /*-----------------------------------------------------------*/
 
-bool Agent_QueueReceive( const AgentQueue_t * pQueueHandle,
-                         void * pBuffer,
-                         uint32_t blockTimeMs )
+bool Agent_MessageReceive( const AgentMessageContext_t * pMsgCtx,
+                           void * pBuffer,
+                           uint32_t blockTimeMs )
 {
     BaseType_t queueStatus = pdFAIL;
 
-    if( ( pQueueHandle != NULL ) && ( pBuffer != NULL ) )
+    if( ( pMsgCtx != NULL ) && ( pBuffer != NULL ) )
     {
-        queueStatus = xQueueReceive( pQueueHandle->queue, pBuffer, pdMS_TO_TICKS( blockTimeMs ) );
+        queueStatus = xQueueReceive( pMsgCtx->queue, pBuffer, pdMS_TO_TICKS( blockTimeMs ) );
     }
 
     return ( queueStatus == pdPASS ) ? true : false;
