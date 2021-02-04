@@ -291,6 +291,12 @@
     <ClCompile Include="..\..\source\simple_sub_pub_demo.c">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent_queue.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h">
@@ -457,6 +463,12 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent_queue.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
