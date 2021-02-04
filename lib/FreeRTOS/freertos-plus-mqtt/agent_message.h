@@ -65,7 +65,7 @@ bool Agent_MessageSend( const AgentMessageContext_t * pMsgCtx,
  * @return `true` if receive was successful, else `false`.
  */
 bool Agent_MessageReceive( const AgentMessageContext_t * pMsgCtx,
-                     	   void * pBuffer,
-                    	   uint32_t blockTimeMs );
+                           void * pBuffer,
+                           uint32_t blockTimeMs );
 
 #endif /* AGENT_MESSAGE_H */

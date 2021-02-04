@@ -158,7 +158,7 @@ struct MQTTAgentContext
  */
 typedef struct MQTTAgentSubscribeArgs
 {
-    MQTTSubscribeInfo_t subscribeInfo;
+    MQTTSubscribeInfo_t * pSubscribeInfo;
     size_t numSubscriptions;
 } MQTTAgentSubscribeArgs_t;
 

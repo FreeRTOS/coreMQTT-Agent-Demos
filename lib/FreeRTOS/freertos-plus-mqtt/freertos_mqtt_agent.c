@@ -336,7 +336,6 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
 {
     bool isValid, isSpace = true;
     MQTTStatus_t statusReturn;
-    MQTTSubscribeInfo_t * pSubscribeInfo;
     MQTTAgentSubscribeArgs_t * pSubscribeArgs;
     MQTTPublishInfo_t * pPublishInfo;
     size_t uxHeaderBytes;
@@ -354,8 +353,8 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
             isSpace = isSpaceInPendingAckList( pMqttAgentContext );
 
             pSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pMqttInfoParam;
-            pSubscribeInfo = &( pSubscribeArgs->subscribeInfo );
-            isValid = ( pSubscribeInfo != NULL ) &&
+            isValid = ( pSubscribeArgs != NULL ) &&
+                      ( pSubscribeArgs->pSubscribeInfo != NULL ) &&
                       ( pMqttAgentContext != NULL ) &&
                       ( isSpace == true );
 
@@ -367,8 +366,10 @@ static MQTTStatus_t createCommand( CommandType_t commandType,
              * the array contains space for another outstanding ack. */
             isSpace = isSpaceInPendingAckList( pMqttAgentContext );
 
+            pSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pMqttInfoParam;
             isValid = ( pMqttAgentContext != NULL ) &&
-                      ( pMqttInfoParam != NULL ) &&
+                      ( pSubscribeArgs != NULL ) &&
+                      ( pSubscribeArgs->pSubscribeInfo != NULL ) &&
                       ( isSpace == true );
             break;
 
@@ -470,7 +471,6 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
     uint16_t packetId = MQTT_PACKET_ID_INVALID;
     bool addAckToList = false, ackAdded = false;
     MQTTPublishInfo_t * pPublishInfo;
-    MQTTSubscribeInfo_t * pSubscribeInfo;
     MQTTAgentSubscribeArgs_t * pSubscribeArgs;
     MQTTContext_t * pMQTTContext;
     bool runProcessLoops = true;
@@ -503,7 +503,6 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
 
             case SUBSCRIBE:
             case UNSUBSCRIBE:
-                pSubscribeInfo = ( MQTTSubscribeInfo_t * ) ( pCommand->pArgs );
                 pSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) ( pCommand->pArgs );
                 packetId = MQTT_GetPacketId( pMQTTContext );
 
@@ -513,14 +512,14 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
                      * it is fine to send another subscription request. A valid use case
                      * for this is changing the maximum QoS of the subscription. */
                     operationStatus = MQTT_Subscribe( pMQTTContext,
-                                                      &(pSubscribeArgs->subscribeInfo),
+                                                      pSubscribeArgs->pSubscribeInfo,
                                                       pSubscribeArgs->numSubscriptions,
                                                       packetId );
                 }
                 else
                 {
                     operationStatus = MQTT_Unsubscribe( pMQTTContext,
-                                                        &(pSubscribeArgs->subscribeInfo),
+                                                        pSubscribeArgs->pSubscribeInfo,
                                                         pSubscribeArgs->numSubscriptions,
                                                         packetId );
                 }
@@ -594,14 +593,14 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
     {
         do
         {
-            pAgentContext->packetReceivedInLoop = false;
+            pMqttAgentContext->packetReceivedInLoop = false;
 
             if( ( operationStatus == MQTTSuccess ) &&
                 ( pMQTTContext->connectStatus == MQTTConnected ) )
             {
                 operationStatus = MQTT_ProcessLoop( pMQTTContext, processLoopTimeoutMs );
             }
-        } while( pAgentContext->packetReceivedInLoop );
+        } while( pMqttAgentContext->packetReceivedInLoop );
     }
 
     return operationStatus;
@@ -618,19 +617,18 @@ static void handleSubscriptionAcks( MQTTAgentContext_t * pAgentContext,
     CommandContext_t * pAckContext = NULL;
     CommandCallback_t ackCallback = NULL;
     uint8_t * pSubackCodes = NULL;
-    MQTTStatus_t subscriptionAddStatus = MQTTSuccess;
     MQTTAgentReturnInfo_t returnInfo = { 0 };
 
     assert( pAckInfo != NULL );
 
     pAckContext = pAckInfo->pOriginalCommand->pCmdContext;
     ackCallback = pAckInfo->pOriginalCommand->pCommandCompleteCallback;
-    pSubackCodes = pPacketInfo->pRemainingData + 2U; /*_RB_ Where does 2 come from? */
-    subscriptionAddStatus = pDeserializedInfo->deserializationResult;
+    /* A SUBACK's status codes start 2 bytes after the variable header. */
+    pSubackCodes = ( packetType == MQTT_PACKET_TYPE_SUBACK ) ? pPacketInfo->pRemainingData + 2U : NULL;
 
     if( ackCallback != NULL )
     {
-        returnInfo.returnCode = subscriptionAddStatus;
+        returnInfo.returnCode = pDeserializedInfo->deserializationResult;
         returnInfo.pSubackCodes = pSubackCodes;
         ackCallback( pAckContext, &returnInfo );
     }
@@ -753,7 +751,7 @@ static MQTTStatus_t createAndAddCommand( CommandType_t commandType,
     MQTTStatus_t statusReturn = MQTTSuccess;
     Command_t * pCommand;
 
-    /* If the packet ID is zero then the MQTT context has not been initialised as 0
+    /* If the packet ID is zero then the MQTT context has not been initialized as 0
      * is the initial value but not a valid packet ID. */
     if( pMqttAgentContext->mqttContext.nextPacketId != 0 )
     {
@@ -888,7 +886,7 @@ MQTTStatus_t MQTTAgent_ResumeSession( MQTTAgentContext_t * pMqttAgentContext,
     AckInfo_t * pendingAcks;
     MQTTPublishInfo_t * originalPublish = NULL;
 
-    /* If the packet ID is zero then the MQTT context has not been initialised as 0
+    /* If the packet ID is zero then the MQTT context has not been initialized as 0
      * is the initial value but not a valid packet ID. */
     if( ( pMqttAgentContext != NULL ) && ( pMqttAgentContext->mqttContext.nextPacketId != 0 ) )
     {
