@@ -42,6 +42,10 @@
 
 /*-----------------------------------------------------------*/
 
+#define SEMAPHORE_NOT_INITIALIZED    ( 0U )
+#define SEMAPHORE_INIT_PENDING       ( 1U )
+#define SEMAPHORE_INITIALIZED        ( 2U )
+
 /**
  * @brief The pool of command structures used to hold information on commands (such
  * as PUBLISH or SUBSCRIBE) between the command being created by an API call and
@@ -56,32 +60,29 @@ static Command_t commandStructurePool[ MQTT_COMMAND_CONTEXTS_POOL_SIZE ];
  */
 static SemaphoreHandle_t freeCommandStructMutex = NULL;
 
-static volatile bool initializedSemaphore = false;
+static volatile uint8_t initStatus = SEMAPHORE_NOT_INITIALIZED;
 
 /*-----------------------------------------------------------*/
 
 static void initializePool()
 {
-    bool destroySemaphore = true;
-    SemaphoreHandle_t tempMutex = xSemaphoreCreateCounting( MQTT_COMMAND_CONTEXTS_POOL_SIZE, MQTT_COMMAND_CONTEXTS_POOL_SIZE );
+    bool owner = false;
 
     taskENTER_CRITICAL();
     {
-        if( !initializedSemaphore )
+        if( initStatus == SEMAPHORE_NOT_INITIALIZED )
         {
-            memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
-            freeCommandStructMutex = tempMutex;
-            destroySemaphore = false;
+            owner = true;
+            initStatus = SEMAPHORE_INIT_PENDING;
         }
-
-        initializedSemaphore = true;
     }
     taskEXIT_CRITICAL();
 
-    /* Destroy the semaphore if it was not used. */
-    if( destroySemaphore )
+    if( owner )
     {
-        vSemaphoreDelete( tempMutex );
+        memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
+        freeCommandStructMutex = xSemaphoreCreateCounting( MQTT_COMMAND_CONTEXTS_POOL_SIZE, MQTT_COMMAND_CONTEXTS_POOL_SIZE );
+        initStatus = SEMAPHORE_INITIALIZED;
     }
 }
 
@@ -93,7 +94,7 @@ Command_t * Agent_GetCommand( uint32_t blockTimeMs )
     size_t i;
 
     /* Check here so we do not enter a critical section every time. */
-    if( !initializedSemaphore )
+    if( initStatus == SEMAPHORE_NOT_INITIALIZED )
     {
         initializePool();
         configASSERT( freeCommandStructMutex ); /*_RB_ Create all objects here statically. */
