@@ -66,7 +66,7 @@ bool addSubscription( SubscriptionElement_t * pxSubscriptionList,
         }
     }
 
-    if( ( xAvailableIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ) && ( pxIncomingPublishCallback != NULL ) )
+    if( xAvailableIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS )
     {
         pxSubscriptionList[ xAvailableIndex ].pcSubscriptionFilterString = pcTopicFilterString;
         pxSubscriptionList[ xAvailableIndex ].usFilterStringLength = usTopicFilterLength;
@@ -118,8 +118,17 @@ bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
 
             if( isMatched == true )
             {
-                pxSubscriptionList[ lIndex ].pxIncomingPublishCallback( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
-                                                                        pxPublishInfo );
+                if( pxSubscriptionList[ lIndex ].pxIncomingPublishCallback != NULL )
+                {
+                    pxSubscriptionList[ lIndex ].pxIncomingPublishCallback( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
+                                                                            pxPublishInfo );
+                }
+                else
+                {
+                    /* Reset isMatched so that the publish can be handled through
+                     * the unsolicited handler. */
+                    isMatched = false;
+                }
             }
         }
     }

@@ -638,7 +638,7 @@ static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
                                         uint16_t packetId,
                                         MQTTPublishInfo_t * pxPublishInfo )
 {
-    bool xPublishHandled = pdFALSE;
+    bool xPublishHandled = false;
     char cOriginalChar, * pcLocation;
 
     /* Fan out the incoming publishes to the callbacks registered using

@@ -63,7 +63,9 @@ typedef void (* IncomingPubCallback_t )( void * pvIncomingPublishCallbackContext
  *
  * @note This implementation allows multiple tasks to subscribe to the same topic.
  * In this case, another element is added to the subscription list, differing
- * in the intended publish callback.
+ * in the intended publish callback. Also note that the topic filters are not
+ * copied in the subscription manager and hence the topic filter strings need to
+ * stay in scope until unsubscribed.
  */
 typedef struct subscriptionElement
 {
