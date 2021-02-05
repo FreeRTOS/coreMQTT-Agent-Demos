@@ -821,6 +821,7 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
     MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
+    MQTTSubscribeInfo_t xSubscribeInfo = { 0 };
     BaseType_t result;
     CommandInfo_t xCommandParams = { 0 };
     CommandContext_t xApplicationDefinedContext = { 0 };
@@ -828,9 +829,10 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
-    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
-    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeArgs.subscribeInfo.qos = xQoS;
+    xSubscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeInfo.qos = xQoS;
+    xSubscribeArgs.pSubscribeInfo = &xSubscribeInfo;
     xSubscribeArgs.numSubscriptions = 1;
 
     /* Complete an application defined context associated with this subscribe message.
@@ -981,6 +983,7 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
     MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
     MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
+    MQTTSubscribeInfo_t xSubscribeInfo = { 0 };
     BaseType_t result;
     CommandInfo_t xCommandParams = { 0 };
     CommandContext_t xApplicationDefinedContext = { 0 };
@@ -988,9 +991,10 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
-    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
-    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeArgs.subscribeInfo.qos = xQoS;
+    xSubscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeInfo.qos = xQoS;
+    xSubscribeArgs.pSubscribeInfo = &xSubscribeInfo;
     xSubscribeArgs.numSubscriptions = 1;
 
     /* Complete an application defined context associated with this subscribe message.

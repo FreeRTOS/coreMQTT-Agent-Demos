@@ -346,6 +346,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     BaseType_t xCommandAcknowledged = pdFALSE;
     uint32_t ulSubscribeMessageID;
     MQTTAgentSubscribeArgs_t xSubscribeArgs;
+    MQTTSubscribeInfo_t xSubscribeInfo;
     static int32_t ulNextSubscribeMessageID = 0;
     CommandContext_t xApplicationDefinedContext = { 0 };
     CommandInfo_t xCommandParams = { 0 };
@@ -364,9 +365,10 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 
     /* Complete the subscribe information.  The topic string must persist for
      * duration of subscription! */
-    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
-    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeArgs.subscribeInfo.qos = xQoS;
+    xSubscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeInfo.qos = xQoS;
+    xSubscribeArgs.pSubscribeInfo = &xSubscribeInfo;
     xSubscribeArgs.numSubscriptions = 1;
 
     /* Complete an application defined context associated with this subscribe message.

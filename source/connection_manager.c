@@ -183,7 +183,7 @@
 
 /*-----------------------------------------------------------*/
 
-struct AgentQueue
+struct AgentMessageContext
 {
     QueueHandle_t queue;
 };
@@ -326,7 +326,7 @@ MQTTAgentContext_t xGlobalMqttAgentContext;
 
 static uint8_t xNetworkBuffer[ MQTT_AGENT_NETWORK_BUFFER_SIZE ];
 
-static AgentQueue_t xCommandQueue;
+static AgentMessageContext_t xCommandQueue;
 
 /**
  * @brief The global array of subscription elements.

@@ -300,7 +300,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent_queue.c">
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClCompile>
   </ItemGroup>
@@ -476,7 +476,7 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent_queue.h">
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClInclude>
   </ItemGroup>
