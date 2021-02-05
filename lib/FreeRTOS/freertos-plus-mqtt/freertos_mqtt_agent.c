@@ -316,17 +316,6 @@ static AckInfo_t getAwaitingOperation( MQTTAgentContext_t * pAgentContext,
 
 /*-----------------------------------------------------------*/
 
-static void removeAwaitingOperation( MQTTAgentContext_t * pAgentContext,
-                                     size_t index )
-{
-    assert( pAgentContext != NULL );
-    assert( index < MQTT_AGENT_MAX_OUTSTANDING_ACKS );
-    pAgentContext->pPendingAcks[ index ].packetId = MQTT_PACKET_ID_INVALID;
-    pAgentContext->pPendingAcks[ index ].pOriginalCommand = NULL;
-}
-
-/*-----------------------------------------------------------*/
-
 static MQTTStatus_t createCommand( CommandType_t commandType,
                                    MQTTAgentContext_t * pMqttAgentContext,
                                    void * pMqttInfoParam,
