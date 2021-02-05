@@ -267,6 +267,7 @@ static void prvCreateMQTTPayload( char *pcBuffer, size_t xBufferSize )
 static void prvSubscribeToTopic( char *pcReceivedPublishPayload  )
 {
     MQTTAgentSubscribeArgs_t xSubscribeArgs;
+    MQTTSubscribeInfo_t xSubscribeInfo;
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
     CommandInfo_t xCommandParams = { 0 };
@@ -285,9 +286,10 @@ static void prvSubscribeToTopic( char *pcReceivedPublishPayload  )
     /* Complete the subscribe information.  The topic string must persist for
     duration of subscription - although in this case is it a static const so
     will persist for the lifetime of the application. */
-    xSubscribeArgs.subscribeInfo.pTopicFilter = pcTopicFilter;
-    xSubscribeArgs.subscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
-    xSubscribeArgs.subscribeInfo.qos = MQTTQoS1;
+    xSubscribeInfo.pTopicFilter = pcTopicFilter;
+    xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
+    xSubscribeInfo.qos = MQTTQoS1;
+    xSubscribeArgs.pSubscribeInfo = &xSubscribeInfo;
     xSubscribeArgs.numSubscriptions = 1;
 
     /* Loop in case the queue used to communicate with the MQTT agent is full and
