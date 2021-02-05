@@ -180,6 +180,14 @@
  */
 #define mqttexampleMQTT_CONTEXT_HANDLE               ( ( MQTTContextHandle_t ) 0 )
 
+/**
+ * @brief The maximum amount of time in milliseconds to wait for the commands
+ * to be posted to the MQTT agent should the MQTT agent's command queue be full.
+ * Tasks wait in the Blocked state, so don't use any CPU time.
+ */
+#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS    ( 200U )
+
+
 
 /*-----------------------------------------------------------*/
 
@@ -250,6 +258,32 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
                                         uint16_t packetId,
                                         MQTTPublishInfo_t * pxPublishInfo );
+
+/**
+ * @brief Function to attempt to resubscribe to the topics already present in the
+ * subscription list. This function will be invoked when this demo requests the
+ * broker to reestablish the session and the broker cannot do so. This function
+ * will enqueue commands to the MQTT Agent queue and will be processed once the
+ * command loop starts.
+ *
+ * @return `MQTTSuccess` if adding subscribes to the command queue succeeds, else
+ * appropriate error code from MQTTAgent_Subscribe.
+ * */
+static MQTTStatus_t prvHandleResubscribe( void );
+
+/**
+ * @brief Passed into MQTTAgent_Subscribe() as the callback to execute when the
+ * broker ACKs the SUBSCRIBE message. This callback implementation is used for
+ * handling the completion of resubscribes. Any topic filter failed to resubscribe
+ * will be removed from the subscription list.
+ *
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
+ *
+ * @param[in] pxCommandContext Context of the initial command.
+ * @param[in] pxReturnInfo The result of the command.
+ */
+static void prvSubscriptionCommandCallback( void * pxCommandContext,
+                                            MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
  * @brief Task used to run the MQTT agent.  In this example the first task that
@@ -457,12 +491,112 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
     LogInfo( ( "Session present: %d\n", xSessionPresent ) );
 
     /* Resume a session if desired. */
-    if( ( xResult == MQTTSuccess ) && !xCleanSession )
+    if( ( xResult == MQTTSuccess ) && ( xCleanSession == false ) )
     {
         xResult = MQTTAgent_ResumeSession( &xGlobalMqttAgentContext, xSessionPresent );
+
+        /* Resubscribe to all the subscribed topics. */
+        if( ( xResult == MQTTSuccess ) && ( xSessionPresent == false ) )
+        {
+            xResult = prvHandleResubscribe();
+        }
     }
 
     return xResult;
+}
+
+/*-----------------------------------------------------------*/
+
+static MQTTStatus_t prvHandleResubscribe( void )
+{
+    MQTTStatus_t xResult = MQTTBadParameter;
+    int32_t lIndex = 0;
+    uint16_t usNumSubscriptions = 0U;
+
+    /* These variables need to stay in scope until command completes.
+     * Dynamically allocating memory for these will help to optimize the memory
+     * by freeing up the mempry once the command is complete. In this demo, only
+     * static allocations are used. */
+    static MQTTAgentSubscribeArgs_t xSubArgs = { 0 };
+    static MQTTSubscribeInfo_t xSubInfo[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ] = { 0 };
+    static CommandInfo_t xCommandParams = { 0 };
+
+    /* Loop through each subscription in the subscription list and add a subscribe
+     * command to the command queue. */
+    for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
+    {
+        /* Check if there is a subscription in the subscription list. This demo
+         * doesn't subscribe to the same topics from different tasks. If there
+         * are duplicates, duplicate topics should be avoided while sending
+         * resubscribes. */
+        if( xGlobalSubscriptionList[ lIndex ].usFilterStringLength != 0 )
+        {
+            xSubInfo[ usNumSubscriptions ].pTopicFilter = xGlobalSubscriptionList[ lIndex ].pcSubscriptionFilterString;
+            xSubInfo[ usNumSubscriptions ].topicFilterLength = xGlobalSubscriptionList[ lIndex ].usFilterStringLength;
+
+            /* QoS1 is used for all the subscriptions in this demo. */
+            xSubInfo[ usNumSubscriptions ].qos = MQTTQoS1;
+
+            usNumSubscriptions++;
+
+            LogInfo( ( "Resubscribe to the topic %.*s will be attempted.",
+                       xSubInfo[ usNumSubscriptions ].topicFilterLength,
+                       xSubInfo[ usNumSubscriptions ].pTopicFilter ) );
+        }
+    }
+
+    if( usNumSubscriptions > 0 )
+    {
+        xSubArgs.pSubscribeInfo = xSubInfo;
+        xSubArgs.numSubscriptions = usNumSubscriptions;
+
+        xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
+        xCommandParams.cmdCompleteCallback = prvSubscriptionCommandCallback;
+        xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xSubArgs;
+
+        /* Enqueue subscribe to the command queue. These commands will be processed only
+         * when command loop starts. */
+        xResult = MQTTAgent_Subscribe( &xGlobalMqttAgentContext, &xSubArgs, &xCommandParams );
+    }
+    else
+    {
+        /* Mark the resubscribe as success if there is nothing to be subscribed. */
+        xResult = MQTTSuccess;
+    }
+
+    return xResult;
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvSubscriptionCommandCallback( void * pxCommandContext,
+                                            MQTTAgentReturnInfo_t * pxReturnInfo )
+{
+    size_t lIndex = 0;
+    MQTTAgentSubscribeArgs_t * pxSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pxCommandContext;
+
+    /* If the return code is success, no further action is required as all the topic filters
+     * are already part of the subscription list. */
+    if( pxReturnInfo->returnCode != MQTTSuccess )
+    {
+        /* Check through each of the suback codes and determine if there are any failures. */
+        for( lIndex = 0; lIndex < pxSubscribeArgs->numSubscriptions; lIndex++ )
+        {
+            /* If this is a suback failure. An attempt to resubscribe can be done.
+             * In this demo, we are removing the failed subscriptions from the
+             * subscription list. */
+            if( pxReturnInfo->pSubackCodes[ lIndex ] == MQTTSubAckFailure )
+            {
+                LogError( ( "Failed to resubscribe to topic %.*s.",
+                            pxSubscribeArgs->pSubscribeInfo[ lIndex ].topicFilterLength,
+                            pxSubscribeArgs->pSubscribeInfo[ lIndex ].pTopicFilter ) );
+                /* Remove subscription callback for unsubscribe. */
+                removeSubscription( xGlobalSubscriptionList,
+                                    pxSubscribeArgs->pSubscribeInfo[ lIndex ].pTopicFilter,
+                                    pxSubscribeArgs->pSubscribeInfo[ lIndex ].topicFilterLength );
+            }
+        }
+    }
 }
 
 /*-----------------------------------------------------------*/
@@ -640,6 +774,8 @@ static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
 {
     bool xPublishHandled = false;
     char cOriginalChar, * pcLocation;
+
+    ( void ) packetId;
 
     /* Fan out the incoming publishes to the callbacks registered using
      * subscription manager. */
