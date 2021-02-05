@@ -984,7 +984,7 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
     BaseType_t result;
     CommandInfo_t xCommandParams = { 0 };
     CommandContext_t xApplicationDefinedContext = { 0 };
-	SubscriptionInfo_t xSubscriptionInfo = { 0 };
+    SubscriptionInfo_t xSubscriptionInfo = { 0 };
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 

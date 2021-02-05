@@ -43,36 +43,51 @@ bool addSubscription( SubscriptionElement_t * pxSubscriptionList,
     size_t xAvailableIndex = SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS;
     bool xReturnStatus = false;
 
-    /* Start at end of array, so that we will insert at the first available index.
-     * Scans backwards to find duplicates. */
-    for( lIndex = ( int32_t ) SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS - 1; lIndex >= 0; lIndex-- )
+    if( ( pxSubscriptionList == NULL ) ||
+        ( pcTopicFilterString == NULL ) ||
+        ( usTopicFilterLength == 0U ) ||
+        ( pxIncomingPublishCallback == NULL ) )
     {
-        if( pxSubscriptionList[ lIndex ].usFilterStringLength == 0 )
+        LogError( ( "Invalid parameter. pxSubscriptionList=%p, pcTopicFilterString=%p,"
+                    " usTopicFilterLength=%u, pxIncomingPublishCallback=%p.",
+                    pxSubscriptionList,
+                    pcTopicFilterString,
+                    ( unsigned int ) usTopicFilterLength,
+                    pxIncomingPublishCallback ) );
+    }
+    else
+    {
+        /* Start at end of array, so that we will insert at the first available index.
+         * Scans backwards to find duplicates. */
+        for( lIndex = ( int32_t ) SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS - 1; lIndex >= 0; lIndex-- )
         {
-            xAvailableIndex = lIndex;
-        }
-        else if( ( pxSubscriptionList[ lIndex ].usFilterStringLength == usTopicFilterLength ) &&
-                 ( strncmp( pcTopicFilterString, pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, usTopicFilterLength ) == 0 ) )
-        {
-            /* If a subscription already exists, don't do anything. */
-            if( ( pxSubscriptionList[ lIndex ].pxIncomingPublishCallback == pxIncomingPublishCallback ) &&
-                ( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext == pvIncomingPublishCallbackContext ) )
+            if( pxSubscriptionList[ lIndex ].usFilterStringLength == 0 )
             {
-                LogWarn( ( "Subscription already exists.\n" ) );
-                xAvailableIndex = SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS;
-                xReturnStatus = true;
-                break;
+                xAvailableIndex = lIndex;
+            }
+            else if( ( pxSubscriptionList[ lIndex ].usFilterStringLength == usTopicFilterLength ) &&
+                     ( strncmp( pcTopicFilterString, pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, usTopicFilterLength ) == 0 ) )
+            {
+                /* If a subscription already exists, don't do anything. */
+                if( ( pxSubscriptionList[ lIndex ].pxIncomingPublishCallback == pxIncomingPublishCallback ) &&
+                    ( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext == pvIncomingPublishCallbackContext ) )
+                {
+                    LogWarn( ( "Subscription already exists.\n" ) );
+                    xAvailableIndex = SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS;
+                    xReturnStatus = true;
+                    break;
+                }
             }
         }
-    }
 
-    if( xAvailableIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS )
-    {
-        pxSubscriptionList[ xAvailableIndex ].pcSubscriptionFilterString = pcTopicFilterString;
-        pxSubscriptionList[ xAvailableIndex ].usFilterStringLength = usTopicFilterLength;
-        pxSubscriptionList[ xAvailableIndex ].pxIncomingPublishCallback = pxIncomingPublishCallback;
-        pxSubscriptionList[ xAvailableIndex ].pvIncomingPublishCallbackContext = pvIncomingPublishCallbackContext;
-        xReturnStatus = true;
+        if( xAvailableIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS )
+        {
+            pxSubscriptionList[ xAvailableIndex ].pcSubscriptionFilterString = pcTopicFilterString;
+            pxSubscriptionList[ xAvailableIndex ].usFilterStringLength = usTopicFilterLength;
+            pxSubscriptionList[ xAvailableIndex ].pxIncomingPublishCallback = pxIncomingPublishCallback;
+            pxSubscriptionList[ xAvailableIndex ].pvIncomingPublishCallbackContext = pvIncomingPublishCallbackContext;
+            xReturnStatus = true;
+        }
     }
 
     return xReturnStatus;
@@ -86,13 +101,26 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
 {
     int32_t lIndex = 0;
 
-    for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
+    if( ( pxSubscriptionList == NULL ) ||
+        ( pcTopicFilterString == NULL ) ||
+        ( usTopicFilterLength == 0U ) )
     {
-        if( pxSubscriptionList[ lIndex ].usFilterStringLength == usTopicFilterLength )
+        LogError( ( "Invalid parameter. pxSubscriptionList=%p, pcTopicFilterString=%p,"
+                    " usTopicFilterLength=%u.",
+                    pxSubscriptionList,
+                    pcTopicFilterString,
+                    ( unsigned int ) usTopicFilterLength ) );
+    }
+    else
+    {
+        for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
         {
-            if( strncmp( pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, pcTopicFilterString, usTopicFilterLength ) == 0 )
+            if( pxSubscriptionList[ lIndex ].usFilterStringLength == usTopicFilterLength )
             {
-                memset( &( pxSubscriptionList[ lIndex ] ), 0x00, sizeof( SubscriptionElement_t ) );
+                if( strncmp( pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, pcTopicFilterString, usTopicFilterLength ) == 0 )
+                {
+                    memset( &( pxSubscriptionList[ lIndex ] ), 0x00, sizeof( SubscriptionElement_t ) );
+                }
             }
         }
     }
@@ -106,28 +134,29 @@ bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
     int32_t lIndex = 0;
     bool isMatched = false;
 
-    for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
+    if( ( pxSubscriptionList == NULL ) ||
+        ( pxPublishInfo == NULL ) )
     {
-        if( pxSubscriptionList[ lIndex ].usFilterStringLength > 0 )
+        LogError( ( "Invalid parameter. pxSubscriptionList=%p, pxPublishInfo=%p,",
+                    pxSubscriptionList,
+                    pxPublishInfo ) );
+    }
+    else
+    {
+        for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
         {
-            MQTT_MatchTopic( pxPublishInfo->pTopicName,
-                             pxPublishInfo->topicNameLength,
-                             pxSubscriptionList[ lIndex ].pcSubscriptionFilterString,
-                             pxSubscriptionList[ lIndex ].usFilterStringLength,
-                             &isMatched );
-
-            if( isMatched == true )
+            if( pxSubscriptionList[ lIndex ].usFilterStringLength > 0 )
             {
-                if( pxSubscriptionList[ lIndex ].pxIncomingPublishCallback != NULL )
+                MQTT_MatchTopic( pxPublishInfo->pTopicName,
+                                 pxPublishInfo->topicNameLength,
+                                 pxSubscriptionList[ lIndex ].pcSubscriptionFilterString,
+                                 pxSubscriptionList[ lIndex ].usFilterStringLength,
+                                 &isMatched );
+
+                if( isMatched == true )
                 {
                     pxSubscriptionList[ lIndex ].pxIncomingPublishCallback( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
                                                                             pxPublishInfo );
-                }
-                else
-                {
-                    /* Reset isMatched so that the publish can be handled through
-                     * the unsolicited handler. */
-                    isMatched = false;
                 }
             }
         }
