@@ -35,7 +35,7 @@
  * broker connection with other tasks. OTA agent invokes the callback implementations to
  * publish job related control information, as well as receive chunks
  * of pre-signed firmware image from the MQTT broker.
- 
+ *
  * See https://freertos.org/mqtt/mqtt-agent-demo.html
  * See https://freertos.org/ota/ota-mqtt-agent-demo.html
  */
@@ -56,6 +56,9 @@
 
 /* MQTT library includes. */
 #include "freertos_mqtt_agent.h"
+
+/* Subscription manager header include. */
+#include "subscription_manager.h"
 
 /* OTA Library include. */
 #include "ota.h"
@@ -147,7 +150,26 @@
 #define APP_VERSION_MINOR                  9
 #define APP_VERSION_BUILD                  2
 
-typedef void ( * PublishCallback_t ) ( MQTTPublishInfo_t *, void * );
+/**
+ * @brief Defines the structure to keep the subscription info so that it can be accessed
+ * in the command complete callback in this demo.
+ */
+typedef struct SubscriptionInfo
+{
+    IncomingPubCallback_t pxIncomingPublishCallback;
+    const char * pcTopicFilter;
+} SubscriptionInfo_t;
+
+/**
+ * @brief Defines the structure to use as the command callback context in this
+ * demo.
+ */
+struct CommandContext
+{
+    MQTTStatus_t xReturnStatus;
+    TaskHandle_t xTaskToNotify;
+    void * pArgs;
+};
 
 /**
  * @brief Function used by OTA agent to publish control messages to the MQTT broker.
@@ -211,6 +233,40 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
                                            uint8_t ucQoS );
 
 /**
+ * @brief Passed into MQTTAgent_Subscribe() as the callback to execute when the
+ * broker ACKs the SUBSCRIBE message.  Its implementation sends a notification
+ * to the task that called MQTTAgent_Subscribe() to let the task know the
+ * SUBSCRIBE operation completed.  It also sets the xReturnStatus of the
+ * structure passed in as the command's context to the value of the
+ * xReturnStatus parameter - which enables the task to check the status of the
+ * operation.
+ *
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
+ *
+ * @param[in] pxCommandContext Context of the initial command.
+ * @param[in] pxReturnInfo Returned info from MQTT Agent.
+ */
+static void prvSubscribeCommandCallback( void * pxCommandContext,
+                                         MQTTAgentReturnInfo_t * pxReturnInfo );
+
+/**
+ * @brief Passed into MQTTAgent_Unsubscribe() as the callback to execute when the
+ * broker ACKs the UNSUBSCRIBE message.  Its implementation sends a notification
+ * to the task that called MQTTAgent_Unsubscribe() to let the task know the
+ * UNSUBSCRIBE operation completed.  It also sets the xReturnStatus of the
+ * structure passed in as the command's context to the value of the
+ * xReturnStatus parameter - which enables the task to check the status of the
+ * operation.
+ *
+ * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
+ *
+ * @param[in] pxCommandContext Context of the initial command.
+ * @param[in] pxReturnInfo Returned info from MQTT Agent.
+ */
+static void prvUnsubscribeCommandCallback( void * pxCommandContext,
+                                           MQTTAgentReturnInfo_t * pxReturnInfo );
+
+/**
  * @brief Fetch an unused OTA event buffer from the pool.
  *
  * Demo uses a simple statically allocated array of fixed size event buffers. The
@@ -268,11 +324,11 @@ static void prvOTADemoTask( void * pvParam );
  * function fetches a free event buffer from the pool and queues the firmware image chunk for
  * OTA agent task processing.
  *
- * @param[in] pPublishInfo Pointer to the structure containing the details of the MQTT packet.
  * @param[in] pxSubscriptionContext Context which is passed unmodified from the MQTT agent.
+ * @param[in] pPublishInfo Pointer to the structure containing the details of the MQTT packet.
  */
-static void prvProcessIncomingData( MQTTPublishInfo_t * pPublishInfo,
-                                    void * pxSubscriptionContext );
+static void prvProcessIncomingData( void * pxSubscriptionContext,
+                                    MQTTPublishInfo_t * pPublishInfo );
 
 /**
  * @brief Callback invoked for job control messages from MQTT broker.
@@ -282,11 +338,11 @@ static void prvProcessIncomingData( MQTTPublishInfo_t * pPublishInfo,
  * job stream. The function fetches a free event buffer from the pool and queues the appropirate event type
  * based on the control message received.
  *
- * @param[in] pPublishInfo Pointer to the structure containing the details of MQTT packet.
  * @param[in] pxSubscriptionContext Context which is passed unmodified from the MQTT agent.
+ * @param[in] pPublishInfo Pointer to the structure containing the details of MQTT packet.
  */
-static void prvProcessIncomingJobMessage( MQTTPublishInfo_t * pPublishInfo,
-                                          void * pxSubscriptionContext );
+static void prvProcessIncomingJobMessage( void * pxSubscriptionContext,
+                                          MQTTPublishInfo_t * pPublishInfo );
 
 /**
  * @brief Buffer used to store the firmware image file path.
@@ -338,6 +394,14 @@ static SemaphoreHandle_t xBufferSemaphore;
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
 /**
+ * @brief The global array of subscription elements.
+ *
+ * @note No thread safety is required to this array, since the updates the array
+ * elements are done only from one task at a time.
+ */
+extern SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
+
+/**
  * @brief Structure containing all application allocated buffers used by the OTA agent.
  * Structure is passed to the OTA agent during initialization.
  */
@@ -379,7 +443,7 @@ const AppVersion32_t appFirmwareVersion =
 /**
  * @brief The static callbacks for the topic filter types.
  */
-static PublishCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { prvProcessIncomingJobMessage, prvProcessIncomingData };
+static IncomingPubCallback_t otaMessageCallback[ OtaNumOfMessageType ] = { prvProcessIncomingJobMessage, prvProcessIncomingData };
 /*-----------------------------------------------------------*/
 
 static void prvOTAEventBufferFree( OtaEventData_t * const pxBuffer )
@@ -643,8 +707,8 @@ static void otaAppCallback( OtaJobEvent_t event,
 
 /*-----------------------------------------------------------*/
 
-static void prvProcessIncomingData( MQTTPublishInfo_t * pPublishInfo,
-                                    void * pxSubscriptionContext )
+static void prvProcessIncomingData( void * pxSubscriptionContext,
+                                    MQTTPublishInfo_t * pPublishInfo )
 {
     configASSERT( pPublishInfo != NULL );
 
@@ -677,8 +741,8 @@ static void prvProcessIncomingData( MQTTPublishInfo_t * pPublishInfo,
 
 /*-----------------------------------------------------------*/
 
-static void prvProcessIncomingJobMessage( MQTTPublishInfo_t * pPublishInfo,
-                                          void * pxSubscriptionContext )
+static void prvProcessIncomingJobMessage( void * pxSubscriptionContext,
+                                          MQTTPublishInfo_t * pPublishInfo )
 {
     OtaEventData_t * pData;
     OtaEventMsg_t eventMsg = { 0 };
@@ -721,15 +785,82 @@ static void prvCommandCallback( void * pCommandContext,
 }
 
 /*-----------------------------------------------------------*/
+
+static void prvUnsubscribeCommandCallback( void * pxCommandContext,
+                                           MQTTAgentReturnInfo_t * pxReturnInfo )
+{
+    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    const char * pcTopicBuffer = ( const char * ) pxApplicationDefinedContext->pArgs;
+
+    /* Store the result in the application defined context so the task that
+     * initiated the subscribe can check the operation's status.  Also send the
+     * status as the notification value.  These things are just done for
+     * demonstration purposes. */
+    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+
+    /* Check if the subscribe operation is a success. Only one topic is
+     * subscribed by this demo. */
+    if( pxReturnInfo->returnCode == MQTTSuccess )
+    {
+        /* Add subscription so that incoming publishes are routed to the application
+         * callback. */
+        removeSubscription( xGlobalSubscriptionList,
+                            pcTopicBuffer,
+                            ( uint16_t ) strlen( pcTopicBuffer ) );
+    }
+
+    xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
+                 ( uint32_t ) ( pxReturnInfo->returnCode ),
+                 eSetValueWithOverwrite );
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvSubscribeCommandCallback( void * pxCommandContext,
+                                         MQTTAgentReturnInfo_t * pxReturnInfo )
+{
+    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    SubscriptionInfo_t * pxSubscriptionInfo = ( SubscriptionInfo_t * ) pxApplicationDefinedContext->pArgs;
+    const char * pcTopicBuffer = pxSubscriptionInfo->pcTopicFilter;
+
+    /* Store the result in the application defined context so the task that
+     * initiated the subscribe can check the operation's status.  Also send the
+     * status as the notification value.  These things are just done for
+     * demonstration purposes. */
+    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+
+    /* Check if the subscribe operation is a success. Only one topic at a time is
+     * subscribed by this demo. */
+    if( ( pxReturnInfo->returnCode == MQTTSuccess ) &&
+        ( pxReturnInfo->pSubackCodes[ 0 ] != MQTTSubAckFailure ) )
+    {
+        /* Add subscription so that incoming publishes are routed to the application
+         * callback. */
+        addSubscription( xGlobalSubscriptionList,
+                         pcTopicBuffer,
+                         ( uint16_t ) strlen( pcTopicBuffer ),
+                         pxSubscriptionInfo->pxIncomingPublishCallback,
+                         pxApplicationDefinedContext );
+    }
+
+    xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
+                 ( uint32_t ) ( pxReturnInfo->returnCode ),
+                 eSetValueWithOverwrite );
+}
+
+/*-----------------------------------------------------------*/
+
 static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
                                          const char * pcTopicFilter,
-                                         PublishCallback_t pCallback )
+                                         IncomingPubCallback_t pCallback )
 {
     MQTTStatus_t mqttStatus;
     uint32_t ulNotifiedValue;
     MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
     BaseType_t result;
     CommandInfo_t xCommandParams = { 0 };
+    CommandContext_t xApplicationDefinedContext = { 0 };
+    SubscriptionInfo_t xSubscriptionInfo = { 0 };
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
@@ -738,9 +869,18 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     xSubscribeArgs.subscribeInfo.qos = xQoS;
     xSubscribeArgs.numSubscriptions = 1;
 
+    /* Complete an application defined context associated with this subscribe message.
+     * This gets updated in the callback function so the variable must persist until
+     * the callback executes. */
+    xSubscriptionInfo.pcTopicFilter = pcTopicFilter;
+    xSubscriptionInfo.pxIncomingPublishCallback = pCallback;
+
+    xApplicationDefinedContext.xTaskToNotify = xTaskHandle;
+    xApplicationDefinedContext.pArgs = ( void * ) &xSubscriptionInfo;
+
     xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
-    xCommandParams.cmdCompleteCallback = prvCommandCallback;
-    xCommandParams.pCmdCompleteCallbackContext = ( void * ) xTaskHandle;
+    xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xApplicationDefinedContext;
 
     LogInfo( ( " Subscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );
@@ -878,6 +1018,7 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
     MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
     BaseType_t result;
     CommandInfo_t xCommandParams = { 0 };
+    CommandContext_t xApplicationDefinedContext = { 0 };
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
@@ -886,9 +1027,15 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
     xSubscribeArgs.subscribeInfo.qos = xQoS;
     xSubscribeArgs.numSubscriptions = 1;
 
+    /* Complete an application defined context associated with this subscribe message.
+     * This gets updated in the callback function so the variable must persist until
+     * the callback executes. */
+    xApplicationDefinedContext.xTaskToNotify = xTaskHandle;
+    xApplicationDefinedContext.pArgs = ( void * ) pcTopicFilter;
+
     xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
-    xCommandParams.cmdCompleteCallback = prvCommandCallback;
-    xCommandParams.pCmdCompleteCallbackContext = ( void * ) xTaskHandle;
+    xCommandParams.cmdCompleteCallback = prvUnsubscribeCommandCallback;
+    xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xApplicationDefinedContext;
 
     LogInfo( ( " Unsubscribing to topic filter: %s", pcTopicFilter ) );
     xTaskNotifyStateClear( NULL );

@@ -80,9 +80,9 @@ BaseType_t addSubscription( SubscriptionElement_t * pxSubscriptionList,
 
 /*-----------------------------------------------------------*/
 
-static void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
-                                const char * topicFilterString,
-                                uint16_t topicFilterLength )
+void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
+                         const char * topicFilterString,
+                         uint16_t topicFilterLength )
 {
     int32_t lIndex = 0;
 
