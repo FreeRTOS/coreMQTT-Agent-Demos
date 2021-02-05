@@ -279,16 +279,16 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
         /* Add subscription so that incoming publishes are routed to the application
          * callback. */
         xSubscriptionAdded = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                              pxSubscribeArgs->subscribeInfo.pTopicFilter,
-                                              pxSubscribeArgs->subscribeInfo.topicFilterLength,
+                                              pxSubscribeArgs->pSubscribeInfo->pTopicFilter,
+                                              pxSubscribeArgs->pSubscribeInfo->topicFilterLength,
                                               prvIncomingPublishCallback,
                                               NULL );
 
         if( xSubscriptionAdded == false )
         {
             LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
-                        pxSubscribeArgs->subscribeInfo.topicFilterLength,
-                        pxSubscribeArgs->subscribeInfo.pTopicFilter ) );
+                        pxSubscribeArgs->pSubscribeInfo->topicFilterLength,
+                        pxSubscribeArgs->pSubscribeInfo->pTopicFilter ) );
         }
     }
 

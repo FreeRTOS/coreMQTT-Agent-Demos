@@ -786,24 +786,24 @@ static void prvSubscriptionCommandCallback( void * pxCommandContext,
             /* Add subscription so that incoming publishes are routed to the application
              * callback. */
             xSubscriptionAdded = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                                  pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.pTopicFilter,
-                                                  pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.topicFilterLength,
+                                                  pxSubscriptionInfo->pxSubscribeArgs->pSubscribeInfo->pTopicFilter,
+                                                  pxSubscriptionInfo->pxSubscribeArgs->pSubscribeInfo->topicFilterLength,
                                                   pxSubscriptionInfo->pxIncomingPublishCallback,
                                                   NULL );
 
             if( xSubscriptionAdded == false )
             {
                 LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
-                            pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.topicFilterLength,
-                            pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.pTopicFilter ) );
+                            pxSubscriptionInfo->pxSubscribeArgs->pSubscribeInfo->topicFilterLength,
+                            pxSubscriptionInfo->pxSubscribeArgs->pSubscribeInfo->pTopicFilter ) );
             }
         }
         else
         {
             /* Remove subscription callback for unsubscribe. */
             removeSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.pTopicFilter,
-                                pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.topicFilterLength );
+                                pxSubscriptionInfo->pxSubscribeArgs->pSubscribeInfo->pTopicFilter,
+                                pxSubscriptionInfo->pxSubscribeArgs->pSubscribeInfo->topicFilterLength );
         }
     }
 
