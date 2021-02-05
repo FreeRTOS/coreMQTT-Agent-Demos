@@ -59,9 +59,9 @@ typedef void (* IncomingPubCallback_t )( void * pvIncomingPublishCallbackContext
                                          MQTTPublishInfo_t * pxPublishInfo );
 
 /**
- * @brief An element in the list of subscriptions maintained by the agent.
+ * @brief An element in the list of subscriptions.
  *
- * @note The agent allows multiple tasks to subscribe to the same topic.
+ * @note This implementation allows multiple tasks to subscribe to the same topic.
  * In this case, another element is added to the subscription list, differing
  * in the intended publish callback.
  */
@@ -69,7 +69,7 @@ typedef struct subscriptionElement
 {
     IncomingPubCallback_t pxIncomingPublishCallback;
     void * pvIncomingPublishCallbackContext;
-    uint16_t uFilterStringLength;
+    uint16_t usFilterStringLength;
     const char * pcSubscriptionFilterString;
 } SubscriptionElement_t;
 
@@ -82,17 +82,17 @@ typedef struct subscriptionElement
  *
  * @param[in] pxSubscriptionList  The pointer to the subscription list array.
  * @param[in] pcTopicFilterString Topic filter string of subscription.
- * @param[in] uTopicFilterLength Length of topic filter string.
+ * @param[in] usTopicFilterLength Length of topic filter string.
  * @param[in] pxIncomingPublishCallback Callback function for the subscription.
  * @param[in] pvIncomingPublishCallbackContext Context for the subscription callback.
  *
  * @return `true` if subscription added or exists, `false` if insufficient memory.
  */
-BaseType_t addSubscription( SubscriptionElement_t * pxSubscriptionList,
-                            const char * pcTopicFilterString,
-                            uint16_t uTopicFilterLength,
-                            IncomingPubCallback_t pxIncomingPublishCallback,
-                            void * pvIncomingPublishCallbackContext );
+bool addSubscription( SubscriptionElement_t * pxSubscriptionList,
+                      const char * pcTopicFilterString,
+                      uint16_t usTopicFilterLength,
+                      IncomingPubCallback_t pxIncomingPublishCallback,
+                      void * pvIncomingPublishCallbackContext );
 
 /**
  * @brief Remove a subscription from the subscription list.
@@ -102,11 +102,11 @@ BaseType_t addSubscription( SubscriptionElement_t * pxSubscriptionList,
  *
  * @param[in] pxSubscriptionList  The pointer to the subscription list array.
  * @param[in] pcTopicFilterString Topic filter of subscription.
- * @param[in] uTopicFilterLength Length of topic filter.
+ * @param[in] usTopicFilterLength Length of topic filter.
  */
 void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
                          const char * pcTopicFilterString,
-                         uint16_t uTopicFilterLength );
+                         uint16_t usTopicFilterLength );
 
 /**
  * @brief Handle incoming publishes by invoking the callbacks registered
@@ -115,10 +115,10 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
  * @param[in] pxSubscriptionList  The pointer to the subscription list array.
  * @param[in] pxPublishInfo Info of incoming publish.
  *
- * @return pdTRUE if an application callback could be invoked;
- *  pdFALSE otherwise.
+ * @return `true` if an application callback could be invoked;
+ *  `false` otherwise.
  */
-BaseType_t handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
-                                    MQTTPublishInfo_t * pxPublishInfo );
+bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
+                              MQTTPublishInfo_t * pxPublishInfo );
 
 #endif /* MQTT_AGENT_H */

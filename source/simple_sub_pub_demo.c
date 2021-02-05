@@ -197,14 +197,6 @@ static void prvSimpleSubscribePublishTask( void * pvParameters );
  */
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
-/**
- * @brief The global array of subscription elements.
- *
- * @note No thread safety is required to this array, since the updates the array
- * elements are done only from one task at a time.
- */
-extern SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
-
 /*-----------------------------------------------------------*/
 
 /**
@@ -270,8 +262,9 @@ static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
 static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
+    bool xSubscriptionAdded = false;
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
-    const char * pcTopicBuffer = ( const char * ) pxApplicationDefinedContext->pArgs;
+    MQTTAgentSubscribeArgs_t * pxSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pxApplicationDefinedContext->pArgs;
 
     /* Store the result in the application defined context so the task that
      * initiated the subscribe can check the operation's status.  Also send the
@@ -281,16 +274,22 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 
     /* Check if the subscribe operation is a success. Only one topic is
      * subscribed by this demo. */
-    if( ( pxReturnInfo->returnCode == MQTTSuccess ) &&
-        ( pxReturnInfo->pSubackCodes[ 0 ] != MQTTSubAckFailure ) )
+    if( pxReturnInfo->returnCode == MQTTSuccess )
     {
         /* Add subscription so that incoming publishes are routed to the application
          * callback. */
-        addSubscription( xGlobalSubscriptionList,
-                         pcTopicBuffer,
-                         ( uint16_t ) strlen( pcTopicBuffer ),
-                         prvIncomingPublishCallback,
-                         pxApplicationDefinedContext );
+        xSubscriptionAdded = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                              pxSubscribeArgs->subscribeInfo.pTopicFilter,
+                                              pxSubscribeArgs->subscribeInfo.topicFilterLength,
+                                              prvIncomingPublishCallback,
+                                              NULL );
+
+        if( xSubscriptionAdded == false )
+        {
+            LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
+                        pxSubscribeArgs->subscribeInfo.topicFilterLength,
+                        pxSubscribeArgs->subscribeInfo.pTopicFilter ) );
+        }
     }
 
     xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
@@ -375,7 +374,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
      * the callback executes. */
     xApplicationDefinedContext.ulNotificationValue = ulNextSubscribeMessageID;
     xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
-    xApplicationDefinedContext.pArgs = ( void * ) pcTopicFilter;
+    xApplicationDefinedContext.pArgs = ( void * ) &xSubscribeArgs;
 
     xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
     xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;

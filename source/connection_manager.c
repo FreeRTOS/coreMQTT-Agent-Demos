@@ -638,17 +638,17 @@ static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
                                         uint16_t packetId,
                                         MQTTPublishInfo_t * pxPublishInfo )
 {
-    BaseType_t publishHandled = pdFALSE;
+    bool xPublishHandled = pdFALSE;
     char cOriginalChar, * pcLocation;
 
     /* Fan out the incoming publishes to the callbacks registered using
      * subscription manager. */
-    publishHandled = handleIncomingPublishes( ( SubscriptionElement_t * ) pMqttAgentContext->pIncomingCallbackContext,
-                                              pxPublishInfo );
+    xPublishHandled = handleIncomingPublishes( ( SubscriptionElement_t * ) pMqttAgentContext->pIncomingCallbackContext,
+                                               pxPublishInfo );
 
     /* If there are no callbacks to handle the incoming publishes,
      * handle it as an unsolicited publish. */
-    if( publishHandled != pdTRUE )
+    if( xPublishHandled != true )
     {
         /* Ensure the topic string is terminated for printing.  This will over-
          * write the message ID, which is restored afterwards. */

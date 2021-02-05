@@ -186,14 +186,6 @@ static const char * pcTopicFilter = "/max/payload/message";
 
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
-/**
- * @brief The global array of subscription elements.
- *
- * @note No thread safety is required to this array, since the updates the array
- * elements are done only from one task at a time.
- */
-extern SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
-
 /*-----------------------------------------------------------*/
 
 void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
@@ -212,6 +204,7 @@ void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
 static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
+    bool xSubscriptionAdded = false;
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
     /* Store the result in the application defined context so the calling task
@@ -220,16 +213,22 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 
     /* Check if the subscribe operation is a success. Only one topic is
      * subscribed by this demo. */
-    if( ( pxReturnInfo->returnCode == MQTTSuccess ) &&
-        ( pxReturnInfo->pSubackCodes[ 0 ] != MQTTSubAckFailure ) )
+    if( pxReturnInfo->returnCode == MQTTSuccess )
     {
         /* Add subscription so that incoming publishes are routed to the application
          * callback. */
-        addSubscription( xGlobalSubscriptionList,
-                         pcTopicFilter,
-                         ( uint16_t ) strlen( pcTopicFilter ),
-                         prvIncomingPublishCallback,
-                         pxApplicationDefinedContext );
+        xSubscriptionAdded = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                              pcTopicFilter,
+                                              ( uint16_t ) strlen( pcTopicFilter ),
+                                              prvIncomingPublishCallback,
+                                              pxApplicationDefinedContext );
+
+        if( xSubscriptionAdded == false )
+        {
+            LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
+                        ( unsigned int ) strlen( pcTopicFilter ),
+                        pcTopicFilter ) );
+        }
     }
 
     xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );

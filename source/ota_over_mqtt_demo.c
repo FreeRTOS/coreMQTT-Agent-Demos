@@ -157,7 +157,8 @@
 typedef struct SubscriptionInfo
 {
     IncomingPubCallback_t pxIncomingPublishCallback;
-    const char * pcTopicFilter;
+    MQTTAgentSubscribeArgs_t * pxSubscribeArgs;
+    BaseType_t isSubscribe;
 } SubscriptionInfo_t;
 
 /**
@@ -233,11 +234,12 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
                                            uint8_t ucQoS );
 
 /**
- * @brief Passed into MQTTAgent_Subscribe() as the callback to execute when the
- * broker ACKs the SUBSCRIBE message.  Its implementation sends a notification
- * to the task that called MQTTAgent_Subscribe() to let the task know the
- * SUBSCRIBE operation completed.  It also sets the xReturnStatus of the
- * structure passed in as the command's context to the value of the
+ * @brief Passed into MQTTAgent_Subscribe() and MQTTAgent_Unsubscribe() as the
+ * callback to execute when the broker ACKs the SUBSCRIBE/UNSUBSCRIBE message.
+ * Its implementation sends a notification to the task that called
+ * MQTTAgent_Subscribe() or MQTTAgent_Unsubscribe() to let the task know the
+ * SUBSCRIBE/UNSUBSCRIBE operation is completed.  It also sets the xReturnStatus
+ * of the structure passed in as the command's context to the value of the
  * xReturnStatus parameter - which enables the task to check the status of the
  * operation.
  *
@@ -246,25 +248,8 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxReturnInfo Returned info from MQTT Agent.
  */
-static void prvSubscribeCommandCallback( void * pxCommandContext,
-                                         MQTTAgentReturnInfo_t * pxReturnInfo );
-
-/**
- * @brief Passed into MQTTAgent_Unsubscribe() as the callback to execute when the
- * broker ACKs the UNSUBSCRIBE message.  Its implementation sends a notification
- * to the task that called MQTTAgent_Unsubscribe() to let the task know the
- * UNSUBSCRIBE operation completed.  It also sets the xReturnStatus of the
- * structure passed in as the command's context to the value of the
- * xReturnStatus parameter - which enables the task to check the status of the
- * operation.
- *
- * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
- *
- * @param[in] pxCommandContext Context of the initial command.
- * @param[in] pxReturnInfo Returned info from MQTT Agent.
- */
-static void prvUnsubscribeCommandCallback( void * pxCommandContext,
-                                           MQTTAgentReturnInfo_t * pxReturnInfo );
+static void prvSubscriptionCommandCallback( void * pxCommandContext,
+                                            MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
  * @brief Fetch an unused OTA event buffer from the pool.
@@ -392,14 +377,6 @@ static SemaphoreHandle_t xBufferSemaphore;
  * @brief Static handle used for MQTT agent context.
  */
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
-
-/**
- * @brief The global array of subscription elements.
- *
- * @note No thread safety is required to this array, since the updates the array
- * elements are done only from one task at a time.
- */
-extern SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
 
 /**
  * @brief Structure containing all application allocated buffers used by the OTA agent.
@@ -786,42 +763,12 @@ static void prvCommandCallback( void * pCommandContext,
 
 /*-----------------------------------------------------------*/
 
-static void prvUnsubscribeCommandCallback( void * pxCommandContext,
-                                           MQTTAgentReturnInfo_t * pxReturnInfo )
+static void prvSubscriptionCommandCallback( void * pxCommandContext,
+                                            MQTTAgentReturnInfo_t * pxReturnInfo )
 {
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
-    const char * pcTopicBuffer = ( const char * ) pxApplicationDefinedContext->pArgs;
-
-    /* Store the result in the application defined context so the task that
-     * initiated the subscribe can check the operation's status.  Also send the
-     * status as the notification value.  These things are just done for
-     * demonstration purposes. */
-    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
-
-    /* Check if the subscribe operation is a success. Only one topic is
-     * subscribed by this demo. */
-    if( pxReturnInfo->returnCode == MQTTSuccess )
-    {
-        /* Add subscription so that incoming publishes are routed to the application
-         * callback. */
-        removeSubscription( xGlobalSubscriptionList,
-                            pcTopicBuffer,
-                            ( uint16_t ) strlen( pcTopicBuffer ) );
-    }
-
-    xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
-                 ( uint32_t ) ( pxReturnInfo->returnCode ),
-                 eSetValueWithOverwrite );
-}
-
-/*-----------------------------------------------------------*/
-
-static void prvSubscribeCommandCallback( void * pxCommandContext,
-                                         MQTTAgentReturnInfo_t * pxReturnInfo )
-{
+    bool xSubscriptionAdded = false;
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
     SubscriptionInfo_t * pxSubscriptionInfo = ( SubscriptionInfo_t * ) pxApplicationDefinedContext->pArgs;
-    const char * pcTopicBuffer = pxSubscriptionInfo->pcTopicFilter;
 
     /* Store the result in the application defined context so the task that
      * initiated the subscribe can check the operation's status.  Also send the
@@ -831,16 +778,33 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 
     /* Check if the subscribe operation is a success. Only one topic at a time is
      * subscribed by this demo. */
-    if( ( pxReturnInfo->returnCode == MQTTSuccess ) &&
-        ( pxReturnInfo->pSubackCodes[ 0 ] != MQTTSubAckFailure ) )
+    if( pxReturnInfo->returnCode == MQTTSuccess )
     {
-        /* Add subscription so that incoming publishes are routed to the application
-         * callback. */
-        addSubscription( xGlobalSubscriptionList,
-                         pcTopicBuffer,
-                         ( uint16_t ) strlen( pcTopicBuffer ),
-                         pxSubscriptionInfo->pxIncomingPublishCallback,
-                         pxApplicationDefinedContext );
+        /* Subscribe. */
+        if( pxSubscriptionInfo->isSubscribe == pdTRUE )
+        {
+            /* Add subscription so that incoming publishes are routed to the application
+             * callback. */
+            xSubscriptionAdded = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                                  pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.pTopicFilter,
+                                                  pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.topicFilterLength,
+                                                  pxSubscriptionInfo->pxIncomingPublishCallback,
+                                                  NULL );
+
+            if( xSubscriptionAdded == false )
+            {
+                LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
+                            pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.topicFilterLength,
+                            pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.pTopicFilter ) );
+            }
+        }
+        else
+        {
+            /* Remove subscription callback for unsubscribe. */
+            removeSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.pTopicFilter,
+                                pxSubscriptionInfo->pxSubscribeArgs->subscribeInfo.topicFilterLength );
+        }
     }
 
     xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
@@ -872,14 +836,15 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
     /* Complete an application defined context associated with this subscribe message.
      * This gets updated in the callback function so the variable must persist until
      * the callback executes. */
-    xSubscriptionInfo.pcTopicFilter = pcTopicFilter;
+    xSubscriptionInfo.isSubscribe = pdTRUE;
+    xSubscriptionInfo.pxSubscribeArgs = &xSubscribeArgs;
     xSubscriptionInfo.pxIncomingPublishCallback = pCallback;
 
     xApplicationDefinedContext.xTaskToNotify = xTaskHandle;
     xApplicationDefinedContext.pArgs = ( void * ) &xSubscriptionInfo;
 
     xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
-    xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;
+    xCommandParams.cmdCompleteCallback = prvSubscriptionCommandCallback;
     xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xApplicationDefinedContext;
 
     LogInfo( ( " Subscribing to topic filter: %s", pcTopicFilter ) );
@@ -1019,6 +984,7 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
     BaseType_t result;
     CommandInfo_t xCommandParams = { 0 };
     CommandContext_t xApplicationDefinedContext = { 0 };
+	SubscriptionInfo_t xSubscriptionInfo = { 0 };
 
     TaskHandle_t xTaskHandle = xTaskGetCurrentTaskHandle();
 
@@ -1030,11 +996,14 @@ static MQTTStatus_t prvUnSubscribeFromTopic( MQTTQoS_t xQoS,
     /* Complete an application defined context associated with this subscribe message.
      * This gets updated in the callback function so the variable must persist until
      * the callback executes. */
+    xSubscriptionInfo.isSubscribe = pdFALSE;
+    xSubscriptionInfo.pxSubscribeArgs = &xSubscribeArgs;
+
     xApplicationDefinedContext.xTaskToNotify = xTaskHandle;
-    xApplicationDefinedContext.pArgs = ( void * ) pcTopicFilter;
+    xApplicationDefinedContext.pArgs = ( void * ) &xSubscriptionInfo;
 
     xCommandParams.blockTimeMs = otaexampleMQTT_TIMEOUT_MS;
-    xCommandParams.cmdCompleteCallback = prvUnsubscribeCommandCallback;
+    xCommandParams.cmdCompleteCallback = prvSubscriptionCommandCallback;
     xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xApplicationDefinedContext;
 
     LogInfo( ( " Unsubscribing to topic filter: %s", pcTopicFilter ) );
