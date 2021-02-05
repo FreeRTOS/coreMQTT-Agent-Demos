@@ -29,52 +29,12 @@
  * @brief Functions for managing MQTT subscriptions.
  */
 
-/* Demo config include. */
-#include "demo_config.h"
-
 /* Subscription manager header include. */
 #include "subscription_manager.h"
 
-/*-----------------------------------------------------------*/
 
-/**
- * @brief Maximum number of subscriptions maintained by the subscription manager
- * simultaneously.
- */
-#ifndef SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS
-    #define SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS    ( 10U )
-#endif
-
-/*-----------------------------------------------------------*/
-
-/**
- * @brief An element in the list of subscriptions maintained by the agent.
- *
- * @note The agent allows multiple tasks to subscribe to the same topic.
- * In this case, another element is added to the subscription list, differing
- * in the intended publish callback.
- */
-typedef struct subscriptionElement
-{
-    IncomingPubCallback_t pxIncomingPublishCallback;
-    void * pvIncomingPublishCallbackContext;
-    uint16_t uFilterStringLength;
-    const char * pcSubscriptionFilterString;
-} SubscriptionElement_t;
-
-/*-----------------------------------------------------------*/
-
-/**
- * @brief The static array of subscription elements.
- *
- * @note No thread safety is required to this array, since the updates the array
- * elements are done only from one task at a time.
- */
-static SubscriptionElement_t xSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
-
-/*-----------------------------------------------------------*/
-
-BaseType_t addSubscription( const char * pcTopicFilterString,
+BaseType_t addSubscription( SubscriptionElement_t * pxSubscriptionList,
+                            const char * pcTopicFilterString,
                             uint16_t uTopicFilterLength,
                             IncomingPubCallback_t pxIncomingPublishCallback,
                             void * pvIncomingPublishCallbackContext )
@@ -87,16 +47,16 @@ BaseType_t addSubscription( const char * pcTopicFilterString,
      * Scans backwards to find duplicates. */
     for( lIndex = ( int32_t ) SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS - 1; lIndex >= 0; lIndex-- )
     {
-        if( xSubscriptionList[ lIndex ].uFilterStringLength == 0 )
+        if( pxSubscriptionList[ lIndex ].uFilterStringLength == 0 )
         {
             xAvailableIndex = lIndex;
         }
-        else if( ( xSubscriptionList[ lIndex ].uFilterStringLength == uTopicFilterLength ) &&
-                 ( strncmp( pcTopicFilterString, xSubscriptionList[ lIndex ].pcSubscriptionFilterString, uTopicFilterLength ) == 0 ) )
+        else if( ( pxSubscriptionList[ lIndex ].uFilterStringLength == uTopicFilterLength ) &&
+                 ( strncmp( pcTopicFilterString, pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, uTopicFilterLength ) == 0 ) )
         {
             /* If a subscription already exists, don't do anything. */
-            if( ( xSubscriptionList[ lIndex ].pxIncomingPublishCallback == pxIncomingPublishCallback ) &&
-                ( xSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext == pvIncomingPublishCallbackContext ) )
+            if( ( pxSubscriptionList[ lIndex ].pxIncomingPublishCallback == pxIncomingPublishCallback ) &&
+                ( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext == pvIncomingPublishCallbackContext ) )
             {
                 LogWarn( ( "Subscription already exists.\n" ) );
                 xAvailableIndex = SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS;
@@ -108,10 +68,10 @@ BaseType_t addSubscription( const char * pcTopicFilterString,
 
     if( ( xAvailableIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ) && ( pxIncomingPublishCallback != NULL ) )
     {
-        xSubscriptionList[ xAvailableIndex ].pcSubscriptionFilterString = pcTopicFilterString;
-        xSubscriptionList[ xAvailableIndex ].uFilterStringLength = uTopicFilterLength;
-        xSubscriptionList[ xAvailableIndex ].pxIncomingPublishCallback = pxIncomingPublishCallback;
-        xSubscriptionList[ xAvailableIndex ].pvIncomingPublishCallbackContext = pvIncomingPublishCallbackContext;
+        pxSubscriptionList[ xAvailableIndex ].pcSubscriptionFilterString = pcTopicFilterString;
+        pxSubscriptionList[ xAvailableIndex ].uFilterStringLength = uTopicFilterLength;
+        pxSubscriptionList[ xAvailableIndex ].pxIncomingPublishCallback = pxIncomingPublishCallback;
+        pxSubscriptionList[ xAvailableIndex ].pvIncomingPublishCallbackContext = pvIncomingPublishCallbackContext;
         xReturnStatus = pdTRUE;
     }
 
@@ -120,18 +80,19 @@ BaseType_t addSubscription( const char * pcTopicFilterString,
 
 /*-----------------------------------------------------------*/
 
-static void removeSubscription( const char * topicFilterString,
+static void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
+                                const char * topicFilterString,
                                 uint16_t topicFilterLength )
 {
     int32_t lIndex = 0;
 
     for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
     {
-        if( xSubscriptionList[ lIndex ].uFilterStringLength == topicFilterLength )
+        if( pxSubscriptionList[ lIndex ].uFilterStringLength == topicFilterLength )
         {
-            if( strncmp( xSubscriptionList[ lIndex ].pcSubscriptionFilterString, topicFilterString, topicFilterLength ) == 0 )
+            if( strncmp( pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, topicFilterString, topicFilterLength ) == 0 )
             {
-                memset( &( xSubscriptionList[ lIndex ] ), 0x00, sizeof( SubscriptionElement_t ) );
+                memset( &( pxSubscriptionList[ lIndex ] ), 0x00, sizeof( SubscriptionElement_t ) );
             }
         }
     }
@@ -139,7 +100,8 @@ static void removeSubscription( const char * topicFilterString,
 
 /*-----------------------------------------------------------*/
 
-BaseType_t handleIncomingPublishes( MQTTPublishInfo_t * pxPublishInfo )
+BaseType_t handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
+                                    MQTTPublishInfo_t * pxPublishInfo )
 {
     BaseType_t xCallbackInvoked = pdFALSE;
     int32_t lIndex = 0;
@@ -147,18 +109,18 @@ BaseType_t handleIncomingPublishes( MQTTPublishInfo_t * pxPublishInfo )
 
     for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
     {
-        if( xSubscriptionList[ lIndex ].uFilterStringLength > 0 )
+        if( pxSubscriptionList[ lIndex ].uFilterStringLength > 0 )
         {
             MQTT_MatchTopic( pxPublishInfo->pTopicName,
                              pxPublishInfo->topicNameLength,
-                             xSubscriptionList[ lIndex ].pcSubscriptionFilterString,
-                             xSubscriptionList[ lIndex ].uFilterStringLength,
+                             pxSubscriptionList[ lIndex ].pcSubscriptionFilterString,
+                             pxSubscriptionList[ lIndex ].uFilterStringLength,
                              &isMatched );
 
             if( isMatched == true )
             {
-                xSubscriptionList[ lIndex ].pxIncomingPublishCallback( xSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
-                                                                       pxPublishInfo );
+                pxSubscriptionList[ lIndex ].pxIncomingPublishCallback( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
+                                                                        pxPublishInfo );
                 xCallbackInvoked = pdTRUE;
             }
         }

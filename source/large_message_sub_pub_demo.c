@@ -186,6 +186,14 @@ static const char * pcTopicFilter = "/max/payload/message";
 
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
+/**
+ * @brief The global array of subscription elements.
+ *
+ * @note No thread safety is required to this array, since the updates the array
+ * elements are done only from one task at a time.
+ */
+extern SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
+
 /*-----------------------------------------------------------*/
 
 void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
@@ -217,7 +225,8 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
     {
         /* Add subscription so that incoming publishes are routed to the application
          * callback. */
-        addSubscription( pcTopicFilter,
+        addSubscription( xGlobalSubscriptionList,
+                         pcTopicFilter,
                          ( uint16_t ) strlen( pcTopicFilter ),
                          prvIncomingPublishCallback,
                          pxApplicationDefinedContext );

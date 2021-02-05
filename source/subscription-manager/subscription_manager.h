@@ -31,11 +31,23 @@
 #ifndef SUBSCRIPTION_MANAGER_H
 #define SUBSCRIPTION_MANAGER_H
 
+/* Demo config include. */
+#include "demo_config.h"
+
 /* Kernel includes. */
 #include "FreeRTOS.h"
 
 /* core MQTT include. */
 #include "core_mqtt.h"
+
+
+/**
+ * @brief Maximum number of subscriptions maintained by the subscription manager
+ * simultaneously in a list.
+ */
+#ifndef SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS
+    #define SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS    10U
+#endif
 
 /**
  * @brief Callback function called when receiving a publish.
@@ -47,12 +59,28 @@ typedef void (* IncomingPubCallback_t )( void * pvIncomingPublishCallbackContext
                                          MQTTPublishInfo_t * pxPublishInfo );
 
 /**
+ * @brief An element in the list of subscriptions maintained by the agent.
+ *
+ * @note The agent allows multiple tasks to subscribe to the same topic.
+ * In this case, another element is added to the subscription list, differing
+ * in the intended publish callback.
+ */
+typedef struct subscriptionElement
+{
+    IncomingPubCallback_t pxIncomingPublishCallback;
+    void * pvIncomingPublishCallbackContext;
+    uint16_t uFilterStringLength;
+    const char * pcSubscriptionFilterString;
+} SubscriptionElement_t;
+
+/**
  * @brief Add a subscription to the subscription list.
  *
  * @note Multiple tasks can be subscribed to the same topic with different
  * context-callback pairs. However, a single context-callback pair may only be
  * associated to the same topic filter once.
  *
+ * @param[in] pxSubscriptionList  The pointer to the subscription list array.
  * @param[in] pcTopicFilterString Topic filter string of subscription.
  * @param[in] uTopicFilterLength Length of topic filter string.
  * @param[in] pxIncomingPublishCallback Callback function for the subscription.
@@ -60,7 +88,8 @@ typedef void (* IncomingPubCallback_t )( void * pvIncomingPublishCallbackContext
  *
  * @return `true` if subscription added or exists, `false` if insufficient memory.
  */
-BaseType_t addSubscription( const char * pcTopicFilterString,
+BaseType_t addSubscription( SubscriptionElement_t * pxSubscriptionList,
+                            const char * pcTopicFilterString,
                             uint16_t uTopicFilterLength,
                             IncomingPubCallback_t pxIncomingPublishCallback,
                             void * pvIncomingPublishCallbackContext );
@@ -71,21 +100,25 @@ BaseType_t addSubscription( const char * pcTopicFilterString,
  * @note If the topic filter exists multiple times in the subscription list,
  * then every instance of the subscription will be removed.
  *
+ * @param[in] pxSubscriptionList  The pointer to the subscription list array.
  * @param[in] pcTopicFilterString Topic filter of subscription.
  * @param[in] uTopicFilterLength Length of topic filter.
  */
-void removeSubscription( const char * pcTopicFilterString,
+void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
+                         const char * pcTopicFilterString,
                          uint16_t uTopicFilterLength );
 
 /**
  * @brief Handle incoming publishes by invoking the callbacks registered
  * for the incoming publish's topic filter.
  *
+ * @param[in] pxSubscriptionList  The pointer to the subscription list array.
  * @param[in] pxPublishInfo Info of incoming publish.
  *
  * @return pdTRUE if an application callback could be invoked;
  *  pdFALSE otherwise.
  */
-BaseType_t handleIncomingPublishes( MQTTPublishInfo_t * pxPublishInfo );
+BaseType_t handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
+                                    MQTTPublishInfo_t * pxPublishInfo );
 
 #endif /* MQTT_AGENT_H */

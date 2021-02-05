@@ -104,6 +104,7 @@ struct CommandContext
     MQTTStatus_t xReturnStatus;
     TaskHandle_t xTaskToNotify;
     uint32_t ulNotificationValue;
+    void * pArgs;
 };
 
 /*-----------------------------------------------------------*/
@@ -196,13 +197,27 @@ static void prvSimpleSubscribePublishTask( void * pvParameters );
  */
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
+/**
+ * @brief The global array of subscription elements.
+ *
+ * @note No thread safety is required to this array, since the updates the array
+ * elements are done only from one task at a time.
+ */
+extern SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
+
 /*-----------------------------------------------------------*/
 
 /**
  * @brief The buffer to hold the topic filter. The topic is generated at runtime
- * by adding the task name.
+ * by adding the task names.
+ *
+ * @note The topic strings must persist until unsubscribed.
  */
-static char topicBuf[ mqttexampleSTRING_BUFFER_LENGTH ]; /* Must persist until publish ack received. */
+#if democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0
+    static char topicBuf[ democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ][ mqttexampleSTRING_BUFFER_LENGTH ];
+#else
+    static char topicBuf[ 1U ][ mqttexampleSTRING_BUFFER_LENGTH ];
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -256,6 +271,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    const char * pcTopicBuffer = ( const char * ) pxApplicationDefinedContext->pArgs;
 
     /* Store the result in the application defined context so the task that
      * initiated the subscribe can check the operation's status.  Also send the
@@ -270,8 +286,9 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
     {
         /* Add subscription so that incoming publishes are routed to the application
          * callback. */
-        addSubscription( topicBuf,
-                         ( uint16_t ) strlen( topicBuf ),
+        addSubscription( xGlobalSubscriptionList,
+                         pcTopicBuffer,
+                         ( uint16_t ) strlen( pcTopicBuffer ),
                          prvIncomingPublishCallback,
                          pxApplicationDefinedContext );
     }
@@ -358,6 +375,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
      * the callback executes. */
     xApplicationDefinedContext.ulNotificationValue = ulNextSubscribeMessageID;
     xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
+    xApplicationDefinedContext.pArgs = ( void * ) pcTopicFilter;
 
     xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
     xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;
@@ -417,6 +435,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     MQTTQoS_t xQoS;
     TickType_t xTicksToDelay;
     CommandInfo_t xCommandParams = { 0 };
+    char * pcTopicBuffer = topicBuf[ ulTaskNumber ];
 
     /* Have different tasks use different QoS.  0 and 1.  2 can also be used
      * if supported by the broker. */
@@ -427,18 +446,18 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     snprintf( taskName, mqttexampleSTRING_BUFFER_LENGTH, "Publisher%d", ( int ) ulTaskNumber );
 
     /* Create a topic name for this task to publish to. */
-    snprintf( topicBuf, mqttexampleSTRING_BUFFER_LENGTH, "/filter/%s", taskName );
+    snprintf( pcTopicBuffer, mqttexampleSTRING_BUFFER_LENGTH, "/filter/%s", taskName );
 
     /* Subscribe to the same topic to which this task will publish.  That will
      * result in each published message being published from the server back to
      * the target. */
-    prvSubscribeToTopic( xQoS, topicBuf );
+    prvSubscribeToTopic( xQoS, pcTopicBuffer );
 
     /* Configure the publish operation. */
     memset( ( void * ) &xPublishInfo, 0x00, sizeof( xPublishInfo ) );
     xPublishInfo.qos = xQoS;
-    xPublishInfo.pTopicName = topicBuf;
-    xPublishInfo.topicNameLength = ( uint16_t ) strlen( topicBuf );
+    xPublishInfo.pTopicName = pcTopicBuffer;
+    xPublishInfo.topicNameLength = ( uint16_t ) strlen( pcTopicBuffer );
     xPublishInfo.pPayload = payloadBuf;
 
     /* Store the handler to this task in the command context so the callback
@@ -471,7 +490,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
 
         LogInfo( ( "Sending publish request to agent with message \"%s\" on topic \"%s\"",
                    payloadBuf,
-                   topicBuf ) );
+                   pcTopicBuffer ) );
 
         xCommandAdded = MQTTAgent_Publish( &xGlobalMqttAgentContext,
                                            &xPublishInfo,
@@ -497,13 +516,13 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         if( ulNotification == ulValueToNotify )
         {
             LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.",
-                       topicBuf,
+                       pcTopicBuffer,
                        mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
         else
         {
             LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.",
-                       topicBuf,
+                       pcTopicBuffer,
                        mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
 

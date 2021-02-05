@@ -231,20 +231,6 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext );
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 
 /**
- * @brief Logs any incoming publish messages received on topics to which there
- * are no subscriptions.  This can happen if the MQTT broker sends control
- * information to the MQTT client on special control topics.
- *
- * @param[in] pMqttAgentContext Agent context.
- * @param[in] packetId Packet ID of publish.
- * @param[in] pxPublishInfo Info of incoming publish.
- */
-static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
-                                                   uint16_t packetId,
-                                                   MQTTPublishInfo_t * pxPublishInfo );
-
-
-/**
  * @brief Fan out the incoming publishes to the callbacks registered by different
  * tasks. If there are no callbacks registered for the incoming publish, it will be
  * passed to the unsolicited publish handler.
@@ -334,6 +320,14 @@ static uint8_t xNetworkBuffer[ MQTT_AGENT_NETWORK_BUFFER_SIZE ];
 
 static QueueHandle_t pxCommandQueue;
 
+/**
+ * @brief The global array of subscription elements.
+ *
+ * @note No thread safety is required to this array, since the updates the array
+ * elements are done only from one task at a time.
+ */
+SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -385,8 +379,8 @@ static MQTTStatus_t prvMQTTInit( void )
                               &xTransport,
                               prvGetTimeMs,
                               prvIncomingPublishCallback,
-                              /* Context to pass into the callback.  Not used. */
-                              NULL );
+                              /* Context to pass into the callback. Passing the pointer to subscription array. */
+                              xGlobalSubscriptionList );
 
     return xReturn;
 }
@@ -632,41 +626,29 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 
 /*-----------------------------------------------------------*/
 
-static void prvUnsolicitedIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
-                                                   uint16_t packetId,
-                                                   MQTTPublishInfo_t * pxPublishInfo )
-{
-    char cOriginalChar, * pcLocation;
-
-    ( void ) pMqttAgentContext;
-    ( void ) packetId;
-
-    /* Ensure the topic string is terminated for printing.  This will over-
-     * write the message ID, which is restored afterwards. */
-    pcLocation = ( char * ) &( pxPublishInfo->pTopicName[ pxPublishInfo->topicNameLength ] );
-    cOriginalChar = *pcLocation;
-    *pcLocation = 0x00;
-    LogWarn( ( "WARN:  Received an unsolicited publish from topic %s", pxPublishInfo->pTopicName ) );
-    *pcLocation = cOriginalChar;
-}
-
-/*-----------------------------------------------------------*/
-
 static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
                                         uint16_t packetId,
                                         MQTTPublishInfo_t * pxPublishInfo )
 {
     BaseType_t publishHandled = pdFALSE;
+    char cOriginalChar, * pcLocation;
 
     /* Fan out the incoming publishes to the callbacks registered using
      * subscription manager. */
-    publishHandled = handleIncomingPublishes( pxPublishInfo );
+    publishHandled = handleIncomingPublishes( ( SubscriptionElement_t * ) pMqttAgentContext->pIncomingCallbackContext,
+                                              pxPublishInfo );
 
-    /* If there are no callbacks to handle the incoming publishes, pass it to
-     * the unsolicited publish handler. */
+    /* If there are no callbacks to handle the incoming publishes,
+     * handle it as an unsolicited publish. */
     if( publishHandled != pdTRUE )
     {
-        prvUnsolicitedIncomingPublishCallback( pMqttAgentContext, packetId, pxPublishInfo );
+        /* Ensure the topic string is terminated for printing.  This will over-
+         * write the message ID, which is restored afterwards. */
+        pcLocation = ( char * ) &( pxPublishInfo->pTopicName[ pxPublishInfo->topicNameLength ] );
+        cOriginalChar = *pcLocation;
+        *pcLocation = 0x00;
+        LogWarn( ( "WARN:  Received an unsolicited publish from topic %s", pxPublishInfo->pTopicName ) );
+        *pcLocation = cOriginalChar;
     }
 }
 
