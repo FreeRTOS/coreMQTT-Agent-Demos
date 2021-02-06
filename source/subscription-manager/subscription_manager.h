@@ -58,9 +58,6 @@
 /* Demo config include. */
 #include "demo_config.h"
 
-/* Kernel includes. */
-#include "FreeRTOS.h"
-
 /* core MQTT include. */
 #include "core_mqtt.h"
 
@@ -84,6 +81,9 @@ typedef void (* IncomingPubCallback_t )( void * pvIncomingPublishCallbackContext
 
 /**
  * @brief An element in the list of subscriptions.
+ *
+ * This subscription manager implementation expects that the array of the
+ * subscription elements used for storing subscriptions to be initialized to 0.
  *
  * @note This implementation allows multiple tasks to subscribe to the same topic.
  * In this case, another element is added to the subscription list, differing
@@ -147,4 +147,4 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
 bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
                               MQTTPublishInfo_t * pxPublishInfo );
 
-#endif /* MQTT_AGENT_H */
+#endif /* SUBSCRIPTION_MANAGER_H */

@@ -357,7 +357,10 @@ static AgentMessageContext_t xCommandQueue;
  * @brief The global array of subscription elements.
  *
  * @note No thread safety is required to this array, since the updates the array
- * elements are done only from one task at a time.
+ * elements are done only from one task at a time. The subscription manager
+ * implementation expects that the array of the subscription elements used for
+ * storing subscriptions to be initialized to 0. As this is a global array, it
+ * will be intialized to 0 by default.
  */
 SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
 
