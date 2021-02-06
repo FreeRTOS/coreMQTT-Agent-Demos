@@ -180,15 +180,6 @@
  */
 #define mqttexampleMQTT_CONTEXT_HANDLE               ( ( MQTTContextHandle_t ) 0 )
 
-/**
- * @brief The maximum amount of time in milliseconds to wait for the commands
- * to be posted to the MQTT agent should the MQTT agent's command queue be full.
- * Tasks wait in the Blocked state, so don't use any CPU time.
- */
-#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS    ( 200U )
-
-
-
 /*-----------------------------------------------------------*/
 
 struct AgentMessageContext
@@ -515,7 +506,7 @@ static MQTTStatus_t prvHandleResubscribe( void )
 
     /* These variables need to stay in scope until command completes.
      * Dynamically allocating memory for these will help to optimize the memory
-     * by freeing up the mempry once the command is complete. In this demo, only
+     * by freeing up the memory once the command is complete. In this demo, only
      * static allocations are used. */
     static MQTTAgentSubscribeArgs_t xSubArgs = { 0 };
     static MQTTSubscribeInfo_t xSubInfo[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ] = { 0 };
@@ -550,7 +541,8 @@ static MQTTStatus_t prvHandleResubscribe( void )
         xSubArgs.pSubscribeInfo = xSubInfo;
         xSubArgs.numSubscriptions = usNumSubscriptions;
 
-        xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
+        /* The block time can be 0 as the command loop is not running at this point. */
+        xCommandParams.blockTimeMs = 0U;
         xCommandParams.cmdCompleteCallback = prvSubscriptionCommandCallback;
         xCommandParams.pCmdCompleteCallbackContext = ( void * ) &xSubArgs;
 
@@ -562,6 +554,12 @@ static MQTTStatus_t prvHandleResubscribe( void )
     {
         /* Mark the resubscribe as success if there is nothing to be subscribed. */
         xResult = MQTTSuccess;
+    }
+
+    if( xResult != MQTTSuccess )
+    {
+        LogError( ( "Failed to enqueue the MQTT subscribe command. xResult=%d.",
+                    ( int ) xResult ) );
     }
 
     return xResult;
@@ -596,6 +594,10 @@ static void prvSubscriptionCommandCallback( void * pxCommandContext,
                                     pxSubscribeArgs->pSubscribeInfo[ lIndex ].topicFilterLength );
             }
         }
+
+        /* Hit an assert as some of the tasks won't be able to proceed correctly without
+         * the subscriptions. This logic will be updated with exponential backoff and retry.  */
+        configASSERT( pdTRUE );
     }
 }
 
