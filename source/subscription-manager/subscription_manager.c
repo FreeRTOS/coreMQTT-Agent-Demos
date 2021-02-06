@@ -29,6 +29,9 @@
  * @brief Functions for managing MQTT subscriptions.
  */
 
+/* Standard includes. */
+#include <string.h>
+
 /* Subscription manager header include. */
 #include "subscription_manager.h"
 
@@ -66,7 +69,7 @@ bool addSubscription( SubscriptionElement_t * pxSubscriptionList,
                 xAvailableIndex = lIndex;
             }
             else if( ( pxSubscriptionList[ lIndex ].usFilterStringLength == usTopicFilterLength ) &&
-                     ( strncmp( pcTopicFilterString, pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, usTopicFilterLength ) == 0 ) )
+                     ( strncmp( pcTopicFilterString, pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, ( size_t ) usTopicFilterLength ) == 0 ) )
             {
                 /* If a subscription already exists, don't do anything. */
                 if( ( pxSubscriptionList[ lIndex ].pxIncomingPublishCallback == pxIncomingPublishCallback ) &&
