@@ -59,32 +59,35 @@
 /* MQTT agent include. */
 #include "freertos_mqtt_agent.h"
 
+/* Subscription manager header include. */
+#include "subscription_manager.h"
+
 /**
  * @brief This demo uses task notifications to signal tasks from MQTT callback
  * functions.  mqttexampleMS_TO_WAIT_FOR_NOTIFICATION defines the time, in ticks,
  * to wait for such a callback.
  */
-#define mqttexampleMS_TO_WAIT_FOR_NOTIFICATION              ( 5000 )
+#define mqttexampleMS_TO_WAIT_FOR_NOTIFICATION            ( 5000 )
 
 /**
  * @brief Time, in milliseconds, to wait between cycles of the demo task.
  */
-#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS      ( 1000UL )
+#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 1000UL )
 
 /**
  * @brief The maximum amount of time in milliseconds to wait for the commands
  * to be posted to the MQTT agent should the MQTT agent's command queue be full.
  * Tasks wait in the Blocked state, so don't use any CPU time.
  */
-#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS           ( 200 )
+#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS         ( 200 )
 
 /**
  * @brief Create an MQTT payload that almost fills the buffer allocated for
  * MQTT message serialisation, leaving a little room for the MQTT protocol
  * headers themselves.
  */
-#define mqttexamplePROTOCOL_OVERHEAD                        ( 50 )
-#define mqttexampleMAX_PAYLOAD_LENGTH ( MQTT_AGENT_NETWORK_BUFFER_SIZE - mqttexamplePROTOCOL_OVERHEAD )
+#define mqttexamplePROTOCOL_OVERHEAD                      ( 50 )
+#define mqttexampleMAX_PAYLOAD_LENGTH                     ( MQTT_AGENT_NETWORK_BUFFER_SIZE - mqttexamplePROTOCOL_OVERHEAD )
 
 /*-----------------------------------------------------------*/
 
@@ -96,7 +99,7 @@ struct CommandContext
 {
     MQTTStatus_t xReturnStatus; /* Pass out the result of the operation. */
     TaskHandle_t xTaskToNotify; /* Handle of the task to send a notification to. */
-    void *pvTag;                /* Use for callback specific data. */
+    void * pvTag;               /* Use for callback specific data. */
 };
 
 /**
@@ -113,7 +116,7 @@ struct CommandContext
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
  */
-static void prvSubscribeCommandCallback( void *pxCommandContext,
+static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -126,11 +129,11 @@ static void prvSubscribeCommandCallback( void *pxCommandContext,
  *
  * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
- * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxSubscriptionContext Context of the initial command.
+ * @param[in] pxCommandContext Context of the initial command.
  */
-static void prvIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
-                                        void * pxSubscriptionContext );
+static void prvIncomingPublishCallback( void * pxSubscriptionContext,
+                                        MQTTPublishInfo_t * pxPublishInfo );
 
 /**
  * @brief Called by the task to wait for a notification from a callback function
@@ -156,7 +159,8 @@ static uint32_t prvWaitForCommandAcknowledgment( void );
  * @param[in] pcBuffer The buffer into which the MQTT payload is written.
  * @param[in] xBufferSize The length of buffer pointed to by pcBuffer.
  */
-static void prvCreateMQTTPayload( char *pcBuffer, size_t xBufferSize );
+static void prvCreateMQTTPayload( char * pcBuffer,
+                                  size_t xBufferSize );
 
 /**
  * @brief Subscribe to the topic the demo task will also publish to - that
@@ -168,7 +172,7 @@ static void prvCreateMQTTPayload( char *pcBuffer, size_t xBufferSize );
  * from the incoming message.  This is stored in the callback context so it can
  * be accessed from within the callback function.
  */
-static void prvSubscribeToTopic( char *pcReceivedPublishPayload  );
+static void prvSubscribeToTopic( char * pcReceivedPublishPayload );
 
 /**
  * @brief The function that implements the task demonstrated by this file.
@@ -178,7 +182,7 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters );
 /*-----------------------------------------------------------*/
 
 /* The MQTT topic used by this demo. */
-static const char* pcTopicFilter = "/max/payload/message";
+static const char * pcTopicFilter = "/max/payload/message";
 
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
@@ -197,23 +201,45 @@ void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( void *pxCommandContext,
+static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
-CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    bool xSubscriptionAdded = false;
+    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
     /* Store the result in the application defined context so the calling task
-    can check it. */
+     * can check it. */
     pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+
+    /* Check if the subscribe operation is a success. Only one topic is
+     * subscribed by this demo. */
+    if( pxReturnInfo->returnCode == MQTTSuccess )
+    {
+        /* Add subscription so that incoming publishes are routed to the application
+         * callback. */
+        xSubscriptionAdded = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                              pcTopicFilter,
+                                              ( uint16_t ) strlen( pcTopicFilter ),
+                                              prvIncomingPublishCallback,
+                                              pxApplicationDefinedContext );
+
+        if( xSubscriptionAdded == false )
+        {
+            LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
+                        ( unsigned int ) strlen( pcTopicFilter ),
+                        pcTopicFilter ) );
+        }
+    }
+
     xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
 }
 
 /*-----------------------------------------------------------*/
 
-static void prvIncomingPublishCallback( MQTTPublishInfo_t * pxPublishInfo,
-                                        void * pxSubscriptionContext )
+static void prvIncomingPublishCallback( void * pxSubscriptionContext,
+                                        MQTTPublishInfo_t * pxPublishInfo )
 {
-    CommandContext_t *pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
+    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
 
     /* Check the incoming message will fit in the buffer before writing it to
      * buffer so the demo task can check the data received from the topic
@@ -242,7 +268,8 @@ static uint32_t prvWaitForCommandAcknowledgment( void )
 
 /*-----------------------------------------------------------*/
 
-static void prvCreateMQTTPayload( char *pcBuffer, size_t xBufferSize )
+static void prvCreateMQTTPayload( char * pcBuffer,
+                                  size_t xBufferSize )
 {
     size_t x;
 
@@ -264,7 +291,7 @@ static void prvCreateMQTTPayload( char *pcBuffer, size_t xBufferSize )
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeToTopic( char *pcReceivedPublishPayload  )
+static void prvSubscribeToTopic( char * pcReceivedPublishPayload )
 {
     MQTTAgentSubscribeArgs_t xSubscribeArgs;
     MQTTSubscribeInfo_t xSubscribeInfo;
@@ -276,7 +303,7 @@ static void prvSubscribeToTopic( char *pcReceivedPublishPayload  )
     static CommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Record the handle of this task in the context that will be used within
-     * the callbacks so the callbacks can send a notification to this task. */
+    * the callbacks so the callbacks can send a notification to this task. */
     xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
     xApplicationDefinedContext.pvTag = ( void * ) pcReceivedPublishPayload;
 
@@ -284,8 +311,8 @@ static void prvSubscribeToTopic( char *pcReceivedPublishPayload  )
     xApplicationDefinedContext.xReturnStatus = MQTTBadParameter;
 
     /* Complete the subscribe information.  The topic string must persist for
-    duration of subscription - although in this case is it a static const so
-    will persist for the lifetime of the application. */
+     * duration of subscription - although in this case is it a static const so
+     * will persist for the lifetime of the application. */
     xSubscribeInfo.pTopicFilter = pcTopicFilter;
     xSubscribeInfo.topicFilterLength = ( uint16_t ) strlen( pcTopicFilter );
     xSubscribeInfo.qos = MQTTQoS1;
@@ -301,6 +328,7 @@ static void prvSubscribeToTopic( char *pcReceivedPublishPayload  )
     xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;
     xCommandParams.pCmdCompleteCallbackContext = &xApplicationDefinedContext;
     LogInfo( ( "Sending subscribe request to agent for topic filter: %s", pcTopicFilter ) );
+
     do
     {
         xStatus = MQTTAgent_Subscribe( &xGlobalMqttAgentContext,
@@ -353,19 +381,19 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
     xPublishInfo.pPayload = pcMaxPayloadMessage;
     xPublishInfo.payloadLength = mqttexampleMAX_PAYLOAD_LENGTH;
 
-    for( ;; )
+    for( ; ; )
     {
         /* Clear out the buffer used to receive incoming publishes.  The
-        prvIncomingPublishCallback() callback writes to this buffer. */
+         * prvIncomingPublishCallback() callback writes to this buffer. */
         memset( pcReceivedPublishPayload, 0x00, sizeof( pcReceivedPublishPayload ) );
 
         /* Publish to the topic to which this task is also subscribed to
-        receive an echo back.  Note the command callback is left NULL so this
-        task will not be notified of when the PUBLISH ack is received - instead
-        it just waits for a notification from prvSubscribeCommandCallback() that
-        the incoming publish (the message being echoed back) has been received. */
+         * receive an echo back.  Note the command callback is left NULL so this
+         * task will not be notified of when the PUBLISH ack is received - instead
+         * it just waits for a notification from prvSubscribeCommandCallback() that
+         * the incoming publish (the message being echoed back) has been received. */
         LogInfo( ( "Sending large publish request to agent with message on topic \"%s\"",
-                 pcTopicFilter ) );
+                   pcTopicFilter ) );
         xCommandParams.blockTimeMs = mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
         xCommandParams.cmdCompleteCallback = NULL; /* Note not used as going to wait for the echo anyway. */
         xCommandAdded = MQTTAgent_Publish( &xGlobalMqttAgentContext,
@@ -376,7 +404,7 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
         configASSERT( xCommandAdded == MQTTSuccess );
 
         /* Wait for the publish back to this task.  prvSubscribeCommandCallback()
-        will notify this task. */
+         * will notify this task. */
         ulNotificationValue = ulTaskNotifyTake( pdFALSE, mqttexampleMS_TO_WAIT_FOR_NOTIFICATION );
 
         /* Only expect a single notification from the callback that executes
@@ -393,16 +421,15 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
         if( x == 0 )
         {
             LogInfo( ( "Received echoed message from publishing to topic %s. Sleeping for %d ms.",
-                        pcTopicFilter, mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+                       pcTopicFilter, mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
         else
         {
             LogError( ( "Error - Timed out or didn't receive echoed message from publishing to topic %s Sleeping for %d ms.",
-                         pcTopicFilter,
-                         mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+                        pcTopicFilter,
+                        mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
         }
 
         vTaskDelay( pdMS_TO_TICKS( mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
     }
 }
-

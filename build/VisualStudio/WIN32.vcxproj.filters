@@ -130,6 +130,9 @@
     <Filter Include="Lib\FreeRTOS\FreeRTOS-Kernel\portable\MSVC-MingW">
       <UniqueIdentifier>{46bb81fc-68bc-48a5-a8c6-d578ea8db98e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\subscription-manager">
+      <UniqueIdentifier>{ba522f10-b32d-4983-acb1-ddf9f4b3b7f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c">
@@ -290,6 +293,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source\simple_sub_pub_demo.c">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\subscription-manager\subscription_manager.c">
+      <Filter>Source\subscription-manager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
@@ -463,6 +469,9 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\subscription-manager\subscription_manager.h">
+      <Filter>Source\subscription-manager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
