@@ -57,10 +57,6 @@
 
 /* Demo config include. */
 #include "demo_config.h"
-
-/* Kernel includes. */
-#include "FreeRTOS.h"
-
 /* core MQTT include. */
 #include "core_mqtt.h"
 
@@ -150,4 +146,4 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
 bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
                               MQTTPublishInfo_t * pxPublishInfo );
 
-#endif /* MQTT_AGENT_H */
+#endif /* SUBSCRIPTION_MANAGER_H */
