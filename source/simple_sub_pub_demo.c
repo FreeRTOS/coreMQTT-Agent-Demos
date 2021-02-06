@@ -166,10 +166,10 @@ static BaseType_t prvWaitForCommandAcknowledgment( uint32_t * pulNotifiedValue )
  *
  * See https://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
- * @param[in] pvIncomingPublishCallback Context of the initial command.
+ * @param[in] pvIncomingPublishCallbackContext Context of the initial command.
  * @param[in] pxPublishInfo Deserialized publish.
  */
-static void prvIncomingPublishCallback( void * pvIncomingPublishCallback,
+static void prvIncomingPublishCallback( void * pvIncomingPublishCallbackContext,
                                         MQTTPublishInfo_t * pxPublishInfo );
 
 /**

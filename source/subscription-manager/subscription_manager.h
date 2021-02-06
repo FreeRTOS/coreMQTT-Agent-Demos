@@ -85,6 +85,9 @@ typedef void (* IncomingPubCallback_t )( void * pvIncomingPublishCallbackContext
 /**
  * @brief An element in the list of subscriptions.
  *
+ * This subscription manager implementation expects that the array of the
+ * subscription elements used for storing subscriptions to be initialized to 0.
+ *
  * @note This implementation allows multiple tasks to subscribe to the same topic.
  * In this case, another element is added to the subscription list, differing
  * in the intended publish callback. Also note that the topic filters are not
