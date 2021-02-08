@@ -252,9 +252,11 @@ static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
 
 /**
  * @brief Function to attempt to resubscribe to the topics already present in the
- * subscription list. This function will be invoked when this demo requests the
- * broker to reestablish the session and the broker cannot do so. This function
- * will enqueue commands to the MQTT Agent queue and will be processed once the
+ * subscription list.
+ *
+ * This function will be invoked when this demo requests the broker to
+ * reestablish the session and the broker cannot do so. This function will
+ * enqueue commands to the MQTT Agent queue and will be processed once the
  * command loop starts.
  *
  * @return `MQTTSuccess` if adding subscribes to the command queue succeeds, else
@@ -561,8 +563,8 @@ static MQTTStatus_t prvHandleResubscribe( void )
 
     if( xResult != MQTTSuccess )
     {
-        LogError( ( "Failed to enqueue the MQTT subscribe command. xResult=%d.",
-                    ( int ) xResult ) );
+        LogError( ( "Failed to enqueue the MQTT subscribe command. xResult=%s.",
+                    MQTT_Status_strerror( xResult ) ) );
     }
 
     return xResult;
