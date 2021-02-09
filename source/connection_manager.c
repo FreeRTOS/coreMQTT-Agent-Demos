@@ -506,29 +506,24 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
 static MQTTStatus_t prvHandleResubscribe( void )
 {
     MQTTStatus_t xResult = MQTTBadParameter;
-    int32_t lIndex = 0;
+    uint32_t ulIndex = 0U;
     uint16_t usNumSubscriptions = 0U;
 
-    /* These variables need to stay in scope until command completes.
-     * Dynamically allocating memory for these will help to optimize the memory
-     * by freeing up the memory once the command is complete. In this demo, only
-     * static allocations are used. */
+    /* These variables need to stay in scope until command completes. */
     static MQTTAgentSubscribeArgs_t xSubArgs = { 0 };
     static MQTTSubscribeInfo_t xSubInfo[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ] = { 0 };
     static CommandInfo_t xCommandParams = { 0 };
 
     /* Loop through each subscription in the subscription list and add a subscribe
      * command to the command queue. */
-    for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
+    for( ulIndex = 0U; ulIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; ulIndex++ )
     {
         /* Check if there is a subscription in the subscription list. This demo
-         * doesn't subscribe to the same topics from different tasks. If there
-         * are duplicates, duplicate topics should be avoided while sending
-         * resubscribes. */
-        if( xGlobalSubscriptionList[ lIndex ].usFilterStringLength != 0 )
+         * doesn't check for duplicate subscriptions. */
+        if( xGlobalSubscriptionList[ ulIndex ].usFilterStringLength != 0 )
         {
-            xSubInfo[ usNumSubscriptions ].pTopicFilter = xGlobalSubscriptionList[ lIndex ].pcSubscriptionFilterString;
-            xSubInfo[ usNumSubscriptions ].topicFilterLength = xGlobalSubscriptionList[ lIndex ].usFilterStringLength;
+            xSubInfo[ usNumSubscriptions ].pTopicFilter = xGlobalSubscriptionList[ ulIndex ].pcSubscriptionFilterString;
+            xSubInfo[ usNumSubscriptions ].topicFilterLength = xGlobalSubscriptionList[ ulIndex ].usFilterStringLength;
 
             /* QoS1 is used for all the subscriptions in this demo. */
             xSubInfo[ usNumSubscriptions ].qos = MQTTQoS1;
@@ -541,7 +536,7 @@ static MQTTStatus_t prvHandleResubscribe( void )
         }
     }
 
-    if( usNumSubscriptions > 0 )
+    if( usNumSubscriptions > 0U )
     {
         xSubArgs.pSubscribeInfo = xSubInfo;
         xSubArgs.numSubscriptions = usNumSubscriptions;
@@ -585,9 +580,7 @@ static void prvSubscriptionCommandCallback( void * pxCommandContext,
         /* Check through each of the suback codes and determine if there are any failures. */
         for( lIndex = 0; lIndex < pxSubscribeArgs->numSubscriptions; lIndex++ )
         {
-            /* If this is a suback failure. An attempt to resubscribe can be done.
-             * In this demo, we are removing the failed subscriptions from the
-             * subscription list. */
+            /* This demo doesn't attempt to resubscribe in the event that a SUBACK failed. */
             if( pxReturnInfo->pSubackCodes[ lIndex ] == MQTTSubAckFailure )
             {
                 LogError( ( "Failed to resubscribe to topic %.*s.",
