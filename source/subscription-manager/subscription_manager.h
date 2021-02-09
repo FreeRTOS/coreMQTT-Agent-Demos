@@ -57,6 +57,7 @@
 
 /* Demo config include. */
 #include "demo_config.h"
+
 /* core MQTT include. */
 #include "core_mqtt.h"
 
