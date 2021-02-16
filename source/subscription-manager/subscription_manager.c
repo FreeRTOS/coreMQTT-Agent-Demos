@@ -135,7 +135,7 @@ bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
                               MQTTPublishInfo_t * pxPublishInfo )
 {
     int32_t lIndex = 0;
-    bool isMatched = false;
+    bool isMatched = false, publishHandled = false;
 
     if( ( pxSubscriptionList == NULL ) ||
         ( pxPublishInfo == NULL ) )
@@ -160,10 +160,11 @@ bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
                 {
                     pxSubscriptionList[ lIndex ].pxIncomingPublishCallback( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
                                                                             pxPublishInfo );
+                    publishHandled = true;
                 }
             }
         }
     }
 
-    return isMatched;
+    return publishHandled;
 }
