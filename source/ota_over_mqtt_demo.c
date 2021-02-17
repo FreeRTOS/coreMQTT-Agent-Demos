@@ -274,7 +274,7 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
 /**
  * @brief Passed into MQTTAgent_Subscribe()  as the
  * callback to execute when the broker ACKs the SUBSCRIBE/UNSUBSCRIBE message.
- * Its implementation sends a notification to the task that called
+ * This implementation sends a notification to the task that called
  * MQTTAgent_Subscribe() or MQTTAgent_Unsubscribe() to let the task know the
  * SUBSCRIBE/UNSUBSCRIBE operation is completed.  It also sets the xReturnStatus
  * of the structure passed in as the command's context to the value of the
@@ -292,7 +292,7 @@ static void prvSubscriptionCommandCallback( CommandContext_t * pxCommandContext,
 /**
  * @brief Passed into MQTTAgent_Unsubscribe() as the
  * callback to execute when the broker ACKs the UNSUBSCRIBE message.
- * Its implementation sends a notification to the task that called
+ * This implementation sends a notification to the task that called
  * MQTTAgent_Unsubscribe() to let the task know the
  * UNSUBSCRIBE operation is completed.It also sets the xReturnStatus
  * of the structure passed in as the command's context to the value of the
@@ -301,7 +301,7 @@ static void prvSubscriptionCommandCallback( CommandContext_t * pxCommandContext,
  *
  * See https ://freertos.org/mqtt/mqtt-agent-demo.html#example_mqtt_api_call
  *
- *@param[in] pxCommandContext Context of the initial command.
+ * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxReturnInfo Returned info from MQTT Agent.
  */
 static void prvMQTTUnsubscribeCompleteCallback( CommandContext_t * pxCommandContext,
@@ -401,7 +401,7 @@ static void prvProcessIncomingJobMessage( void * pxSubscriptionContext,
  *
  * The callback is not subscribed with MQTT broker, but only with local subscription manager.
  * A wildcard OTA job topic is used for subscription so that all unsolicited messages related to OTA is
- * forwarded to this callback for filteration. Right now the callback is used to filter responses to job requests
+ * forwarded to this callback for filtration. Right now the callback is used to filter responses to job requests
  * from the OTA service.
  *
  * @param[in] pvIncomingPublishCallbackContext MQTT context which stores the connection.
