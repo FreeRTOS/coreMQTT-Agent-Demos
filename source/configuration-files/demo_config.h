@@ -418,10 +418,4 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define democonfigBROKER_ENDPOINT_LENGTH      ( ( uint16_t ) ( sizeof( democonfigMQTT_BROKER_ENDPOINT ) - 1 ) )
 
 
-/*
- * @brief Enables Over the Air update demo using coreMQTT agent.
- */
-#define democonfigENABLE_OTA_UPDATE_DEMO               ( 1 )
-
-
 #endif /* DEMO_CONFIG_H */
