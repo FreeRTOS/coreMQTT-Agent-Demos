@@ -528,11 +528,11 @@ static MQTTStatus_t prvHandleResubscribe( void )
             /* QoS1 is used for all the subscriptions in this demo. */
             xSubInfo[ usNumSubscriptions ].qos = MQTTQoS1;
 
-            usNumSubscriptions++;
-
             LogInfo( ( "Resubscribe to the topic %.*s will be attempted.",
                        xSubInfo[ usNumSubscriptions ].topicFilterLength,
                        xSubInfo[ usNumSubscriptions ].pTopicFilter ) );
+
+            usNumSubscriptions++;
         }
     }
 
