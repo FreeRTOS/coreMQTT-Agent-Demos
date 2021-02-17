@@ -190,7 +190,6 @@
 #define APP_VERSION_BUILD                  2
 
 /*
- * /**
  * @brief Structure used to store the topic filter to ota callback mappings.
  */
 typedef struct OtaTopicFilterCallback
@@ -290,10 +289,8 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
 static void prvSubscriptionCommandCallback( CommandContext_t * pxCommandContext,
                                             MQTTAgentReturnInfo_t * pxReturnInfo );
 
-
-
 /**
- *@brief Passed into MQTTAgent_Unsubscribe() as the
+ * @brief Passed into MQTTAgent_Unsubscribe() as the
  * callback to execute when the broker ACKs the UNSUBSCRIBE message.
  * Its implementation sends a notification to the task that called
  * MQTTAgent_Unsubscribe() to let the task know the
