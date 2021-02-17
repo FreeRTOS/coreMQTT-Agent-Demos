@@ -761,6 +761,12 @@ static void prvProcessIncomingOtaMessage( void * pvIncomingPublishCallbackContex
     {
         prvProcessIncomingJobMessage( pvIncomingPublishCallbackContext, pxPublishInfo );
     }
+    else
+    {
+        LogWarn( ( "Unhandled OTA message received on topic: %.*s.",
+                   pxPublishInfo->topicNameLength,
+                   pxPublishInfo->pTopicName ) );
+    }
 }
 /*-----------------------------------------------------------*/
 
