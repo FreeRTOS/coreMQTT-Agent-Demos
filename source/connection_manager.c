@@ -333,6 +333,8 @@ extern void vStartOTACodeSigningDemo( configSTACK_DEPTH_TYPE uxStackSize,
                                       UBaseType_t uxPriority );
 extern void vSuspendOTACodeSigningDemo( void );
 extern void vResumeOTACodeSigningDemo( void );
+extern bool vOTAProcessMessage( void * pvIncomingPublishCallbackContext,
+                                MQTTPublishInfo_t * pxPublishInfo );
 /*-----------------------------------------------------------*/
 
 /**
@@ -781,6 +783,18 @@ static void prvIncomingPublishCallback( MQTTAgentContext_t * pMqttAgentContext,
      * subscription manager. */
     xPublishHandled = handleIncomingPublishes( ( SubscriptionElement_t * ) pMqttAgentContext->pIncomingCallbackContext,
                                                pxPublishInfo );
+
+
+    #if ( democonfigCREATE_CODE_SIGNING_OTA_DEMO == 1 )
+
+        /*
+         * Check if the incoming publish is for OTA agent.
+         */
+        if( xPublishHandled != true )
+        {
+            xPublishHandled = vOTAProcessMessage( pMqttAgentContext->pIncomingCallbackContext, pxPublishInfo );
+        }
+    #endif
 
     /* If there are no callbacks to handle the incoming publishes,
      * handle it as an unsolicited publish. */
