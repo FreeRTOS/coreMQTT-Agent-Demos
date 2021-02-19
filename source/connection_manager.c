@@ -72,7 +72,7 @@
 #include "core_mqtt.h"
 
 /* MQTT agent include. */
-#include "freertos_mqtt_agent.h"
+#include "mqtt_agent.h"
 
 /* Exponential backoff retry include. */
 #include "backoff_algorithm.h"

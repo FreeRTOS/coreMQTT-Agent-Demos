@@ -219,7 +219,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c">
       <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.c">
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\connection_manager.c">
@@ -401,7 +401,7 @@
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.h">
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include\backoff_algorithm.h">
