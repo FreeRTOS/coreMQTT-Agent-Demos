@@ -115,8 +115,16 @@
     #error Please define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartOTACodeSigningDemo().
 #endif
 
+#ifndef democonfigCREATE_DEFENDER_DEMO
+    #error Please define democonfigCREATE_DEFENDER_DEMO to 1 or 0 in demo_config.h - determines if vStartDefenderDemo() gets called or not.
+#endif
+
+#if ( democonfigCREATE_DEFENDER_DEMO != 0 ) && !defined( democonfigDEFENDER_TASK_STACK_SIZE )
+    #error Please define democonfigDEFENDER_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartDefenderDemo().
+#endif
+
 /**
- * @brief Dimensions the buffer used to serialise and deserialise MQTT packets.
+ * @brief Dimensions the buffer used to serialize and deserialize MQTT packets.
  * @note Specified in bytes.  Must be large enough to hold the maximum
  * anticipated MQTT payload.
  */
@@ -335,6 +343,9 @@ extern void vSuspendOTACodeSigningDemo( void );
 extern void vResumeOTACodeSigningDemo( void );
 extern bool vOTAProcessMessage( void * pvIncomingPublishCallbackContext,
                                 MQTTPublishInfo_t * pxPublishInfo );
+
+extern void vStartDefenderDemo( configSTACK_DEPTH_TYPE uxStackSize,
+                                UBaseType_t uxPriority );
 /*-----------------------------------------------------------*/
 
 /**
@@ -364,7 +375,7 @@ static AgentMessageContext_t xCommandQueue;
  * elements are done only from one task at a time. The subscription manager
  * implementation expects that the array of the subscription elements used for
  * storing subscriptions to be initialized to 0. As this is a global array, it
- * will be intialized to 0 by default.
+ * will be initialized to 0 by default.
  */
 SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ];
 
@@ -878,7 +889,7 @@ static void prvConnectToMQTTBroker( void )
     xNetworkStatus = prvSocketConnect( &xNetworkContext );
     configASSERT( xNetworkStatus == pdPASS );
 
-    /* Initialise the MQTT context with the buffer and transport interface. */
+    /* Initialize the MQTT context with the buffer and transport interface. */
     xMQTTStatus = prvMQTTInit();
     configASSERT( xMQTTStatus == MQTTSuccess );
 
@@ -892,7 +903,7 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
 {
     ( void ) pvParameters;
 
-    /* Miscellaneous initialisation. */
+    /* Miscellaneous initialization. */
     ulGlobalEntryTimeMs = prvGetTimeMs();
 
     /* Create the TCP connection to the broker, then the MQTT connection to the
@@ -919,6 +930,13 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
         {
             vStartOTACodeSigningDemo( democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE,
                                       tskIDLE_PRIORITY + 1 );
+        }
+    #endif
+
+    #if ( democonfigCREATE_DEFENDER_DEMO == 1 )
+        {
+            vStartDefenderDemo( democonfigDEFENDER_TASK_STACK_SIZE,
+                                tskIDLE_PRIORITY );
         }
     #endif
 

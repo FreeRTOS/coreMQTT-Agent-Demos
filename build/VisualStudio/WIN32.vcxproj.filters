@@ -133,6 +133,21 @@
     <Filter Include="Source\subscription-manager">
       <UniqueIdentifier>{ba522f10-b32d-4983-acb1-ddf9f4b3b7f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\defender-tools">
+      <UniqueIdentifier>{10f16eac-176d-454f-be90-b1e3748ee814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\Defender">
+      <UniqueIdentifier>{b79cd5ba-797b-4b56-98dc-8dfe4d580ebb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\AWS\Defender\include">
+      <UniqueIdentifier>{c748ace1-8979-41e6-9189-95f323c09229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\tcp_utilities">
+      <UniqueIdentifier>{897992b2-06e3-4432-a84f-09cc9f2cbff8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-TCP\tcp_utilities\include">
+      <UniqueIdentifier>{d7f4bf68-bdb2-4baa-9e27-f4965e78f1d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c">
@@ -302,6 +317,21 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\defender_demo.c">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\defender-tools\metrics_collector.c">
+      <Filter>Source\defender-tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\defender-tools\report_builder.c">
+      <Filter>Source\defender-tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\defender\source\defender.c">
+      <Filter>Lib\AWS\Defender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\tcp_netstat.c">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\tcp_utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -478,6 +508,24 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\defender-tools\metrics_collector.h">
+      <Filter>Source\defender-tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\defender-tools\report_builder.h">
+      <Filter>Source\defender-tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\defender_config.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\AWS\defender\source\include\defender.h">
+      <Filter>Lib\AWS\Defender\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\AWS\defender\source\include\defender_config_defaults.h">
+      <Filter>Lib\AWS\Defender\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include\tcp_netstat.h">
+      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\tcp_utilities\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

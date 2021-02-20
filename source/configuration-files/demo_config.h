@@ -71,14 +71,19 @@ extern void vLoggingPrintf( const char * pcFormatString,
 /* Constants that select which demos to build into the project:
  * Set the following to 1 to include the demo in the build, or 0 to exclude the
  * demo. */
-#define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK     0
-#define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE )
+#define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK        0
+#define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE    ( configMINIMAL_STACK_SIZE )
 
-#define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE    0
-#define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE        ( configMINIMAL_STACK_SIZE )
+#define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE       0
+#define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE           ( configMINIMAL_STACK_SIZE )
 
-#define democonfigCREATE_CODE_SIGNING_OTA_DEMO          1
-#define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE      ( configMINIMAL_STACK_SIZE )
+#define democonfigCREATE_CODE_SIGNING_OTA_DEMO             1
+#define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE         ( configMINIMAL_STACK_SIZE )
+
+
+#define democonfigCREATE_DEFENDER_DEMO                     1
+#define democonfigDEFENDER_TASK_STACK_SIZE                 ( configMINIMAL_STACK_SIZE )
+
 
 
 /**
@@ -123,7 +128,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_PORT    ( insert here. )
  */
-//#define democonfigMQTT_BROKER_PORT ( 8883 )
+#define democonfigMQTT_BROKER_PORT        ( 8883 )
 
 /**
  * @brief Server's root CA certificate.
@@ -200,7 +205,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * for an MQTT broker that only has an IP address but no hostname. However,
  * SNI should be enabled whenever possible.
  */
-#define democonfigDISABLE_SNI    ( pdFALSE )
+#define democonfigDISABLE_SNI                ( pdFALSE )
 
 /**
  * @brief Configuration that indicates if the demo connection is made to the AWS IoT Core MQTT broker.
