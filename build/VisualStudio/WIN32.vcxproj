@@ -32,7 +32,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt_serializer.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt_state.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_ARP.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_DHCP.c" />
@@ -88,7 +88,7 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_serializer.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_state.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\interface\transport_interface.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\freertos_mqtt_agent.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOSIPConfigDefaults.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_ARP.h" />

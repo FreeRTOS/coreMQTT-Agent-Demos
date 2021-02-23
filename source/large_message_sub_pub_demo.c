@@ -57,7 +57,7 @@
 #include "core_mqtt_state.h"
 
 /* MQTT agent include. */
-#include "freertos_mqtt_agent.h"
+#include "mqtt_agent.h"
 
 /* Subscription manager header include. */
 #include "subscription_manager.h"
