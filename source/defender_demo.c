@@ -163,20 +163,15 @@
 #define defenderexampleMAX_COMMAND_SEND_BLOCK_TIME_MS                            ( 200 )
 
 /**
- * @brief Number of custom metrics sent in the demo.
- */
-#define defenderexampleCUSTOM_METRICS_ARRAY_SIZE          2
-
-/**
  * @brief Name of the report id field in the response from the AWS IoT Device
  * Defender service.
  */
-#define defenderexampleRESPONSE_REPORT_ID_FIELD           "reportId"
+#define defenderexampleRESPONSE_REPORT_ID_FIELD                                  "reportId"
 
 /**
  * @brief The length of #defenderexampleRESPONSE_REPORT_ID_FIELD.
  */
-#define defenderexampleRESPONSE_REPORT_ID_FIELD_LENGTH    ( sizeof( defenderexampleRESPONSE_REPORT_ID_FIELD ) - 1 )
+#define defenderexampleRESPONSE_REPORT_ID_FIELD_LENGTH                           ( sizeof( defenderexampleRESPONSE_REPORT_ID_FIELD ) - 1 )
 
 /**
  * @brief Defines the structure to use as the command callback context in this
@@ -221,11 +216,6 @@ static uint16_t pusOpenUdpPorts[ defenderexampleOPEN_UDP_PORTS_ARRAY_SIZE ];
 static Connection_t pxEstablishedConnections[ defenderexampleESTABLISHED_CONNECTIONS_ARRAY_SIZE ];
 
 /**
- * @brief Custom metrics array.
- */
-static CustomMetric_t pxCustomMetrics[ defenderexampleCUSTOM_METRICS_ARRAY_SIZE ];
-
-/**
  * @brief Task status array which will store status information of tasks
  * running in the system, which is used to generate custom metrics.
  */
@@ -235,16 +225,6 @@ static TaskStatus_t pxTaskList[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ]
  * @brief Custom metric array for the ids of running tasks on the system.
  */
 static int64_t pllCustomMetricsTaskNumbers[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ];
-
-/**
- * @brief Stack high water mark custom metric name.
- */
-static const char pcStackHighWaterMarkName[] = "stack_high_water_mark";
-
-/**
- * @brief Task numbers custom metric name.
- */
-static const char pcTaskNumbersName[] = "task_numbers";
 
 /**
  * @brief All the metrics sent in the device defender report.
@@ -566,7 +546,9 @@ static bool prvCollectDeviceMetrics( void )
 {
     bool xStatus = false;
     eMetricsCollectorStatus eMetricsCollectorStatus;
-    uint32_t ulNumOpenTcpPorts = 0UL, ulNumOpenUdpPorts = 0UL, ulNumEstablishedConnections = 0UL;
+    uint32_t ulNumOpenTcpPorts = 0UL, ulNumOpenUdpPorts = 0UL, ulNumEstablishedConnections = 0UL, i;
+    UBaseType_t uxTasksWritten;
+    TaskStatus_t pxTaskStatus;
 
     /* Collect bytes and packets sent and received. */
     eMetricsCollectorStatus = eGetNetworkStats( &( xNetworkStats ) );
@@ -624,10 +606,6 @@ static bool prvCollectDeviceMetrics( void )
      * numbers type custom metric. */
     if( eMetricsCollectorStatus == eMetricsCollectorSuccess )
     {
-        UBaseType_t uxTasksWritten;
-        TaskStatus_t pxTaskStatus;
-        uint32_t i;
-
         vTaskGetInfo(
             /* Query this task. */
             NULL,
@@ -650,16 +628,6 @@ static bool prvCollectDeviceMetrics( void )
             {
                 pllCustomMetricsTaskNumbers[ i ] = pxTaskList[ i ].xTaskNumber;
             }
-
-            pxCustomMetrics[ 0 ].pcName = pcStackHighWaterMarkName;
-            pxCustomMetrics[ 0 ].eType = eCustomMetricNumber;
-            pxCustomMetrics[ 0 ].xData.llNumber = pxTaskStatus.usStackHighWaterMark;
-            pxCustomMetrics[ 0 ].ulLength = 1;
-
-            pxCustomMetrics[ 1 ].pcName = pcTaskNumbersName;
-            pxCustomMetrics[ 1 ].eType = eCustomMetricNumberList;
-            pxCustomMetrics[ 1 ].xData.pllNumberList = pllCustomMetricsTaskNumbers;
-            pxCustomMetrics[ 1 ].ulLength = uxTasksWritten;
         }
     }
 
@@ -674,8 +642,9 @@ static bool prvCollectDeviceMetrics( void )
         xDeviceMetrics.ulOpenUdpPortsArrayLength = ulNumOpenUdpPorts;
         xDeviceMetrics.pxEstablishedConnectionsArray = &( pxEstablishedConnections[ 0 ] );
         xDeviceMetrics.ulEstablishedConnectionsArrayLength = ulNumEstablishedConnections;
-        xDeviceMetrics.pxCustomMetricsArray = pxCustomMetrics;
-        xDeviceMetrics.ulCustomMetricsArrayLength = 2;
+        xDeviceMetrics.ulStackHighWaterMark = pxTaskStatus.usStackHighWaterMark;
+        xDeviceMetrics.pulTaskIdsArray = pllCustomMetricsTaskNumbers;
+        xDeviceMetrics.ulTaskIdsArrayLength = uxTasksWritten;
     }
 
     return xStatus;

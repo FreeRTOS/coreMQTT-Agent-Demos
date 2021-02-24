@@ -99,9 +99,19 @@
     "}"                                       \
     "}"                                       \
     "},"                                      \
-    "\"%s\":{"
+    "\"%s\": {"                               \
+    "\"stack_high_water_mark\": ["            \
+    "{"                                       \
+    "\"%s\": %u"                              \
+    "}"                                       \
+    "],"                                      \
+    "\"task_numbers\": ["                     \
+    "{"                                       \
+    "\"%s\": "
 
 #define reportbuilderJSON_REPORT_FORMAT_PART5 \
+    "}"                                       \
+    "]"                                       \
     "}"                                       \
     "}"
 
@@ -168,55 +178,22 @@ static eReportBuilderStatus prvWriteConnectionsArray( char * pcBuffer,
                                                       uint32_t * pulOutCharsWritten );
 
 /**
- * @brief Write custom metrics entries to the given buffer in the format
- * expected by the AWS IoT Device Defender Service.
- *
- * This function writes the following format:
- * "MyMetricOfType_Number":[
- *     {
- *         "number":1.0
- *     }
- * ],
- * "MyMetricOfType_NumberList":[
- *     {
- *         "number_list":[
- *             1.0,
- *             2.0,
- *             3.0
- *         ]
- *     }
- * ],
- * "MyMetricOfType_StringList":[
- *     {
- *         "string_list":[
- *             "value_1",
- *             "value_2"
- *         ]
- *     }
- * ],
- * "MyMetricOfType_IpList":[
- *     {
- *         "ip_list":[
- *             "172.0.0.0",
- *             "172.0.0.10"
- *         ]
- *     }
- * ]
+ * @brief Write task ids array to the given buffer as a JSON array.
  *
  * @param[in] pcBuffer The buffer to write the connections array.
  * @param[in] ulBufferLength The length of the buffer.
- * @param[in] pxCustomMetricsArray The array containing the custom metrics.
- * @param[in] ulCustomMetricsArrayLength Length of the pxCustomMetricsArray array.
+ * @param[in] pulTaskIdsArray The array containing the task ids.
+ * @param[in] pulTaskIdsArrayLength Length of the pulTaskIdsArray array.
  * @param[out] pulOutCharsWritten Number of characters written to the buffer.
  *
  * @return #ReportBuilderSuccess if the array is successfully written;
  * #ReportBuilderBufferTooSmall if the buffer cannot hold the full array.
  */
-static eReportBuilderStatus prvWriteCustomMetrics( char * pcBuffer,
-                                                   uint32_t ulBufferLength,
-                                                   const CustomMetric_t * pxCustomMetricsArray,
-                                                   uint32_t ulCustomMetricsArrayLength,
-                                                   uint32_t * pulOutCharsWritten );
+static eReportBuilderStatus prvWriteTaskIdsArray( char * pcBuffer,
+                                                  uint32_t ulBufferLength,
+                                                  const uint32_t * pulTaskIdsArray,
+                                                  uint32_t pulTaskIdsArrayLength,
+                                                  uint32_t * pulOutCharsWritten );
 /*-----------------------------------------------------------*/
 
 static eReportBuilderStatus prvWritePortsArray( char * pcBuffer,
@@ -385,32 +362,40 @@ static eReportBuilderStatus prvWriteConnectionsArray( char * pcBuffer,
 }
 /*-----------------------------------------------------------*/
 
-static eReportBuilderStatus prvWriteCustomMetrics( char * pcBuffer,
-                                                   uint32_t ulBufferLength,
-                                                   const CustomMetric_t * pxCustomMetricsArray,
-                                                   uint32_t ulCustomMetricsArrayLength,
-                                                   uint32_t * pulOutCharsWritten )
+static eReportBuilderStatus prvWriteTaskIdsArray( char * pcBuffer,
+                                                  uint32_t ulBufferLength,
+                                                  const uint32_t * pulTaskIdsArray,
+                                                  uint32_t pulTaskIdsArrayLength,
+                                                  uint32_t * pulOutCharsWritten )
 {
     char * pcCurrentWritePos = pcBuffer;
     uint32_t i, ulRemainingBufferLength = ulBufferLength;
     int32_t ulCharactersWritten;
     eReportBuilderStatus eStatus = eReportBuilderSuccess;
-    const CustomMetric_t * pxCustomMetric;
 
     configASSERT( pcBuffer != NULL );
-    configASSERT( pxCustomMetricsArray != NULL );
+    configASSERT( pulTaskIdsArray != NULL );
     configASSERT( pulOutCharsWritten != NULL );
 
-    /* Write the custom metrics array elements. */
-    for( i = 0; i < ulCustomMetricsArrayLength; i++ )
+    /* Write the JSON array open marker. */
+    if( ulRemainingBufferLength > 1 )
     {
-        pxCustomMetric = &( pxCustomMetricsArray[ i ] );
+        *pcCurrentWritePos = reportbuilderJSON_ARRAY_OPEN_MARKER;
+        ulRemainingBufferLength -= 1;
+        pcCurrentWritePos += 1;
+    }
+    else
+    {
+        eStatus = eReportBuilderBufferTooSmall;
+    }
 
-        /* Write the metric name key. */
+    /* Write the array elements. */
+    for( i = 0; ( ( i < pulTaskIdsArrayLength ) && ( eStatus == eReportBuilderSuccess ) ); i++ )
+    {
         ulCharactersWritten = snprintf( pcCurrentWritePos,
                                         ulRemainingBufferLength,
-                                        "\"%s\":[{",
-                                        pxCustomMetric->pcName );
+                                        "%u,",
+                                        pulTaskIdsArray[ i ] );
 
         if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
         {
@@ -419,143 +404,30 @@ static eReportBuilderStatus prvWriteCustomMetrics( char * pcBuffer,
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
+            ulRemainingBufferLength -= ( uint32_t ) ulCharactersWritten;
             pcCurrentWritePos += ulCharactersWritten;
-        }
-
-        /* Write the metric data. */
-        if( pxCustomMetric->eType == eCustomMetricNumber )
-        {
-            ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                            ulRemainingBufferLength,
-                                            "\"%s\":%lld}],",
-                                            DEFENDER_REPORT_NUMBER_KEY,
-                                            ( long long ) pxCustomMetric->xData.llNumber );
-
-            if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
-            {
-                eStatus = eReportBuilderBufferTooSmall;
-                break;
-            }
-            else
-            {
-                ulRemainingBufferLength -= ulCharactersWritten;
-                pcCurrentWritePos += ulCharactersWritten;
-            }
-        }
-        else
-        {
-            /* Metric is a list type */
-            if( pxCustomMetric->eType == eCustomMetricNumberList )
-            {
-                ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                                ulRemainingBufferLength,
-                                                "\"%s\":[",
-                                                DEFENDER_REPORT_NUMBER_LIST_KEY );
-            }
-            else if( pxCustomMetric->eType == eCustomMetricStringList )
-            {
-                ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                                ulRemainingBufferLength,
-                                                "\"%s\":[",
-                                                DEFENDER_REPORT_STRING_LIST_KEY );
-            }
-            else if( pxCustomMetric->eType == eCustomMetricIpList )
-            {
-                ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                                ulRemainingBufferLength,
-                                                "\"%s\":[",
-                                                DEFENDER_REPORT_IP_LIST_KEY );
-            }
-
-            if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
-            {
-                eStatus = eReportBuilderBufferTooSmall;
-                break;
-            }
-            else
-            {
-                ulRemainingBufferLength -= ulCharactersWritten;
-                pcCurrentWritePos += ulCharactersWritten;
-            }
-
-            /* Write the metric array elements. */
-            for( i = 0; i < pxCustomMetric->ulLength; i++ )
-            {
-                if( pxCustomMetric->eType == eCustomMetricNumberList )
-                {
-                    ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                                    ulRemainingBufferLength,
-                                                    "%lld,",
-                                                    ( long long ) ( pxCustomMetric->xData.pllNumberList )[ i ] );
-                }
-                else if( pxCustomMetric->eType == eCustomMetricStringList )
-                {
-                    ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                                    ulRemainingBufferLength,
-                                                    "\"%s\",",
-                                                    ( pxCustomMetric->xData.ppcStringList )[ i ] );
-                }
-                else if( pxCustomMetric->eType == eCustomMetricIpList )
-                {
-                    ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                                    ulRemainingBufferLength,
-                                                    "\"%u.%u.%u.%u\",",
-                                                    ( unsigned int ) ( ( pxCustomMetric->xData.pulIpList )[ i ] >> 24 ) & 0xFF,
-                                                    ( unsigned int ) ( ( pxCustomMetric->xData.pulIpList )[ i ] >> 16 ) & 0xFF,
-                                                    ( unsigned int ) ( ( pxCustomMetric->xData.pulIpList )[ i ] >> 8 ) & 0xFF,
-                                                    ( unsigned int ) ( pxCustomMetric->xData.pulIpList )[ i ] & 0xFF );
-                }
-
-                if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
-                {
-                    eStatus = eReportBuilderBufferTooSmall;
-                    break;
-                }
-                else
-                {
-                    ulRemainingBufferLength -= ulCharactersWritten;
-                    pcCurrentWritePos += ulCharactersWritten;
-                }
-            }
-
-            if( eStatus != eReportBuilderSuccess )
-            {
-                break;
-            }
-
-            /* Discard the last comma. */
-            if( pxCustomMetric->ulLength > 0 )
-            {
-                pcCurrentWritePos -= 1;
-                ulRemainingBufferLength += 1;
-            }
-
-            /* Close the custom metric element */
-            ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                            ulRemainingBufferLength,
-                                            "]}]," );
-
-            if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
-            {
-                eStatus = eReportBuilderBufferTooSmall;
-                break;
-            }
-            else
-            {
-                ulRemainingBufferLength -= ulCharactersWritten;
-                pcCurrentWritePos += ulCharactersWritten;
-            }
         }
     }
 
     if( eStatus == eReportBuilderSuccess )
     {
         /* Discard the last comma. */
-        if( ulCustomMetricsArrayLength > 0 )
+        if( pulTaskIdsArrayLength > 0 )
         {
             pcCurrentWritePos -= 1;
             ulRemainingBufferLength += 1;
+        }
+
+        /* Write the JSON array close marker. */
+        if( ulRemainingBufferLength > 1 )
+        {
+            *pcCurrentWritePos = reportbuilderJSON_ARRAY_CLOSE_MARKER;
+            ulRemainingBufferLength -= 1;
+            pcCurrentWritePos += 1;
+        }
+        else
+        {
+            eStatus = eReportBuilderBufferTooSmall;
         }
     }
 
@@ -755,7 +627,10 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
                                         reportbuilderJSON_REPORT_FORMAT_PART4,
                                         DEFENDER_REPORT_TOTAL_KEY,
                                         pxMetrics->ulEstablishedConnectionsArrayLength,
-                                        DEFENDER_REPORT_CUSTOM_METRICS_KEY
+                                        DEFENDER_REPORT_CUSTOM_METRICS_KEY,
+                                        DEFENDER_REPORT_NUMBER_KEY,
+                                        pxMetrics->ulStackHighWaterMark,
+                                        DEFENDER_REPORT_NUMBER_LIST_KEY
                                         );
 
         if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
@@ -770,14 +645,14 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
         }
     }
 
-    /* Write custom metrics. */
-    if( ( eStatus == eReportBuilderSuccess ) && ( pxMetrics->pxCustomMetricsArray != NULL ) )
+    /* Write task ids array. */
+    if( eStatus == eReportBuilderSuccess )
     {
-        eStatus = prvWriteCustomMetrics( pcCurrentWritePos,
-                                         ulRemainingBufferLength,
-                                         pxMetrics->pxCustomMetricsArray,
-                                         pxMetrics->ulCustomMetricsArrayLength,
-                                         &( bufferWritten ) );
+        eStatus = prvWriteTaskIdsArray( pcCurrentWritePos,
+                                        ulRemainingBufferLength,
+                                        pxMetrics->pulTaskIdsArray,
+                                        pxMetrics->ulTaskIdsArrayLength,
+                                        &( bufferWritten ) );
 
         if( eStatus == eReportBuilderSuccess )
         {
@@ -786,7 +661,7 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
         }
         else
         {
-            LogError( ( "Failed to write custom metrics." ) );
+            LogError( ( "Failed to write task ids array." ) );
         }
     }
 
