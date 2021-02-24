@@ -224,7 +224,7 @@ static TaskStatus_t pxTaskList[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ]
 /**
  * @brief Custom metric array for the ids of running tasks on the system.
  */
-static uint32_t plCustomMetricsTaskNumbers[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ];
+static uint32_t pulCustomMetricsTaskNumbers[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ];
 
 /**
  * @brief All the metrics sent in the device defender report.
@@ -626,7 +626,7 @@ static bool prvCollectDeviceMetrics( void )
         {
             for( i = 0; i < uxTasksWritten; i++ )
             {
-                plCustomMetricsTaskNumbers[ i ] = pxTaskList[ i ].xTaskNumber;
+                pulCustomMetricsTaskNumbers[ i ] = pxTaskList[ i ].xTaskNumber;
             }
         }
     }
@@ -643,7 +643,7 @@ static bool prvCollectDeviceMetrics( void )
         xDeviceMetrics.pxEstablishedConnectionsArray = &( pxEstablishedConnections[ 0 ] );
         xDeviceMetrics.ulEstablishedConnectionsArrayLength = ulNumEstablishedConnections;
         xDeviceMetrics.ulStackHighWaterMark = pxTaskStatus.usStackHighWaterMark;
-        xDeviceMetrics.pulTaskIdsArray = plCustomMetricsTaskNumbers;
+        xDeviceMetrics.pulTaskIdsArray = pulCustomMetricsTaskNumbers;
         xDeviceMetrics.ulTaskIdsArrayLength = uxTasksWritten;
     }
 
