@@ -393,11 +393,13 @@ void vStartDefenderDemo( configSTACK_DEPTH_TYPE uxStackSize,
 
 static bool prvSubscribeToDefenderTopics( void )
 {
-    MQTTAgentSubscribeArgs_t xSubscribeArgs;
-    MQTTSubscribeInfo_t xSubscribeInfo[ 2 ];
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
     CommandInfo_t xCommandParams = { 0 };
+
+    /* These must persist until the command is processed. */
+    static MQTTAgentSubscribeArgs_t xSubscribeArgs;
+    static MQTTSubscribeInfo_t xSubscribeInfo[ 2 ];
 
     /* Context must persist as long as subscription persists. */
     static CommandContext_t xApplicationDefinedContext = { 0 };
@@ -716,7 +718,7 @@ static bool prvGenerateDeviceMetricsReport( uint32_t * pulOutReportLength )
 
 static bool prvPublishDeviceMetricsReport( uint32_t reportLength )
 {
-    MQTTPublishInfo_t xPublishInfo = { 0 };
+    static MQTTPublishInfo_t xPublishInfo = { 0 };
     CommandInfo_t xCommandParams = { 0 };
     MQTTStatus_t xCommandAdded;
 
