@@ -204,7 +204,7 @@ static eReportBuilderStatus prvWritePortsArray( char * pcBuffer,
 {
     char * pcCurrentWritePos = pcBuffer;
     uint32_t i, ulRemainingBufferLength = ulBufferLength;
-    int32_t ulCharactersWritten;
+    int32_t lCharactersWritten;
     eReportBuilderStatus eStatus = eReportBuilderSuccess;
 
     configASSERT( pcBuffer != NULL );
@@ -226,21 +226,21 @@ static eReportBuilderStatus prvWritePortsArray( char * pcBuffer,
     /* Write the array elements. */
     for( i = 0; ( ( i < ulOpenPortsArrayLength ) && ( eStatus == eReportBuilderSuccess ) ); i++ )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_PORT_OBJECT_FORMAT,
-                                        DEFENDER_REPORT_PORT_KEY,
-                                        pusOpenPortsArray[ i ] );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_PORT_OBJECT_FORMAT,
+                                       DEFENDER_REPORT_PORT_KEY,
+                                       pusOpenPortsArray[ i ] );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             eStatus = eReportBuilderBufferTooSmall;
             break;
         }
         else
         {
-            ulRemainingBufferLength -= ( uint32_t ) ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= ( uint32_t ) lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -283,7 +283,7 @@ static eReportBuilderStatus prvWriteConnectionsArray( char * pcBuffer,
 {
     char * pcCurrentWritePos = pcBuffer;
     uint32_t i, ulRemainingBufferLength = ulBufferLength;
-    int32_t ulCharactersWritten;
+    int32_t lCharactersWritten;
     eReportBuilderStatus eStatus = eReportBuilderSuccess;
     const Connection_t * pxConn;
 
@@ -307,27 +307,27 @@ static eReportBuilderStatus prvWriteConnectionsArray( char * pcBuffer,
     for( i = 0; ( ( i < ulConnectionsArrayLength ) && ( eStatus == eReportBuilderSuccess ) ); i++ )
     {
         pxConn = &( pxConnectionsArray[ i ] );
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_CONNECTION_OBJECT_FORMAT,
-                                        DEFENDER_REPORT_LOCAL_PORT_KEY,
-                                        pxConn->usLocalPort,
-                                        DEFENDER_REPORT_REMOTE_ADDR_KEY,
-                                        ( pxConn->ulRemoteIp >> 24 ) & 0xFF,
-                                        ( pxConn->ulRemoteIp >> 16 ) & 0xFF,
-                                        ( pxConn->ulRemoteIp >> 8 ) & 0xFF,
-                                        ( pxConn->ulRemoteIp ) & 0xFF,
-                                        pxConn->usRemotePort );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_CONNECTION_OBJECT_FORMAT,
+                                       DEFENDER_REPORT_LOCAL_PORT_KEY,
+                                       pxConn->usLocalPort,
+                                       DEFENDER_REPORT_REMOTE_ADDR_KEY,
+                                       ( pxConn->ulRemoteIp >> 24 ) & 0xFF,
+                                       ( pxConn->ulRemoteIp >> 16 ) & 0xFF,
+                                       ( pxConn->ulRemoteIp >> 8 ) & 0xFF,
+                                       ( pxConn->ulRemoteIp ) & 0xFF,
+                                       pxConn->usRemotePort );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             eStatus = eReportBuilderBufferTooSmall;
             break;
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -370,7 +370,7 @@ static eReportBuilderStatus prvWriteTaskIdsArray( char * pcBuffer,
 {
     char * pcCurrentWritePos = pcBuffer;
     uint32_t i, ulRemainingBufferLength = ulBufferLength;
-    int32_t ulCharactersWritten;
+    int32_t lCharactersWritten;
     eReportBuilderStatus eStatus = eReportBuilderSuccess;
 
     configASSERT( pcBuffer != NULL );
@@ -392,20 +392,20 @@ static eReportBuilderStatus prvWriteTaskIdsArray( char * pcBuffer,
     /* Write the array elements. */
     for( i = 0; ( ( i < pulTaskIdsArrayLength ) && ( eStatus == eReportBuilderSuccess ) ); i++ )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        "%u,",
-                                        pulTaskIdsArray[ i ] );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       "%u,",
+                                       pulTaskIdsArray[ i ] );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             eStatus = eReportBuilderBufferTooSmall;
             break;
         }
         else
         {
-            ulRemainingBufferLength -= ( uint32_t ) ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= ( uint32_t ) lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -451,7 +451,7 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
     char * pcCurrentWritePos = pcBuffer;
     uint32_t ulRemainingBufferLength = ulBufferLength, bufferWritten;
     eReportBuilderStatus eStatus = eReportBuilderSuccess;
-    int32_t ulCharactersWritten;
+    int32_t lCharactersWritten;
 
     configASSERT( pcBuffer != NULL );
     configASSERT( pxMetrics != NULL );
@@ -475,29 +475,29 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
     /* Write part1. */
     if( eStatus == eReportBuilderSuccess )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_REPORT_FORMAT_PART1,
-                                        DEFENDER_REPORT_HEADER_KEY,
-                                        DEFENDER_REPORT_ID_KEY,
-                                        ulReportId,
-                                        DEFENDER_REPORT_VERSION_KEY,
-                                        ulMajorReportVersion,
-                                        ulMinorReportVersion,
-                                        DEFENDER_REPORT_METRICS_KEY,
-                                        DEFENDER_REPORT_TCP_LISTENING_PORTS_KEY,
-                                        DEFENDER_REPORT_PORTS_KEY
-                                        );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_REPORT_FORMAT_PART1,
+                                       DEFENDER_REPORT_HEADER_KEY,
+                                       DEFENDER_REPORT_ID_KEY,
+                                       ulReportId,
+                                       DEFENDER_REPORT_VERSION_KEY,
+                                       ulMajorReportVersion,
+                                       ulMinorReportVersion,
+                                       DEFENDER_REPORT_METRICS_KEY,
+                                       DEFENDER_REPORT_TCP_LISTENING_PORTS_KEY,
+                                       DEFENDER_REPORT_PORTS_KEY
+                                       );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             LogError( ( "Failed to write part 1." ) );
             eStatus = eReportBuilderBufferTooSmall;
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -524,24 +524,24 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
     /* Write part2. */
     if( eStatus == eReportBuilderSuccess )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_REPORT_FORMAT_PART2,
-                                        DEFENDER_REPORT_TOTAL_KEY,
-                                        pxMetrics->ulOpenTcpPortsArrayLength,
-                                        DEFENDER_REPORT_UDP_LISTENING_PORTS_KEY,
-                                        DEFENDER_REPORT_PORTS_KEY
-                                        );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_REPORT_FORMAT_PART2,
+                                       DEFENDER_REPORT_TOTAL_KEY,
+                                       pxMetrics->ulOpenTcpPortsArrayLength,
+                                       DEFENDER_REPORT_UDP_LISTENING_PORTS_KEY,
+                                       DEFENDER_REPORT_PORTS_KEY
+                                       );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             LogError( ( "Failed to write part 2." ) );
             eStatus = eReportBuilderBufferTooSmall;
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -568,34 +568,34 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
     /* Write part3. */
     if( eStatus == eReportBuilderSuccess )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_REPORT_FORMAT_PART3,
-                                        DEFENDER_REPORT_TOTAL_KEY,
-                                        pxMetrics->ulOpenUdpPortsArrayLength,
-                                        DEFENDER_REPORT_NETWORK_STATS_KEY,
-                                        DEFENDER_REPORT_BYTES_IN_KEY,
-                                        pxMetrics->pxNetworkStats->ulBytesReceived,
-                                        DEFENDER_REPORT_BYTES_OUT_KEY,
-                                        pxMetrics->pxNetworkStats->ulBytesSent,
-                                        DEFENDER_REPORT_PKTS_IN_KEY,
-                                        pxMetrics->pxNetworkStats->ulPacketsReceived,
-                                        DEFENDER_REPORT_PKTS_OUT_KEY,
-                                        pxMetrics->pxNetworkStats->ulPacketsSent,
-                                        DEFENDER_REPORT_TCP_CONNECTIONS_KEY,
-                                        DEFENDER_REPORT_ESTABLISHED_CONNECTIONS_KEY,
-                                        DEFENDER_REPORT_CONNECTIONS_KEY
-                                        );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_REPORT_FORMAT_PART3,
+                                       DEFENDER_REPORT_TOTAL_KEY,
+                                       pxMetrics->ulOpenUdpPortsArrayLength,
+                                       DEFENDER_REPORT_NETWORK_STATS_KEY,
+                                       DEFENDER_REPORT_BYTES_IN_KEY,
+                                       pxMetrics->pxNetworkStats->ulBytesReceived,
+                                       DEFENDER_REPORT_BYTES_OUT_KEY,
+                                       pxMetrics->pxNetworkStats->ulBytesSent,
+                                       DEFENDER_REPORT_PKTS_IN_KEY,
+                                       pxMetrics->pxNetworkStats->ulPacketsReceived,
+                                       DEFENDER_REPORT_PKTS_OUT_KEY,
+                                       pxMetrics->pxNetworkStats->ulPacketsSent,
+                                       DEFENDER_REPORT_TCP_CONNECTIONS_KEY,
+                                       DEFENDER_REPORT_ESTABLISHED_CONNECTIONS_KEY,
+                                       DEFENDER_REPORT_CONNECTIONS_KEY
+                                       );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             LogError( ( "Failed to write part 3." ) );
             eStatus = eReportBuilderBufferTooSmall;
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -622,26 +622,26 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
     /* Write part4. */
     if( eStatus == eReportBuilderSuccess )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_REPORT_FORMAT_PART4,
-                                        DEFENDER_REPORT_TOTAL_KEY,
-                                        pxMetrics->ulEstablishedConnectionsArrayLength,
-                                        DEFENDER_REPORT_CUSTOM_METRICS_KEY,
-                                        DEFENDER_REPORT_NUMBER_KEY,
-                                        pxMetrics->ulStackHighWaterMark,
-                                        DEFENDER_REPORT_NUMBER_LIST_KEY
-                                        );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_REPORT_FORMAT_PART4,
+                                       DEFENDER_REPORT_TOTAL_KEY,
+                                       pxMetrics->ulEstablishedConnectionsArrayLength,
+                                       DEFENDER_REPORT_CUSTOM_METRICS_KEY,
+                                       DEFENDER_REPORT_NUMBER_KEY,
+                                       pxMetrics->ulStackHighWaterMark,
+                                       DEFENDER_REPORT_NUMBER_LIST_KEY
+                                       );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             LogError( ( "Failed to write part 4." ) );
             eStatus = eReportBuilderBufferTooSmall;
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 
@@ -668,19 +668,19 @@ eReportBuilderStatus eGenerateJsonReport( char * pcBuffer,
     /* Write part5. */
     if( eStatus == eReportBuilderSuccess )
     {
-        ulCharactersWritten = snprintf( pcCurrentWritePos,
-                                        ulRemainingBufferLength,
-                                        reportbuilderJSON_REPORT_FORMAT_PART5 );
+        lCharactersWritten = snprintf( pcCurrentWritePos,
+                                       ulRemainingBufferLength,
+                                       reportbuilderJSON_REPORT_FORMAT_PART5 );
 
-        if( !reportbuilderSNPRINTF_SUCCESS( ulCharactersWritten, ulRemainingBufferLength ) )
+        if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
         {
             LogError( ( "Failed to write part 5." ) );
             eStatus = eReportBuilderBufferTooSmall;
         }
         else
         {
-            ulRemainingBufferLength -= ulCharactersWritten;
-            pcCurrentWritePos += ulCharactersWritten;
+            ulRemainingBufferLength -= lCharactersWritten;
+            pcCurrentWritePos += lCharactersWritten;
         }
     }
 

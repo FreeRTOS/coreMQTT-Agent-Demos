@@ -166,12 +166,12 @@
  * @brief Name of the report id field in the response from the AWS IoT Device
  * Defender service.
  */
-#define defenderexampleRESPONSE_REPORT_ID_FIELD                                  "reportId"
+#define defenderexampleRESPONSE_REPORT_ID_FIELD           "reportId"
 
 /**
  * @brief The length of #defenderexampleRESPONSE_REPORT_ID_FIELD.
  */
-#define defenderexampleRESPONSE_REPORT_ID_FIELD_LENGTH                           ( sizeof( defenderexampleRESPONSE_REPORT_ID_FIELD ) - 1 )
+#define defenderexampleRESPONSE_REPORT_ID_FIELD_LENGTH    ( sizeof( defenderexampleRESPONSE_REPORT_ID_FIELD ) - 1 )
 
 /**
  * @brief Defines the structure to use as the command callback context in this
@@ -224,7 +224,7 @@ static TaskStatus_t pxTaskList[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ]
 /**
  * @brief Custom metric array for the ids of running tasks on the system.
  */
-static int64_t pllCustomMetricsTaskNumbers[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ];
+static uint32_t plCustomMetricsTaskNumbers[ defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE ];
 
 /**
  * @brief All the metrics sent in the device defender report.
@@ -626,7 +626,7 @@ static bool prvCollectDeviceMetrics( void )
         {
             for( i = 0; i < uxTasksWritten; i++ )
             {
-                pllCustomMetricsTaskNumbers[ i ] = pxTaskList[ i ].xTaskNumber;
+                plCustomMetricsTaskNumbers[ i ] = pxTaskList[ i ].xTaskNumber;
             }
         }
     }
@@ -643,7 +643,7 @@ static bool prvCollectDeviceMetrics( void )
         xDeviceMetrics.pxEstablishedConnectionsArray = &( pxEstablishedConnections[ 0 ] );
         xDeviceMetrics.ulEstablishedConnectionsArrayLength = ulNumEstablishedConnections;
         xDeviceMetrics.ulStackHighWaterMark = pxTaskStatus.usStackHighWaterMark;
-        xDeviceMetrics.pulTaskIdsArray = pllCustomMetricsTaskNumbers;
+        xDeviceMetrics.pulTaskIdsArray = plCustomMetricsTaskNumbers;
         xDeviceMetrics.ulTaskIdsArrayLength = uxTasksWritten;
     }
 
@@ -698,6 +698,8 @@ static bool prvPublishDeviceMetricsReport( uint32_t reportLength )
     xPublishInfo.payloadLength = reportLength;
 
     xCommandParams.blockTimeMs = defenderexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
+    /* We do not need a completion callback here since we expect to get a
+     * response on the appropriate topics for accepted or rejected reports. */
     xCommandParams.cmdCompleteCallback = NULL;
 
     xCommandAdded = MQTTAgent_Publish( &xGlobalMqttAgentContext,
