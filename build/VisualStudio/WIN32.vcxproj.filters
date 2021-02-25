@@ -55,16 +55,16 @@
     <Filter Include="Lib\ThirdParty">
       <UniqueIdentifier>{e9175352-aed6-4693-b338-871170ced3eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT">
+    <Filter Include="Lib\FreeRTOS\MQTT-Agent">
       <UniqueIdentifier>{66bf4baa-05c1-4a72-8b8f-bbec377d4dbf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT">
+    <Filter Include="Lib\FreeRTOS\MQTT-Agent\coreMQTT">
       <UniqueIdentifier>{ce7e35db-3f23-43b7-9c0b-751054fc339d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include">
+    <Filter Include="Lib\FreeRTOS\MQTT-Agent\coreMQTT\include">
       <UniqueIdentifier>{fb6ca934-b0e4-4fea-9ae2-c06d2836c0f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\interface">
+    <Filter Include="Lib\FreeRTOS\MQTT-Agent\coreMQTT\interface">
       <UniqueIdentifier>{677c8d90-d358-45c8-ac35-f0a2504169d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\FreeRTOS\Network-Transport">
@@ -213,14 +213,14 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\NetworkInterface\WinPCap\NetworkInterface.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\WinPCap</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\core_mqtt.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt_serializer.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\core_mqtt_serializer.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\core_mqtt_state.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\core_mqtt_state.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP</Filter>
@@ -234,8 +234,8 @@
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c">
       <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\connection_manager.c">
       <Filter>Source</Filter>
@@ -312,11 +312,11 @@
     <ClCompile Include="..\..\source\subscription-manager\subscription_manager.c">
       <Filter>Source\subscription-manager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\agent_command_pool.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.c">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\agent_message.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\defender_demo.c">
       <Filter>Source</Filter>
@@ -392,20 +392,20 @@
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_stack.h">
       <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_config_defaults.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt_config_defaults.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_serializer.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt_serializer.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\include\core_mqtt_state.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\include</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt_state.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\coreMQTT\source\interface\transport_interface.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT\coreMQTT\interface</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\interface\transport_interface.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent\coreMQTT\interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.h">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP</Filter>
@@ -431,8 +431,8 @@
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\mqtt_agent.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include\backoff_algorithm.h">
       <Filter>Lib\FreeRTOS\utilities\Backoff-Algorithm</Filter>
@@ -503,11 +503,11 @@
     <ClInclude Include="..\..\source\subscription-manager\subscription_manager.h">
       <Filter>Source\subscription-manager</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_command_pool.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\agent_command_pool.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-mqtt\agent_message.h">
-      <Filter>Lib\FreeRTOS\FreeRTOS-Plus-MQTT</Filter>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\agent_message.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\defender-tools\metrics_collector.h">
       <Filter>Source\defender-tools</Filter>

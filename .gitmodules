@@ -4,8 +4,8 @@
 [submodule "lib/FreeRTOS/freertos-plus-tcp"]
 	path = lib/FreeRTOS/freertos-plus-tcp
 	url =  https://github.com/FreeRTOS/FreeRTOS-Plus-TCP.git
-[submodule "lib/FreeRTOS/freertos-plus-mqtt/coreMQTT"]
-	path = lib/FreeRTOS/freertos-plus-mqtt/coreMQTT
+[submodule "lib/FreeRTOS/mqtt-agent/coreMQTT"]
+	path = lib/FreeRTOS/mqtt-agent/coreMQTT
 	url =  https://github.com/FreeRTOS/coreMQTT.git
 [submodule "lib/ThirdParty/mbedtls"]
 	path = lib/ThirdParty/mbedtls
