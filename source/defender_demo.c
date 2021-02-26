@@ -90,7 +90,7 @@
  * A maximum of these many open TCP ports will be sent in the device defender
  * report.
  */
-#define defenderexampleOPEN_TCP_PORTS_ARRAY_SIZE                                 10
+#define defenderexampleOPEN_TCP_PORTS_ARRAY_SIZE              10
 
 /**
  * @brief Size of the open UDP ports array.
@@ -98,7 +98,7 @@
  * A maximum of these many open UDP ports will be sent in the device defender
  * report.
  */
-#define defenderexampleOPEN_UDP_PORTS_ARRAY_SIZE                                 10
+#define defenderexampleOPEN_UDP_PORTS_ARRAY_SIZE              10
 
 /**
  * @brief Size of the established connections array.
@@ -106,72 +106,61 @@
  * A maximum of these many established connections will be sent in the device
  * defender report.
  */
-#define defenderexampleESTABLISHED_CONNECTIONS_ARRAY_SIZE                        10
+#define defenderexampleESTABLISHED_CONNECTIONS_ARRAY_SIZE     10
 
 /**
  * @brief Size of the task numbers array.
  *
  * This must be at least the number of tasks in use.
  */
-#define defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE                           10
+#define defenderexampleCUSTOM_METRICS_TASKS_ARRAY_SIZE        10
 
 /**
  * @brief Size of the buffer which contains the generated device defender report.
  *
  * If the generated report is larger than this, it is rejected.
  */
-#define defenderexampleDEVICE_METRICS_REPORT_BUFFER_SIZE                         1000
+#define defenderexampleDEVICE_METRICS_REPORT_BUFFER_SIZE      1000
 
 /**
  * @brief Major version number of the device defender report.
  */
-#define defenderexampleDEVICE_METRICS_REPORT_MAJOR_VERSION                       1
-
-/**
- * @brief Major version number of the device defender report.
- */
-#define defenderexampleDEVICE_METRICS_REPORT_MINOR_VERSION                       0
+#define defenderexampleDEVICE_METRICS_REPORT_MAJOR_VERSION    1
 
 /**
  * @brief Minor version number of the device defender report.
  */
-#define defenderexampleDEVICE_METRICS_REPORT_BUFFER_SIZE_REPORT_MINOR_VERSION    0
+#define defenderexampleDEVICE_METRICS_REPORT_MINOR_VERSION    0
 
 /**
- * @brief Number of seconds to wait for the response from AWS IoT Device
- * Defender service.
+ * @brief Time in ms to wait between consequtive defender reports
  */
-#define defenderexampleRESPONSE_WAIT_SECONDS                                     ( 2 )
-
-/**
- * @brief Time in ticks to wait between consequtive defender reports
- */
-#define defenderexampleTICKS_BETWEEN_REPORTS                                     ( pdMS_TO_TICKS( 15000U ) )
+#define defenderexampleMS_BETWEEN_REPORTS                     ( 15000U )
 
 /**
  * @brief This demo uses task notifications to signal tasks from MQTT callback
  * functions.  defenderexampleMS_TO_WAIT_FOR_NOTIFICATION defines the time, in ticks,
  * to wait for such a callback.
  */
-#define defenderexampleMS_TO_WAIT_FOR_NOTIFICATION                               ( 5000 )
+#define defenderexampleMS_TO_WAIT_FOR_NOTIFICATION            ( 5000 )
 
 /**
  * @brief The maximum amount of time in milliseconds to wait for the commands
  * to be posted to the MQTT agent should the MQTT agent's command queue be full.
  * Tasks wait in the Blocked state, so don't use any CPU time.
  */
-#define defenderexampleMAX_COMMAND_SEND_BLOCK_TIME_MS                            ( 200 )
+#define defenderexampleMAX_COMMAND_SEND_BLOCK_TIME_MS         ( 200 )
 
 /**
  * @brief Name of the report id field in the response from the AWS IoT Device
  * Defender service.
  */
-#define defenderexampleRESPONSE_REPORT_ID_FIELD           "reportId"
+#define defenderexampleRESPONSE_REPORT_ID_FIELD               "reportId"
 
 /**
  * @brief The length of #defenderexampleRESPONSE_REPORT_ID_FIELD.
  */
-#define defenderexampleRESPONSE_REPORT_ID_FIELD_LENGTH    ( sizeof( defenderexampleRESPONSE_REPORT_ID_FIELD ) - 1 )
+#define defenderexampleRESPONSE_REPORT_ID_FIELD_LENGTH        ( sizeof( defenderexampleRESPONSE_REPORT_ID_FIELD ) - 1 )
 
 /**
  * @brief Defines the structure to use as the command callback context in this
@@ -418,6 +407,8 @@ static bool prvSubscribeToDefenderTopics( void )
 
     do
     {
+        /* If this fails, the agent's queue is full, so we retry until the agent
+         * has more space in the queue. */
         xStatus = MQTTAgent_Subscribe( &xGlobalMqttAgentContext,
                                        &( xSubscribeArgs ),
                                        &xCommandParams );
@@ -425,7 +416,7 @@ static bool prvSubscribeToDefenderTopics( void )
 
     /* Wait for acks from subscribe messages - this is optional.  If the
      * returned value is zero then the wait timed out. */
-    ulNotificationValue = ulTaskNotifyTake( pdFALSE, defenderexampleMS_TO_WAIT_FOR_NOTIFICATION );
+    ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( defenderexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
     configASSERT( ulNotificationValue != 0UL );
 
     /* The callback sets the xReturnStatus member of the context. */
@@ -547,8 +538,8 @@ static bool prvCollectDeviceMetrics( void )
     bool xStatus = false;
     eMetricsCollectorStatus eMetricsCollectorStatus;
     uint32_t ulNumOpenTcpPorts = 0UL, ulNumOpenUdpPorts = 0UL, ulNumEstablishedConnections = 0UL, i;
-    UBaseType_t uxTasksWritten;
-    TaskStatus_t pxTaskStatus;
+    UBaseType_t uxTasksWritten = { 0 };
+    TaskStatus_t pxTaskStatus = { 0 };
 
     /* Collect bytes and packets sent and received. */
     eMetricsCollectorStatus = eGetNetworkStats( &( xNetworkStats ) );
@@ -698,6 +689,7 @@ static bool prvPublishDeviceMetricsReport( uint32_t reportLength )
     xPublishInfo.payloadLength = reportLength;
 
     xCommandParams.blockTimeMs = defenderexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
+
     /* We do not need a completion callback here since we expect to get a
      * response on the appropriate topics for accepted or rejected reports. */
     xCommandParams.cmdCompleteCallback = NULL;
@@ -903,7 +895,7 @@ void prvDefenderDemoTask( void * pvParameters )
             }
 
             /* Wait for the response to our report. */
-            ulNotificationValue = ulTaskNotifyTake( pdFALSE, defenderexampleMS_TO_WAIT_FOR_NOTIFICATION );
+            ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( defenderexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
 
             if( xReportStatus == ReportStatusNotReceived )
             {
@@ -912,7 +904,9 @@ void prvDefenderDemoTask( void * pvParameters )
             }
 
             LogDebug( ( "Sleeping until next report." ) );
-            vTaskDelay( defenderexampleTICKS_BETWEEN_REPORTS );
+            vTaskDelay( pdMS_TO_TICKS( defenderexampleMS_BETWEEN_REPORTS ) );
         }
     }
 }
+
+/*-----------------------------------------------------------*/
