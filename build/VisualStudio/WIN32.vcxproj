@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\lib\AWS\defender\source\defender.c" />
     <ClCompile Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\ota.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\ota_base64.c" />
@@ -45,6 +46,7 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_UDP_IP.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\BufferManagement\BufferAllocation_2.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\NetworkInterface\WinPCap\NetworkInterface.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\tcp_netstat.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.c" />
@@ -52,6 +54,9 @@
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\backoff_algorithm.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_error.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c" />
+    <ClCompile Include="..\..\source\defender-tools\metrics_collector.c" />
+    <ClCompile Include="..\..\source\defender-tools\report_builder.c" />
+    <ClCompile Include="..\..\source\defender_demo.c" />
     <ClCompile Include="..\..\source\large_message_sub_pub_demo.c" />
     <ClCompile Include="..\..\source\logging_output_windows.c" />
     <ClCompile Include="..\..\source\main.c" />
@@ -69,6 +74,8 @@
     <ClCompile Include="..\..\source\subscription-manager\subscription_manager.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\lib\AWS\defender\source\include\defender.h" />
+    <ClInclude Include="..\..\lib\AWS\defender\source\include\defender_config_defaults.h" />
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h" />
     <ClInclude Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreJSON\source\include\core_json.h" />
@@ -104,6 +111,7 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\NetworkInterface.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_end.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_start.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include\tcp_netstat.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.h" />
@@ -121,11 +129,14 @@
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\utf8_p.h" />
     <ClInclude Include="..\..\source\configuration-files\aws_ota_codesigner_certificate.h" />
     <ClInclude Include="..\..\source\configuration-files\core_mqtt_config.h" />
+    <ClInclude Include="..\..\source\configuration-files\defender_config.h" />
     <ClInclude Include="..\..\source\configuration-files\demo_config.h" />
     <ClInclude Include="..\..\source\configuration-files\FreeRTOSConfig.h" />
     <ClInclude Include="..\..\source\configuration-files\FreeRTOSIPConfig.h" />
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h" />
     <ClInclude Include="..\..\source\configuration-files\ota_config.h" />
+    <ClInclude Include="..\..\source\defender-tools\metrics_collector.h" />
+    <ClInclude Include="..\..\source\defender-tools\report_builder.h" />
     <ClInclude Include="..\..\source\subscription-manager\subscription_manager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -184,7 +195,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\mqtt-agent;..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\interface;..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\mqtt-agent;..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\interface;..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MBEDTLS_CONFIG_FILE="mbedtls_config.h";WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0500;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

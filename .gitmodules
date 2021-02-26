@@ -19,3 +19,6 @@
 [submodule "lib/FreeRTOS/utilities/backoffAlgorithm"]
 	path = lib/FreeRTOS/utilities/backoffAlgorithm
 	url = https://github.com/FreeRTOS/backoffAlgorithm
+[submodule "lib/AWS/defender"]
+	path = lib/AWS/defender
+	url = https://github.com/aws/Device-Defender-for-AWS-IoT-embedded-sdk.git
