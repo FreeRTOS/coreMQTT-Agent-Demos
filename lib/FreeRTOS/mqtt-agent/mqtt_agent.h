@@ -259,7 +259,9 @@ MQTTStatus_t MQTTAgent_Init( MQTTAgentContext_t * pMqttAgentContext,
  * @return appropriate error code, or `MQTTSuccess` from a successful disconnect
  * or termination.
  */
+/* @[declare_mqtt_agent_commandloop] */
 MQTTStatus_t MQTTAgent_CommandLoop( MQTTAgentContext_t * pMqttAgentContext );
+/* @[declare_mqtt_agent_commandloop] */
 
 /**
  * @brief Resume a session by resending publishes if a session is present in
@@ -271,8 +273,10 @@ MQTTStatus_t MQTTAgent_CommandLoop( MQTTAgentContext_t * pMqttAgentContext );
  * @return `MQTTSuccess` if it succeeds in resending publishes, else an
  * appropriate error code from `MQTT_Publish()`
  */
+/* @[declare_mqtt_agent_resumesession] */
 MQTTStatus_t MQTTAgent_ResumeSession( MQTTAgentContext_t * pMqttAgentContext,
                                       bool sessionPresent );
+/* @[declare_mqtt_agent_resumesession] */
 
 /**
  * @brief Add a command to call MQTT_Subscribe() for an MQTT connection.
@@ -293,9 +297,11 @@ MQTTStatus_t MQTTAgent_ResumeSession( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_subscribe] */
 MQTTStatus_t MQTTAgent_Subscribe( MQTTAgentContext_t * pMqttAgentContext,
                                   MQTTAgentSubscribeArgs_t * pSubscriptionArgs,
                                   CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_subscribe] */
 
 /**
  * @brief Add a command to call MQTT_Unsubscribe() for an MQTT connection.
@@ -316,9 +322,11 @@ MQTTStatus_t MQTTAgent_Subscribe( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_unsubscribe] */
 MQTTStatus_t MQTTAgent_Unsubscribe( MQTTAgentContext_t * pMqttAgentContext,
                                     MQTTAgentSubscribeArgs_t * pSubscriptionArgs,
                                     CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_unsubscribe] */
 
 /**
  * @brief Add a command to call MQTT_Publish() for an MQTT connection.
@@ -339,9 +347,11 @@ MQTTStatus_t MQTTAgent_Unsubscribe( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_publish] */
 MQTTStatus_t MQTTAgent_Publish( MQTTAgentContext_t * pMqttAgentContext,
                                 MQTTPublishInfo_t * pPublishInfo,
                                 CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_publish] */
 
 /**
  * @brief Send a message to the MQTT agent purely to trigger an iteration of its loop,
@@ -378,8 +388,10 @@ MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTAgentContext_t * pMqttAgentContex
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_ping] */
 MQTTStatus_t MQTTAgent_Ping( MQTTAgentContext_t * pMqttAgentContext,
                              CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_ping] */
 
 /**
  * @brief Add a command to call MQTT_Connect() for an MQTT connection. If a session
@@ -401,9 +413,11 @@ MQTTStatus_t MQTTAgent_Ping( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_connect] */
 MQTTStatus_t MQTTAgent_Connect( MQTTAgentContext_t * pMqttAgentContext,
                                 MQTTAgentConnectArgs_t * pConnectArgs,
                                 CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_connect] */
 
 /**
  * @brief Add a command to disconnect an MQTT connection.
@@ -423,8 +437,10 @@ MQTTStatus_t MQTTAgent_Connect( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_disconnect] */
 MQTTStatus_t MQTTAgent_Disconnect( MQTTAgentContext_t * pMqttAgentContext,
                                    CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_disconnect] */
 
 /**
  * @brief Add a termination command to the command queue.
@@ -444,7 +460,9 @@ MQTTStatus_t MQTTAgent_Disconnect( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_terminate] */
 MQTTStatus_t MQTTAgent_Terminate( MQTTAgentContext_t * pMqttAgentContext,
                                   CommandInfo_t * pCommandInfo );
+/* @[declare_mqtt_agent_terminate] */
 
 #endif /* MQTT_AGENT_H */
