@@ -202,7 +202,7 @@ typedef struct CommandInfo
 {
     CommandCallback_t cmdCompleteCallback;          /**< @brief Callback to invoke upon completion. */
     CommandContext_t * pCmdCompleteCallbackContext; /**< @brief Context for completion callback. */
-    uint32_t blockTimeMs;                           /**< @brief Maximum to block for enqueing the command. */
+    uint32_t blockTimeMs;                           /**< @brief Maximum block time for enqueueing the command. */
 } CommandInfo_t;
 
 /**
@@ -367,8 +367,10 @@ MQTTStatus_t MQTTAgent_Publish( MQTTAgentContext_t * pMqttAgentContext,
  * @return `MQTTSuccess` if the command was posted to the MQTT agent's event queue.
  * Otherwise an enumerated error code.
  */
+/* @[declare_mqtt_agent_processloop] */
 MQTTStatus_t MQTTAgent_TriggerProcessLoop( MQTTAgentContext_t * pMqttAgentContext,
                                            uint32_t blockTimeMs );
+/* @[declare_mqtt_agent_processloop] */
 
 /**
  * @brief Add a command to call MQTT_Ping() for an MQTT connection.
