@@ -472,7 +472,7 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
     MQTTAgentReturnInfo_t returnInfo = { 0 };
     MQTTAgentCommandFunc_t commandFunction = NULL;
     void * pCommandArgs = NULL;
-    const uint32_t processLoopTimeoutMs = 0;
+    const uint32_t processLoopTimeoutMs = 0U;
     uint8_t commandOutFlags = 0U;
     MQTTAgentCommandFuncReturns_t commandOutParams = { 0 };
 
