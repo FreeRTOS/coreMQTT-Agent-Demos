@@ -42,29 +42,6 @@
 
 /*-----------------------------------------------------------*/
 
-static MQTTStatus_t runProcessLoops( MQTTAgentContext_t * pMqttAgentContext )
-{
-    MQTTStatus_t ret = MQTTSuccess;
-    const uint32_t processLoopTimeoutMs = 0;
-
-    assert( pMqttAgentContext != NULL );
-
-    do
-    {
-        pMqttAgentContext->packetReceivedInLoop = false;
-
-        if( ( ret == MQTTSuccess ) &&
-            ( pMqttAgentContext->mqttContext.connectStatus == MQTTConnected ) )
-        {
-            ret = MQTT_ProcessLoop( &( pMqttAgentContext->mqttContext ), processLoopTimeoutMs );
-        }
-    } while( pMqttAgentContext->packetReceivedInLoop );
-
-    return ret;
-}
-
-/*-----------------------------------------------------------*/
-
 MQTTStatus_t MQTTAgentCommand_ProcessLoop( MQTTAgentContext_t * pMqttAgentContext,
                                            void * pUnusedArg,
                                            MQTTAgentCommandFuncReturns_t * pReturnFlags )
@@ -291,3 +268,5 @@ MQTTStatus_t MQTTAgentCommand_Terminate( MQTTAgentContext_t * pMqttAgentContext,
 
     return MQTTSuccess;
 }
+
+/*-----------------------------------------------------------*/

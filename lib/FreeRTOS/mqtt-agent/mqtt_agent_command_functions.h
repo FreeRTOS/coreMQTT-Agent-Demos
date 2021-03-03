@@ -34,6 +34,10 @@
 /* MQTT Agent include. */
 #include "mqtt_agent.h"
 
+/**
+ * @brief An array of function pointers mapping commands to a function to
+ * execute.
+ */
 #ifndef MQTT_AGENT_FUNCTION_TABLE
     #define MQTT_AGENT_FUNCTION_TABLE                   \
     {                                                   \
@@ -49,21 +53,29 @@
     }
 #endif /* ifndef MQTT_AGENT_FUNCTION_TABLE */
 
-#define MQTT_AGENT_FLAG_COMMAND_COMPLETE    ( ( uint8_t ) 1U << 0 )
-#define MQTT_AGENT_ADD_ACKNOWLEDGMENT       ( ( uint8_t ) 1U << 1 )
-#define MQTT_AGENT_FLAG_END_LOOP            ( ( uint8_t ) 1U << 2 )
-
-
 /*-----------------------------------------------------------*/
 
+/**
+ * @brief A structure of values and flags expected to be returned
+ * by command functions.
+ */
 typedef struct MQTTAgentCommandFuncReturns
 {
-    uint16_t packetId;
-    bool endLoop;
-    bool addAcknowledgment;
-    bool runProcessLoop;
+    uint16_t packetId;      /**< @brief Packet ID of packet sent by command. */
+    bool endLoop;           /**< @brief Flag to indicate command loop should terminate. */
+    bool addAcknowledgment; /**< @brief Flag to indicate an acknowledgment should be tracked. */
+    bool runProcessLoop;    /**< @brief Flag to indicate MQTT_ProcessLoop() should be called after this command. */
 } MQTTAgentCommandFuncReturns_t;
 
+/**
+ * @brief Function prototype for a command.
+ *
+ * @param[in] pMqttAgentContext MQTT Agent context.
+ * @param[in] pArgs Arguments for the command.
+ * @param[out] pFlags Return flags set by the function.
+ *
+ * @return Return code of MQTT call.
+ */
 typedef MQTTStatus_t (* MQTTAgentCommandFunc_t ) ( MQTTAgentContext_t * pMqttAgentContext,
                                                    void * pArgs,
                                                    MQTTAgentCommandFuncReturns_t * pFlags );
