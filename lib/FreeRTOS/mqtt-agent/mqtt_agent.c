@@ -472,16 +472,16 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
     MQTTAgentReturnInfo_t returnInfo = { 0 };
     MQTTAgentCommandFunc_t commandFunction = NULL;
     void * pCommandArgs = NULL;
+    const uint32_t processLoopTimeoutMs = 0;
     uint8_t commandOutFlags = 0U;
     MQTTAgentCommandFuncReturns_t commandOutParams = { 0 };
 
     assert( pMqttAgentContext != NULL );
     assert( pEndLoop != NULL );
 
-    pMQTTContext = &( pMqttAgentContext->mqttContext );
-
     if( pCommand != NULL )
     {
+        assert( pCommand->commandType < NUM_COMMANDS );
         commandFunction = pCommandFunctionTable[ pCommand->commandType ];
         pCommandArgs = pCommand->pArgs;
     }
@@ -520,8 +520,24 @@ static MQTTStatus_t processCommand( MQTTAgentContext_t * pMqttAgentContext,
         Agent_ReleaseCommand( pCommand );
     }
 
+    /* Run the process loop if there were no errors and the MQTT connection
+     * still exists. */
+    if( ( operationStatus == MQTTSuccess ) && commandOutParams.runProcessLoop )
+    {
+        do
+        {
+            pMqttAgentContext->packetReceivedInLoop = false;
+
+            if( ( operationStatus == MQTTSuccess ) &&
+                ( pMqttAgentContext->mqttContext.connectStatus == MQTTConnected ) )
+            {
+                operationStatus = MQTT_ProcessLoop( &( pMqttAgentContext->mqttContext ), processLoopTimeoutMs );
+            }
+        } while( pMqttAgentContext->packetReceivedInLoop );
+    }
+
     /* Set the flag to break from the command loop. */
-    pEndLoop = ( commandOutParams.endLoop || ( operationStatus != MQTTSuccess ) );
+    *pEndLoop = ( commandOutParams.endLoop || ( operationStatus != MQTTSuccess ) );
 
     return operationStatus;
 }

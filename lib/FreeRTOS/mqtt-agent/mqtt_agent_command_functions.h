@@ -56,17 +56,17 @@
 
 /*-----------------------------------------------------------*/
 
-typedef MQTTStatus_t (* MQTTAgentCommandFunc_t ) ( MQTTAgentContext_t * pMqttAgentContext,
-                                                   void * pArgs,
-                                                   uint8_t * pFlags );
-
 typedef struct MQTTAgentCommandFuncReturns
 {
     uint16_t packetId;
     bool endLoop;
     bool addAcknowledgment;
-    bool completeCommand;
+    bool runProcessLoop;
 } MQTTAgentCommandFuncReturns_t;
+
+typedef MQTTStatus_t (* MQTTAgentCommandFunc_t ) ( MQTTAgentContext_t * pMqttAgentContext,
+                                                   void * pArgs,
+                                                   MQTTAgentCommandFuncReturns_t * pFlags );
 
 /*-----------------------------------------------------------*/
 
@@ -106,7 +106,7 @@ MQTTStatus_t MQTTAgentCommand_Publish( MQTTAgentContext_t * pMqttAgentContext,
  * @return Status code of MQTT_Subscribe().
  */
 MQTTStatus_t MQTTAgentCommand_Subscribe( MQTTAgentContext_t * pMqttAgentContext,
-                                         void * pSubscribeArgs,
+                                         void * pVoidSubscribeArgs,
                                          MQTTAgentCommandFuncReturns_t * pReturnFlags );
 
 /**
@@ -119,7 +119,7 @@ MQTTStatus_t MQTTAgentCommand_Subscribe( MQTTAgentContext_t * pMqttAgentContext,
  * @return Status code of MQTT_Unsubscribe().
  */
 MQTTStatus_t MQTTAgentCommand_Unsubscribe( MQTTAgentContext_t * pMqttAgentContext,
-                                           void * pSubscribeArgs,
+                                           void * pVoidSubscribeArgs,
                                            MQTTAgentCommandFuncReturns_t * pReturnFlags );
 
 /**
