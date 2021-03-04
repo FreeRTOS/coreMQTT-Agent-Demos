@@ -308,4 +308,7 @@ extern UBaseType_t uxRand();
 
 #define portINLINE                          __inline
 
+/* Include the tcp_netstat utility. */
+#include "tcp_netstat.h"
+
 #endif /* FREERTOS_IP_CONFIG_H */
