@@ -22,3 +22,6 @@
 [submodule "lib/AWS/defender"]
 	path = lib/AWS/defender
 	url = https://github.com/aws/Device-Defender-for-AWS-IoT-embedded-sdk.git
+[submodule "lib/FreeRTOS/coreMQTT-Agent"]
+	path = lib/FreeRTOS/coreMQTT-Agent
+	url = https://github.com/FreeRTOS/coreMQTT-Agent.git
