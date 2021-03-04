@@ -318,6 +318,9 @@
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\agent_message.c">
       <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent_command_functions.c">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\source\defender_demo.c">
       <Filter>Source</Filter>
     </ClCompile>
@@ -507,6 +510,9 @@
       <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\agent_message.h">
+      <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent_command_functions.h">
       <Filter>Lib\FreeRTOS\MQTT-Agent</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\defender-tools\metrics_collector.h">
