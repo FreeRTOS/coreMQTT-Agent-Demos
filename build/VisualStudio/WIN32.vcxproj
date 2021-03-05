@@ -21,6 +21,13 @@
     <ClCompile Include="..\..\lib\AWS\ota\source\ota_mqtt.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreJSON\source\core_json.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt_serializer.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt_state.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\mqtt_agent.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\mqtt_agent_command_functions.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\portable\freertos\agent_command_pool.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\portable\freertos\agent_message.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\list.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MemMang\heap_4.c" />
@@ -29,13 +36,6 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\stream_buffer.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\tasks.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\timers.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\agent_command_pool.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\core_mqtt.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\core_mqtt_serializer.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\core_mqtt_state.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\agent_message.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent_command_functions.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_ARP.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_DHCP.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_DNS.c" />
@@ -80,6 +80,15 @@
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h" />
     <ClInclude Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreJSON\source\include\core_json.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt_config_defaults.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt_serializer.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt_state.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface\transport_interface.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\agent_command_pool.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\agent_message.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\mqtt_agent.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\mqtt_agent_command_functions.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\FreeRTOS.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\message_buffer.h" />
@@ -90,15 +99,6 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\task.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\timers.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\agent_command_pool.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt_config_defaults.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt_serializer.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include\core_mqtt_state.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\interface\transport_interface.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\agent_message.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent\mqtt_agent_command_functions.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOSIPConfigDefaults.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_ARP.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\FreeRTOS_DHCP.h" />
@@ -197,7 +197,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\mqtt-agent;..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\interface;..\..\lib\FreeRTOS\mqtt-agent\coreMQTT\source\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MBEDTLS_CONFIG_FILE="mbedtls_config.h";WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0500;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
