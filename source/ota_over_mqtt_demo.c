@@ -51,14 +51,10 @@
 #include "task.h"
 #include "semphr.h"
 
-#include "ota_config.h"
 #include "demo_config.h"
 
 /* MQTT library includes. */
 #include "mqtt_agent.h"
-
-/* Subscription manager header include. */
-#include "subscription_manager.h"
 
 /* OTA Library include. */
 #include "ota.h"
@@ -78,6 +74,10 @@
 
 #ifndef democonfigCLIENT_IDENTIFIER
     #error "Please define the democonfigCLIENT_IDENTIFIER with the thing name for which OTA is performed"
+#endif
+
+#if !defined( MQTT_AGENT_NETWORK_BUFFER_SIZE ) || ( MQTT_AGENT_NETWORK_BUFFER_SIZE < OTA_DATA_BLOCK_SIZE )
+    #error "Please define MQTT_AGENT_NETWORK_BUFFER_SIZE to adequate size as required by OTA data block"
 #endif
 
 /**
