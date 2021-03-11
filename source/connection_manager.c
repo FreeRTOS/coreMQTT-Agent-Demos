@@ -346,6 +346,9 @@ extern bool vOTAProcessMessage( void * pvIncomingPublishCallbackContext,
 
 extern void vStartDefenderDemo( configSTACK_DEPTH_TYPE uxStackSize,
                                 UBaseType_t uxPriority );
+
+extern void vStartShadowDemo(configSTACK_DEPTH_TYPE uxStackSize,
+   UBaseType_t uxPriority);
 /*-----------------------------------------------------------*/
 
 /**
@@ -939,6 +942,13 @@ static void prvConnectAndCreateDemoTasks( void * pvParameters )
                                 tskIDLE_PRIORITY );
         }
     #endif
+
+#if ( democonfigCREATE_SHADOW_DEMO == 1 )
+        {
+           vStartShadowDemo(democonfigSHADOW_TASK_STACK_SIZE,
+              tskIDLE_PRIORITY);
+        }
+#endif
 
     /* This task has nothing left to do, so rather than create the MQTT
      * agent as a separate thread, it simply calls the function that implements

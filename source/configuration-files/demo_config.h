@@ -84,7 +84,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define democonfigCREATE_DEFENDER_DEMO                     1
 #define democonfigDEFENDER_TASK_STACK_SIZE                 ( configMINIMAL_STACK_SIZE )
 
-
+#define democonfigCREATE_SHADOW_DEMO                       1
+#define democonfigSHADOW_TASK_STACK_SIZE                   ( configMINIMAL_STACK_SIZE )
 
 /**
  * @brief The MQTT client identifier used in this example.  Each client identifier
