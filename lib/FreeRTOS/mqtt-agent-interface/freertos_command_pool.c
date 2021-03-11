@@ -107,15 +107,14 @@ Command_t * Agent_GetCommand( uint32_t blockTimeMs )
     bool structRetrieved = false;
 
     /* Check queue has been created. */
-    if( initStatus == QUEUE_INITIALIZED )
-    {
-        /* Retrieve a struct from the queue. */
-        structRetrieved = Agent_MessageReceive( &commandStructQueue, &( structToUse ), blockTimeMs );
+    configASSERT( initStatus == QUEUE_INITIALIZED );
 
-        if( !structRetrieved )
-        {
-            LogError( ( "No command structure available." ) );
-        }
+    /* Retrieve a struct from the queue. */
+    structRetrieved = Agent_MessageReceive( &commandStructQueue, &( structToUse ), blockTimeMs );
+
+    if( !structRetrieved )
+    {
+        LogError( ( "No command structure available." ) );
     }
 
     return structToUse;
@@ -128,11 +127,16 @@ bool Agent_ReleaseCommand( Command_t * pCommandToRelease )
     size_t i;
     bool structReturned = false;
 
+    configASSERT( initStatus == QUEUE_INITIALIZED );
+
     /* See if the structure being returned is actually from the pool. */
     if( ( pCommandToRelease >= commandStructurePool ) &&
         ( pCommandToRelease < ( commandStructurePool + MQTT_COMMAND_CONTEXTS_POOL_SIZE ) ) )
     {
         structReturned = Agent_MessageSend( &commandStructQueue, &pCommandToRelease, 0U );
+
+        /* The send should not fail as the queue was created to hold every command
+         * in the pool. */
         configASSERT( structReturned );
         LogDebug( ( "Returned Command Context %d to pool",
                     ( int ) ( pCommandToRelease - commandStructurePool ) ) );
