@@ -44,8 +44,7 @@
 /*-----------------------------------------------------------*/
 
 #define QUEUE_NOT_INITIALIZED    ( 0U )
-#define QUEUE_INIT_PENDING       ( 1U )
-#define QUEUE_INITIALIZED        ( 2U )
+#define QUEUE_INITIALIZED        ( 1U )
 
 /**
  * @brief The pool of command structures used to hold information on commands (such
