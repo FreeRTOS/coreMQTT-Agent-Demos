@@ -194,13 +194,6 @@
 
 /*-----------------------------------------------------------*/
 
-struct AgentMessageContext
-{
-    QueueHandle_t queue;
-};
-
-/*-----------------------------------------------------------*/
-
 /**
  * @brief Initializes an MQTT context, including transport interface and
  * network buffer.

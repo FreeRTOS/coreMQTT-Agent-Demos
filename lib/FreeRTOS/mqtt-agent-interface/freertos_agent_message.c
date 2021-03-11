@@ -39,6 +39,7 @@
 
 /* Header include. */
 #include "freertos_agent_message.h"
+#include "agent_message.h"
 
 /*-----------------------------------------------------------*/
 

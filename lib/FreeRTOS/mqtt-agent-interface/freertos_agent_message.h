@@ -28,8 +28,8 @@
  * @file agent_message.h
  * @brief Functions to interact with queues.
  */
-#ifndef AGENT_MESSAGE_H
-#define AGENT_MESSAGE_H
+#ifndef FREERTOS_AGENT_MESSAGE_H
+#define FREERTOS_AGENT_MESSAGE_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -81,4 +81,4 @@ bool Agent_MessageReceive( const AgentMessageContext_t * pMsgCtx,
                            void * pBuffer,
                            uint32_t blockTimeMs );
 
-#endif /* AGENT_MESSAGE_H */
+#endif /* FREERTOS_AGENT_MESSAGE_H */
