@@ -35,6 +35,11 @@
 #include "mqtt_agent.h"
 
 /**
+ * @brief Initialize the common task pool. Not thread safe.
+ */
+void Agent_InitializePool( void );
+
+/**
  * @brief Obtain a Command_t structure from the pool of structures managed by the agent.
  *
  * @note Command_t structures hold everything the MQTT agent needs to process a

@@ -74,6 +74,10 @@
 /* MQTT agent include. */
 #include "mqtt_agent.h"
 
+/* MQTT Agent ports. */
+#include "freertos_agent_message.h"
+#include "freertos_command_pool.h"
+
 /* Exponential backoff retry include. */
 #include "backoff_algorithm.h"
 
@@ -406,12 +410,24 @@ static MQTTStatus_t prvMQTTInit( void )
     MQTTFixedBuffer_t xFixedBuffer = { .pBuffer = xNetworkBuffer, .size = MQTT_AGENT_NETWORK_BUFFER_SIZE };
     static uint8_t staticQueueStorageArea[ MQTT_AGENT_COMMAND_QUEUE_LENGTH * sizeof( Command_t * ) ];
     static StaticQueue_t staticQueueStructure;
+    AgentMessageInterface_t messageInterface = {
+        .pMsgCtx = NULL,
+        .send = Agent_MessageSend,
+        .recv = Agent_MessageReceive,
+        .getCommand = Agent_GetCommand,
+        .releaseCommand = Agent_ReleaseCommand
+    };
 
     LogDebug( ( "Creating command queue." ) );
     xCommandQueue.queue = xQueueCreateStatic( MQTT_AGENT_COMMAND_QUEUE_LENGTH,
                                               sizeof( Command_t * ),
                                               staticQueueStorageArea,
                                               &staticQueueStructure );
+    configASSERT( xCommandQueue.queue );
+    messageInterface.pMsgCtx = &xCommandQueue;
+
+    /* Initialize the task pool. */
+    Agent_InitializePool();
 
     /* Fill in Transport Interface send and receive function pointers. */
     xTransport.pNetworkContext = &xNetworkContext;
@@ -425,7 +441,7 @@ static MQTTStatus_t prvMQTTInit( void )
 
     /* Initialize MQTT library. */
     xReturn = MQTTAgent_Init( &xGlobalMqttAgentContext,
-                              &xCommandQueue,
+                              &messageInterface,
                               &xFixedBuffer,
                               &xTransport,
                               prvGetTimeMs,

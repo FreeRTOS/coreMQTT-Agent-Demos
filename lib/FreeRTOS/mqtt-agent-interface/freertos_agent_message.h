@@ -35,6 +35,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* FreeRTOS includes. */
+#include "FreeRTOS.h"
+#include "queue.h"
+
 /* Include MQTT agent messaging interface. */
 #include "agent_message.h"
 
