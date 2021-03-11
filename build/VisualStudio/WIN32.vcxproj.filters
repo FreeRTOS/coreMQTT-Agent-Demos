@@ -165,14 +165,15 @@
     </Filter>
     <Filter Include="Lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface">
       <UniqueIdentifier>{d852f1f2-242b-4f62-a469-bc8f51e6d5a4}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Lib\AWS\Shadow">
-      <UniqueIdentifier>{a3b4d669-d865-4b94-9b80-3a9ec708d988}</UniqueIdentifier>
+      <UniqueIdentifier>{52c9068b-79db-472b-8235-31e3b99dde36}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lib\AWS\Shadow\include">
-      <UniqueIdentifier>{2cc27d3e-1360-4472-8952-6a36a5bb4e4a}</UniqueIdentifier>
+      <UniqueIdentifier>{ff129ac5-3c99-4ce5-8968-5b9433332808}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\shadow-tasks">
-      <UniqueIdentifier>{236406e0-98b2-48be-9cce-e4b0abd9bb33}</UniqueIdentifier>
+      <UniqueIdentifier>{66473abe-6956-449b-904a-fd3d655083c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -361,16 +362,17 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt_state.c">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\lib\AWS\shadow\source\shadow.c">
       <Filter>Lib\AWS\Shadow</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\shadow_demo.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\shadow-tasks\shadow_update_task.c">
+    <ClCompile Include="..\..\source\shadow-tasks\shadow_device_task.c">
       <Filter>Source\shadow-tasks</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\shadow-tasks\shadow_device_task.c">
+    <ClCompile Include="..\..\source\shadow-tasks\shadow_update_task.c">
       <Filter>Source\shadow-tasks</Filter>
     </ClCompile>
   </ItemGroup>
@@ -569,10 +571,11 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface\transport_interface.h">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface</Filter>
-    <ClInclude Include="..\..\lib\AWS\shadow\source\include\shadow_config_defaults.h">
-      <Filter>Lib\AWS\Shadow\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\AWS\shadow\source\include\shadow.h">
+      <Filter>Lib\AWS\Shadow\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\AWS\shadow\source\include\shadow_config_defaults.h">
       <Filter>Lib\AWS\Shadow\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\shadow_config.h">
