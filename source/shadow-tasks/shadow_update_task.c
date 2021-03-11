@@ -270,7 +270,7 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     xCommandParams.blockTimeMs = shadowexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;
     xCommandParams.cmdCompleteCallback = prvSubscribeCommandCallback;
     xCommandParams.pCmdCompleteCallbackContext = &xApplicationDefinedContext;
-    LogInfo( ( "Sending subscribe request to agent for defender topics." ) );
+    LogInfo( ( "Sending subscribe request to agent for shadow topics." ) );
 
     do
     {
