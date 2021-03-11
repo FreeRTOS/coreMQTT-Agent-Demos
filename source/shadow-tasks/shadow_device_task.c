@@ -744,6 +744,8 @@ void vShadowDeviceTask( void * pvParameters )
             {
                 LogInfo( ( "No change in powerOn state since last report. Current state is %u.", ulCurrentPowerOnState ) );
 
+                /* The following line is only needed for winsim. Due to an inaccurate tick rate, the connection
+                 * times out as the keepalive packets are not sent at the expected interval. */
                 MQTTAgent_Ping( &xGlobalMqttAgentContext,
                                 &xCommandParams );
             }
