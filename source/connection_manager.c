@@ -775,6 +775,7 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
+    static CommandInfo_t xCommandParams = { 0 };
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;
@@ -784,7 +785,8 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
     if( ( uxQueueMessagesWaiting( xCommandQueue.queue ) == 0U ) && ( FreeRTOS_recvcount( pxSocket ) > 0 ) )
     {
         /* Don't block as this is called from the context of the IP task. */
-        MQTTAgent_TriggerProcessLoop( &xGlobalMqttAgentContext, 0 );
+        xCommandParams.blockTimeMs = 0U;
+        MQTTAgent_ProcessLoop( &xGlobalMqttAgentContext, &xCommandParams );
     }
 }
 
