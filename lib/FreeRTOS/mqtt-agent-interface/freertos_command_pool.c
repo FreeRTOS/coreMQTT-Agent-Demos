@@ -54,8 +54,9 @@
 static Command_t commandStructurePool[ MQTT_COMMAND_CONTEXTS_POOL_SIZE ];
 
 /**
- * @brief A queue used to guard the pool of Command_t structures. Structures
- * may be obtained by receiving a pointer from the queue, and returned by
+ * @brief The message context used to guard the pool of Command_t structures.
+ * For FreeRTOS, this is implemented with a queue. Structures may be
+ * obtained by receiving a pointer from the queue, and returned by
  * sending the pointer back into it.
  */
 static AgentMessageContext_t commandStructMessageCtx;
