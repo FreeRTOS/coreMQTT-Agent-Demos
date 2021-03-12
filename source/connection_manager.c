@@ -775,7 +775,7 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
-    static CommandInfo_t xCommandParams = { 0 };
+    CommandInfo_t xCommandParams = { 0 };
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;

@@ -58,7 +58,7 @@ static Command_t commandStructurePool[ MQTT_COMMAND_CONTEXTS_POOL_SIZE ];
  * may be obtained by receiving a pointer from the queue, and returned by
  * sending the pointer back into it.
  */
-static AgentMessageContext_t commandStructQueue;
+static AgentMessageContext_t commandStructMessageCtx;
 
 /**
  * @brief Initialization status of the queue.
@@ -78,11 +78,11 @@ void Agent_InitializePool( void )
     if( initStatus == QUEUE_NOT_INITIALIZED )
     {
         memset( ( void * ) commandStructurePool, 0x00, sizeof( commandStructurePool ) );
-        commandStructQueue.queue = xQueueCreateStatic( MQTT_COMMAND_CONTEXTS_POOL_SIZE,
+        commandStructMessageCtx.queue = xQueueCreateStatic( MQTT_COMMAND_CONTEXTS_POOL_SIZE,
                                                        sizeof( Command_t * ),
                                                        staticQueueStorageArea,
                                                        &staticQueueStructure );
-        configASSERT( commandStructQueue.queue );
+        configASSERT( commandStructMessageCtx.queue );
 
         /* Populate the queue. */
         for( i = 0; i < MQTT_COMMAND_CONTEXTS_POOL_SIZE; i++ )
@@ -90,7 +90,7 @@ void Agent_InitializePool( void )
             /* Store the address as a variable. */
             pCommand = &commandStructurePool[ i ];
             /* Send the pointer to the queue. */
-            commandAdded = Agent_MessageSend( &commandStructQueue, &pCommand, 0U );
+            commandAdded = Agent_MessageSend( &commandStructMessageCtx, &pCommand, 0U );
             configASSERT( commandAdded );
         }
 
@@ -110,7 +110,7 @@ Command_t * Agent_GetCommand( uint32_t blockTimeMs )
     configASSERT( initStatus == QUEUE_INITIALIZED );
 
     /* Retrieve a struct from the queue. */
-    structRetrieved = Agent_MessageReceive( &commandStructQueue, &( structToUse ), blockTimeMs );
+    structRetrieved = Agent_MessageReceive( &commandStructMessageCtx, &( structToUse ), blockTimeMs );
 
     if( !structRetrieved )
     {
@@ -133,7 +133,7 @@ bool Agent_ReleaseCommand( Command_t * pCommandToRelease )
     if( ( pCommandToRelease >= commandStructurePool ) &&
         ( pCommandToRelease < ( commandStructurePool + MQTT_COMMAND_CONTEXTS_POOL_SIZE ) ) )
     {
-        structReturned = Agent_MessageSend( &commandStructQueue, &pCommandToRelease, 0U );
+        structReturned = Agent_MessageSend( &commandStructMessageCtx, &pCommandToRelease, 0U );
 
         /* The send should not fail as the queue was created to hold every command
          * in the pool. */
