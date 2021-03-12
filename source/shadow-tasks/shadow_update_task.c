@@ -92,7 +92,7 @@
     "{"                                  \
     "\"state\":{"                        \
     "\"desired\":{"                      \
-    "\"powerOn\":%01d"                   \
+    "\"powerOn\":%1d"                   \
     "}"                                  \
     "},"                                 \
     "\"clientToken\":\"%06lu\""          \
@@ -100,19 +100,20 @@
 
 /**
  * @brief The expected size of #SHADOW_DESIRED_JSON.
+ * 
+ * Since all of the format specifiers in #SHADOW_DESIRED_JSON include a length,
+ * its actual size can be pre-calculated at compile time from the difference between
+ * the lengths of the format strings and their formatted output. We must subtract 3
+ * from the length as according the following formula:
+ * 1. The length of the format string "%1u" is 3.
+ * 2. The length of the format string "%06lu" is 5.
+ * 3. The formatted length in case 1. is 1 ( for the state of powerOn ).
+ * 4. The formatted length in case 2. is 6 ( for the clientToken length ).
+ * 5. Thus the additional size of our format is 2 = 3 + 5 - 1 - 6 + 1 (termination character).
  *
- * Because all the format specifiers in #SHADOW_DESIRED_JSON include a length,
- * its full actual size is known by pre-calculation, here's the formula why
- * the length need to minus 3:
- * 1. The length of "%01d" is 4.
- * 2. The length of %06lu is 5.
- * 3. The actual length we will use in case 1. is 1 ( for the state of powerOn ).
- * 4. The actual length we will use in case 2. is 6 ( for the clientToken length ).
- * 5. Thus the additional size 3 = 4 + 5 - 1 - 6 + 1 (termination character).
- *
- * In your own application, you could calculate the size of the json doc in this way.
+ * Custom applications may calculate the length of the JSON document with the same method.
  */
-#define shadowexampleSHADOW_DESIRED_JSON_LENGTH    ( sizeof( shadowexampleSHADOW_DESIRED_JSON ) - 3 )
+#define shadowexampleSHADOW_DESIRED_JSON_LENGTH    ( sizeof( shadowexampleSHADOW_DESIRED_JSON ) - 2 )
 
 
 /**
@@ -140,8 +141,7 @@
  */
 struct CommandContext
 {
-    MQTTStatus_t xReturnStatus;
-    TaskHandle_t xTaskToNotify;
+    bool xReturnStatus;
 };
 
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
@@ -156,6 +156,11 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
  */
 static uint32_t ulClientToken = 0U;
 
+/**
+ * @brief The handle of this task. It is used by callbacks to notify this task.
+ */
+static TaskHandle_t xShadowUpdateTaskHandle;
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -164,7 +169,7 @@ static uint32_t ulClientToken = 0U;
  * @return true if the subscribe is successful;
  * false otherwise.
  */
-static bool prvSubscribeToShadowPublishTopics( void );
+static bool prvSubscribeToShadowUpdateTopics( void );
 
 /**
  * @brief Passed into MQTTAgent_Subscribe() as the callback to execute when the
@@ -240,12 +245,8 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     /* Context must persist as long as subscription persists. */
     static CommandContext_t xApplicationDefinedContext = { 0 };
 
-    /* Record the handle of this task in the context that will be used within
-    * the callbacks so the callbacks can send a notification to this task. */
-    xApplicationDefinedContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
-
-    /* Ensure the return status is not accidentally MQTTSuccess already. */
-    xApplicationDefinedContext.xReturnStatus = MQTTBadParameter;
+    /* Ensure the return status is not accidentally true already. */
+    xApplicationDefinedContext.xReturnStatus = false;
 
     /* Subscribe to shadow topic for accepted responses for submitted updates. */
     xSubscribeInfo[ 0 ].pTopicFilter = SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER );
@@ -287,7 +288,7 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     configASSERT( ulNotificationValue != 0UL );
 
     /* The callback sets the xReturnStatus member of the context. */
-    if( xApplicationDefinedContext.xReturnStatus != MQTTSuccess )
+    if( xApplicationDefinedContext.xReturnStatus != true )
     {
         LogError( ( "Failed to subscribe to shadow update topics." ) );
         xReturnStatus = false;
@@ -295,43 +296,6 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     else
     {
         LogInfo( ( "Received subscribe ack for shadow update topics." ) );
-    }
-
-    /* Add subscriptions so that incoming publishes are routed to the application
-     * callback. */
-
-    if( xReturnStatus == true )
-    {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateAcceptedCallback,
-                                         &xApplicationDefinedContext );
-
-        if( xReturnStatus == false )
-        {
-            LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
-                        SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                        SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ) ) );
-            xReturnStatus = false;
-        }
-    }
-
-    if( xReturnStatus == true )
-    {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateRejectedCallback,
-                                         &xApplicationDefinedContext );
-
-        if( xReturnStatus == false )
-        {
-            LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
-                        SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                        SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ) ) );
-            xReturnStatus = false;
-        }
     }
 
     return xReturnStatus;
@@ -342,13 +306,57 @@ static bool prvSubscribeToShadowUpdateTopics( void )
 static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+   bool xReturnStatus = false;
+   CommandContext_t* pxApplicationDefinedContext = (CommandContext_t*)pxCommandContext;
+
+   /* Check if the subscribe operation is a success. */
+   if (pxReturnInfo->returnCode == MQTTSuccess)
+   {
+      xReturnStatus = true;
+   }
+
+    /* Add subscriptions so that incoming publishes are routed to the application
+ * callback. */
+
+    if (xReturnStatus == true)
+    {
+       xReturnStatus = addSubscription((SubscriptionElement_t*)xGlobalMqttAgentContext.pIncomingCallbackContext,
+          SHADOW_TOPIC_STRING_UPDATE_ACCEPTED(democonfigCLIENT_IDENTIFIER),
+          SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED(democonfigCLIENT_IDENTIFIER_LENGTH),
+          prvIncomingPublishUpdateAcceptedCallback,
+          NULL);
+
+       if (xReturnStatus == false)
+       {
+          LogError(("Failed to register an incoming publish callback for topic %.*s.",
+             SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED(democonfigCLIENT_IDENTIFIER_LENGTH),
+             SHADOW_TOPIC_STRING_UPDATE_ACCEPTED(democonfigCLIENT_IDENTIFIER)));
+          xReturnStatus = false;
+       }
+    }
+
+    if (xReturnStatus == true)
+    {
+       xReturnStatus = addSubscription((SubscriptionElement_t*)xGlobalMqttAgentContext.pIncomingCallbackContext,
+          SHADOW_TOPIC_STRING_UPDATE_REJECTED(democonfigCLIENT_IDENTIFIER),
+          SHADOW_TOPIC_LENGTH_UPDATE_REJECTED(democonfigCLIENT_IDENTIFIER_LENGTH),
+          prvIncomingPublishUpdateRejectedCallback,
+          NULL);
+
+       if (xReturnStatus == false)
+       {
+          LogError(("Failed to register an incoming publish callback for topic %.*s.",
+             SHADOW_TOPIC_LENGTH_UPDATE_REJECTED(democonfigCLIENT_IDENTIFIER_LENGTH),
+             SHADOW_TOPIC_STRING_UPDATE_REJECTED(democonfigCLIENT_IDENTIFIER)));
+          xReturnStatus = false;
+       }
+    }
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
-    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+    pxApplicationDefinedContext->xReturnStatus = xReturnStatus;
 
-    xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
+    xTaskNotifyGive(xShadowUpdateTaskHandle);
 }
 
 
@@ -362,7 +370,8 @@ static void prvIncomingPublishUpdateAcceptedCallback( void * pxSubscriptionConte
     uint32_t ulReceivedToken = 0U;
     JSONStatus_t result = JSONSuccess;
 
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
+    /* Remove compiler warnings about unused parameters. */
+    (void)pxSubscriptionContext;
 
     configASSERT( pxPublishInfo != NULL );
     configASSERT( pxPublishInfo->pPayload != NULL );
@@ -434,7 +443,7 @@ static void prvIncomingPublishUpdateAcceptedCallback( void * pxSubscriptionConte
             LogInfo( ( "Received accepted response for update with token %lu. ", ( unsigned long ) ulClientToken ) );
 
             /* Wake up the shadow task which is waiting for this response. */
-            xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
+            xTaskNotifyGive( xShadowUpdateTaskHandle );
         }
     }
 }
@@ -447,8 +456,10 @@ static void prvIncomingPublishUpdateRejectedCallback( void * pxSubscriptionConte
     JSONStatus_t result = JSONSuccess;
     char * pcOutValue = NULL;
     uint32_t ulOutValueLength = 0UL;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
     uint32_t ulReceivedToken = 0U;
+
+    /* Remove compiler warnings about unused parameters. */
+    (void)pxSubscriptionContext;
 
     configASSERT( pxPublishInfo != NULL );
     configASSERT( pxPublishInfo->pPayload != NULL );
@@ -523,7 +534,7 @@ static void prvIncomingPublishUpdateRejectedCallback( void * pxSubscriptionConte
             }
 
             /* Wake up the shadow task which is waiting for this response. */
-            xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
+            xTaskNotifyGive(xShadowUpdateTaskHandle);
         }
     }
 }
@@ -545,6 +556,10 @@ void vShadowUpdateTask( void * pvParameters )
 
     /* Remove compiler warnings about unused parameters. */
     ( void ) pvParameters;
+
+    /* Record the handle of this task so that the callbacks so the callbacks can
+     * send a notification to this task. */
+    xShadowUpdateTaskHandle = xTaskGetCurrentTaskHandle();
 
     /* Set up the CommandInfo_t for the demo loop.
      * We do not need a completion callback here since for publishes, we expect to get a
@@ -591,7 +606,8 @@ void vShadowUpdateTask( void * pvParameters )
                                                &xPublishInfo,
                                                &xCommandParams );
 
-            /* Wait for the response to our report. */
+            /* Wait for the response to our report. When the Device shadow service recieves the request it will
+             * publish a response to  the /update/accepted or update/rejected */
             ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( shadowexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
 
             if( ulNotificationValue == 0 )

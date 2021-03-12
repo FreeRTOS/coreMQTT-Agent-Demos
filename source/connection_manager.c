@@ -123,6 +123,14 @@
     #error Please define democonfigDEFENDER_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the task created by vStartDefenderDemo().
 #endif
 
+#ifndef democonfigCREATE_SHADOW_DEMO
+    #error Please define democonfigCREATE_SHADOW_DEMO to 1 or 0 in demo_config.h - determines if vStartShadowDemo() gets called or not.
+#endif
+
+#if ( democonfigCREATE_SHADOW_DEMO != 0 ) && !defined( democonfigSHADOW_TASK_STACK_SIZE )
+    #error Please define democonfigSHADOW_TASK_STACK_SIZE in demo_config.h to set the stack size (in words, not bytes) for the tasks created by vStartShadowDemo().
+#endif
+
 /**
  * @brief Dimensions the buffer used to serialize and deserialize MQTT packets.
  * @note Specified in bytes.  Must be large enough to hold the maximum
