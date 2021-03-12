@@ -41,8 +41,8 @@
  *    or prvIncomingPublishUpdateRejectedCallback handle the response.
  * 7. Wait until time for next check and repeat from step 5.
  *
- * Meanwhile, when prvIncomingPublishUpdateDeltaCallback recives changes to shadow state, it will apply them on the
- * device
+ * Meanwhile, when prvIncomingPublishUpdateDeltaCallback receives changes to the shadow state,
+ * it will apply them on the device.
  */
 
 /* Standard includes. */
@@ -97,7 +97,7 @@
     "{"                                   \
     "\"state\":{"                         \
     "\"reported\":{"                      \
-    "\"powerOn\":%01u"                    \
+    "\"powerOn\":%1u"                     \
     "}"                                   \
     "},"                                  \
     "\"clientToken\":\"%06lu\""           \
@@ -106,21 +106,19 @@
 /**
  * @brief The expected size of #SHADOW_REPORTED_JSON.
  *
- * Because all the format specifiers in #SHADOW_REPORTED_JSON include a length,
- * its full size is known at compile-time by pre-calculation.
+ * Since all of the format specifiers in #SHADOW_REPORTED_JSON include a length,
+ * its actual size can be pre-calculated at compile time from the difference between
+ * the lengths of the format strings and their formatted output. We must subtract 2
+ * from the length as according the following formula:
+ * 1. The length of the format string "%1u" is 3.
+ * 2. The length of the format string "%06lu" is 5.
+ * 3. The formatted length in case 1. is 1 ( for the state of powerOn ).
+ * 4. The formatted length in case 2. is 6 ( for the clientToken length ).
+ * 5. Thus the additional size of our format is 2 = 3 + 5 - 1 - 6 + 1 (termination character).
  *
- * Because all the format specifiers in #SHADOW_REPORTED_JSON include a length,
- * its full actual size is known by pre-calculation, here's the formula why
- * the length need to minus 3:
- * 1. The length of "%01d" is 4.
- * 2. The length of %06lu is 5.
- * 3. The actual length we will use in case 1. is 1 ( for the state of powerOn ).
- * 4. The actual length we will use in case 2. is 6 ( for the clientToken length ).
- * 5. Thus the additional size 3 = 4 + 5 - 1 - 6 + 1 (termination character).
- *
- * In your own application, you could calculate the size of the json doc in this way.
+ * Custom applications may calculate the length of the JSON document with the same method.
  */
-#define shadowexampleSHADOW_REPORTED_JSON_LENGTH       ( sizeof( shadowexampleSHADOW_REPORTED_JSON ) - 3 )
+#define shadowexampleSHADOW_REPORTED_JSON_LENGTH       ( sizeof( shadowexampleSHADOW_REPORTED_JSON ) - 2 )
 
 /**
  * @brief Time in ms to wait between checking for updates to report.
@@ -267,14 +265,9 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     CommandInfo_t xCommandParams = { 0 };
 
     /* These must persist until the command is processed. */
-    static MQTTAgentSubscribeArgs_t xSubscribeArgs;
-    static MQTTSubscribeInfo_t xSubscribeInfo[ 3 ];
-
-    /* Context must persist as long as subscription persists. */
-    static CommandContext_t xApplicationDefinedContext = { 0 };
-
-    /* Ensure the return status is not accidentally true already. */
-    xApplicationDefinedContext.xReturnStatus = false;
+    MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
+    MQTTSubscribeInfo_t xSubscribeInfo[ 3 ];
+    CommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Subscribe to shadow topic for responses for incoming delta updates. */
     xSubscribeInfo[ 0 ].pTopicFilter = SHADOW_TOPIC_STRING_UPDATE_DELTA( democonfigCLIENT_IDENTIFIER );
@@ -290,7 +283,7 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     xSubscribeInfo[ 2 ].qos = MQTTQoS1;
 
     /* Complete the subscribe information. The topic string must persist for
-     * duration of subscription - although in this case is it a static const so
+     * duration of subscription - although in this case it is a static const so
      * will persist for the lifetime of the application. */
     xSubscribeArgs.pSubscribeInfo = xSubscribeInfo;
     xSubscribeArgs.numSubscriptions = 3;
@@ -422,7 +415,9 @@ static void prvIncomingPublishUpdateDeltaCallback( void * pxSubscriptionContext,
     configASSERT( pxPublishInfo != NULL );
     configASSERT( pxPublishInfo->pPayload != NULL );
 
-    LogDebug( ( "/update/delta json payload:%s.", ( const char * ) pxPublishInfo->pPayload ) );
+    LogDebug( ( "/update/delta json payload:%.*s.",
+                pxPublishInfo->payloadLength,
+                ( const char * ) pxPublishInfo->pPayload ) );
 
     /* The payload will look similar to this:
      * {
@@ -475,7 +470,9 @@ static void prvIncomingPublishUpdateDeltaCallback( void * pxSubscriptionContext,
                  * that we've received before. Your application may use a
                  * different approach.
                  */
-                LogWarn( ( "Recieved unexpected delta update with version %u. Current version is %u", ( unsigned int ) ulVersion, ( unsigned int ) ulCurrentVersion ) );
+                LogWarn( ( "Recieved unexpected delta update with version %u. Current version is %u",
+                           ( unsigned int ) ulVersion,
+                           ( unsigned int ) ulCurrentVersion ) );
             }
             else
             {
@@ -529,7 +526,9 @@ static void prvIncomingPublishUpdateAcceptedCallback( void * pxSubscriptionConte
     configASSERT( pxPublishInfo != NULL );
     configASSERT( pxPublishInfo->pPayload != NULL );
 
-    LogDebug( ( "/update/accepted JSON payload: %s.", ( const char * ) pxPublishInfo->pPayload ) );
+    LogDebug( ( "/update/accepted JSON payload: %.*s.",
+                pxPublishInfo->payloadLength,
+                ( const char * ) pxPublishInfo->pPayload ) );
 
     /* Handle the reported state with state change in /update/accepted topic.
      * Thus we will retrieve the client token from the JSON document to see if
@@ -636,7 +635,9 @@ static void prvIncomingPublishUpdateRejectedCallback( void * pxSubscriptionConte
     configASSERT( pxPublishInfo != NULL );
     configASSERT( pxPublishInfo->pPayload != NULL );
 
-    LogDebug( ( "/update/rejected json payload: %s.", ( const char * ) pxPublishInfo->pPayload ) );
+    LogDebug( ( "/update/rejected json payload: %.*s.",
+                pxPublishInfo->payloadLength,
+                ( const char * ) pxPublishInfo->pPayload ) );
 
     /* The payload will look similar to this:
      * {
@@ -788,7 +789,7 @@ void vShadowDeviceTask( void * pvParameters )
                                                    &xPublishInfo,
                                                    &xCommandParams );
 
-                /* Wait for the response to our report. When the Device shadow service recieves the request it will
+                /* Wait for the response to our report. When the Device shadow service receives the request it will
                  * publish a response to  the /update/accepted or update/rejected */
                 ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( shadowexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
 
