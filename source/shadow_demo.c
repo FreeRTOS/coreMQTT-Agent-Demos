@@ -51,7 +51,8 @@
 #endif
 
 /**
- * Enable/disable the
+ * Enable/disable the task that sends desired state requests to the Device Shadow service for
+ * demonstration purposes.
  */
 #define shadowexampleENABLE_UPDATE_TASK    1
 
