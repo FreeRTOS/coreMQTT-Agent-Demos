@@ -89,9 +89,10 @@
  *   "clientToken": "021909"
  * }
  *
- * Note the client token, which is required for all Shadow updates. The client
- * token must be unique at any given time, but may be reused once the update is
- * completed. For this demo, a timestamp is used for a client token.
+ * Note the client token, which is optional. The token is used to identify the
+ * response to an update. The client token must be unique at any given time,
+ * but may be reused once the update is completed. For this demo, a timestamp
+ * is used for a client token.
  */
 #define shadowexampleSHADOW_REPORTED_JSON \
     "{"                                   \
@@ -140,6 +141,13 @@
 #define shadowexampleMAX_COMMAND_SEND_BLOCK_TIME_MS    ( 200 )
 
 /**
+ * @brief An invalid value for the powerOn state. This is used to set the last
+ * reported state to a value that will not match the current state. As we only
+ * set the powerOn state to 0 or 1, any other value will suffice.
+ */
+#define shadowexampleINVALID_POWERON_STATE             ( 2 )
+
+/**
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
@@ -158,16 +166,14 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
 static uint32_t ulCurrentPowerOnState = 0;
 
 /**
- * @brief The last reported state. It is initialized to and invalid value so that
+ * @brief The last reported state. It is initialized to an invalid value so that
  * an update is initially sent.
  */
-static uint32_t ulReportedPowerOnState = 2;
+static uint32_t ulReportedPowerOnState = shadowexampleINVALID_POWERON_STATE;
 
 /**
- * @brief When we send an update to the device shadow, and if we care about
- * the response from cloud (accepted/rejected), remember the clientToken and
- * use it to match with the response. We set this to 0 when not waiting on a
- * response.
+ * @brief Match the received clientToken with the one sent in a device shadow
+ * update. Set to 0 when not waiting on a response.
  */
 static uint32_t ulClientToken = 0U;
 
@@ -259,7 +265,7 @@ void vShadowDeviceTask( void * pvParameters );
 
 static bool prvSubscribeToShadowUpdateTopics( void )
 {
-    bool xReturnStatus = true;
+    bool xReturnStatus = false;
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
     CommandInfo_t xCommandParams = { 0 };
@@ -316,11 +322,11 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     if( xApplicationDefinedContext.xReturnStatus != true )
     {
         LogError( ( "Failed to subscribe to shadow update topics." ) );
-        xReturnStatus = false;
     }
     else
     {
         LogInfo( ( "Successfully subscribed to shadow update topics." ) );
+        xReturnStatus = true;
     }
 
     return xReturnStatus;
@@ -331,26 +337,21 @@ static bool prvSubscribeToShadowUpdateTopics( void )
 static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
-    bool xReturnStatus = false;
+    bool xSuccess = false;
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
     /* Check if the subscribe operation is a success. */
     if( pxReturnInfo->returnCode == MQTTSuccess )
     {
-        xReturnStatus = true;
-    }
+        /* Add subscriptions so that incoming publishes are routed to the application
+         * callback. */
+        xSuccess = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                    SHADOW_TOPIC_STRING_UPDATE_DELTA( democonfigCLIENT_IDENTIFIER ),
+                                    SHADOW_TOPIC_LENGTH_UPDATE_DELTA( democonfigCLIENT_IDENTIFIER_LENGTH ),
+                                    prvIncomingPublishUpdateDeltaCallback,
+                                    NULL );
 
-    /* Add subscriptions so that incoming publishes are routed to the application
-     * callback. */
-    if( xReturnStatus == true )
-    {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_DELTA( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_DELTA( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateDeltaCallback,
-                                         NULL );
-
-        if( xReturnStatus == false )
+        if( xSuccess == false )
         {
             LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
                         SHADOW_TOPIC_LENGTH_UPDATE_DELTA( democonfigCLIENT_IDENTIFIER_LENGTH ),
@@ -358,15 +359,15 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
         }
     }
 
-    if( xReturnStatus == true )
+    if( xSuccess == true )
     {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateAcceptedCallback,
-                                         NULL );
+        xSuccess = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                    SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ),
+                                    SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
+                                    prvIncomingPublishUpdateAcceptedCallback,
+                                    NULL );
 
-        if( xReturnStatus == false )
+        if( xSuccess == false )
         {
             LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
                         SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
@@ -374,15 +375,15 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
         }
     }
 
-    if( xReturnStatus == true )
+    if( xSuccess == true )
     {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateRejectedCallback,
-                                         NULL );
+        xSuccess = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                    SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ),
+                                    SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
+                                    prvIncomingPublishUpdateRejectedCallback,
+                                    NULL );
 
-        if( xReturnStatus == false )
+        if( xSuccess == false )
         {
             LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
                         SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
@@ -392,7 +393,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
-    pxApplicationDefinedContext->xReturnStatus = xReturnStatus;
+    pxApplicationDefinedContext->xReturnStatus = xSuccess;
 
     xTaskNotifyGive( xShadowDeviceTaskHandle );
 }
@@ -800,7 +801,7 @@ void vShadowDeviceTask( void * pvParameters )
                     /* If we time out waiting for a response and then the report is accepted, the
                      * state may be out of sync. Set the reported state as to ensure we resend the
                      * report. */
-                    ulReportedPowerOnState = 2;
+                    ulReportedPowerOnState = shadowexampleINVALID_POWERON_STATE;
                 }
 
                 /* Clear the client token */

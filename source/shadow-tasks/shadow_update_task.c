@@ -84,9 +84,10 @@
  *   "clientToken": "021909"
  * }
  *
- * Note the client token, which is optional for all Shadow updates. The client
- * token must be unique at any given time, but may be reused once the update is
- * completed. For this demo, a timestamp is used for a client token.
+ * Note the client token, which is optional. The token is used to identify the
+ * response to an update. The client token must be unique at any given time,
+ * but may be reused once the update is completed. For this demo, a timestamp
+ * is used for a client token.
  */
 #define shadowexampleSHADOW_DESIRED_JSON \
     "{"                                  \
@@ -149,10 +150,8 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
 /*-----------------------------------------------------------*/
 
 /**
- * @brief When we send an update to the device shadow, and if we care about
- * the response from cloud (accepted/rejected), remember the clientToken and
- * use it to match with the response. We set this to 0 when not waiting on a
- * response.
+ * @brief Match the received clientToken with the one sent in a device shadow
+ * update. Set to 0 when not waiting on a response.
  */
 static uint32_t ulClientToken = 0U;
 
@@ -173,9 +172,9 @@ static bool prvSubscribeToShadowUpdateTopics( void );
 
 /**
  * @brief Passed into MQTTAgent_Subscribe() as the callback to execute when the
- * broker ACKs the SUBSCRIBE message.  Its implementation sends a notification
+ * broker ACKs the SUBSCRIBE message. Its implementation sends a notification
  * to the task that called MQTTAgent_Subscribe() to let the task know the
- * SUBSCRIBE operation completed.  It also sets the xReturnStatus of the
+ * SUBSCRIBE operation completed. It also sets the xReturnStatus of the
  * structure passed in as the command's context to the value of the
  * xReturnStatus parameter - which enables the task to check the status of the
  * operation.
@@ -233,20 +232,15 @@ void vShadowUpdateTask( void * pvParameters );
 
 static bool prvSubscribeToShadowUpdateTopics( void )
 {
-    bool xReturnStatus = true;
+    bool xReturnStatus = false;
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
     CommandInfo_t xCommandParams = { 0 };
 
     /* These must persist until the command is processed. */
-    static MQTTAgentSubscribeArgs_t xSubscribeArgs;
-    static MQTTSubscribeInfo_t xSubscribeInfo[ 2 ];
-
-    /* Context must persist as long as subscription persists. */
-    static CommandContext_t xApplicationDefinedContext = { 0 };
-
-    /* Ensure the return status is not accidentally true already. */
-    xApplicationDefinedContext.xReturnStatus = false;
+    MQTTAgentSubscribeArgs_t xSubscribeArgs;
+    MQTTSubscribeInfo_t xSubscribeInfo[ 2 ];
+    CommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Subscribe to shadow topic for accepted responses for submitted updates. */
     xSubscribeInfo[ 0 ].pTopicFilter = SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER );
@@ -291,11 +285,11 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     if( xApplicationDefinedContext.xReturnStatus != true )
     {
         LogError( ( "Failed to subscribe to shadow update topics." ) );
-        xReturnStatus = false;
     }
     else
     {
         LogInfo( ( "Received subscribe ack for shadow update topics." ) );
+        xReturnStatus = true;
     }
 
     return xReturnStatus;
@@ -306,55 +300,47 @@ static bool prvSubscribeToShadowUpdateTopics( void )
 static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
-    bool xReturnStatus = false;
+    bool xSuccess = false;
     CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
 
     /* Check if the subscribe operation is a success. */
     if( pxReturnInfo->returnCode == MQTTSuccess )
     {
-        xReturnStatus = true;
-    }
+        /* Add subscriptions so that incoming publishes are routed to the application
+         * callback. */
+        xSuccess = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                    SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ),
+                                    SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
+                                    prvIncomingPublishUpdateAcceptedCallback,
+                                    NULL );
 
-    /* Add subscriptions so that incoming publishes are routed to the application
-     * callback. */
-
-    if( xReturnStatus == true )
-    {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateAcceptedCallback,
-                                         NULL );
-
-        if( xReturnStatus == false )
+        if( xSuccess == false )
         {
             LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
                         SHADOW_TOPIC_LENGTH_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
                         SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER ) ) );
-            xReturnStatus = false;
         }
     }
 
-    if( xReturnStatus == true )
+    if( xSuccess == true )
     {
-        xReturnStatus = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
-                                         SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ),
-                                         SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
-                                         prvIncomingPublishUpdateRejectedCallback,
-                                         NULL );
+        xSuccess = addSubscription( ( SubscriptionElement_t * ) xGlobalMqttAgentContext.pIncomingCallbackContext,
+                                    SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ),
+                                    SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
+                                    prvIncomingPublishUpdateRejectedCallback,
+                                    NULL );
 
-        if( xReturnStatus == false )
+        if( xSuccess == false )
         {
             LogError( ( "Failed to register an incoming publish callback for topic %.*s.",
                         SHADOW_TOPIC_LENGTH_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
                         SHADOW_TOPIC_STRING_UPDATE_REJECTED( democonfigCLIENT_IDENTIFIER ) ) );
-            xReturnStatus = false;
         }
     }
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
-    pxApplicationDefinedContext->xReturnStatus = xReturnStatus;
+    pxApplicationDefinedContext->xReturnStatus = xSuccess;
 
     xTaskNotifyGive( xShadowUpdateTaskHandle );
 }
