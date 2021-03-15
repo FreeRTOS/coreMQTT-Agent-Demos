@@ -20,6 +20,7 @@
     <ClCompile Include="..\..\lib\AWS\ota\source\ota_interface.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\ota_mqtt.c" />
     <ClCompile Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.c" />
+    <ClCompile Include="..\..\lib\AWS\shadow\source\shadow.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreJSON\source\core_json.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt_serializer.c" />
@@ -62,6 +63,9 @@
     <ClCompile Include="..\..\source\logging_output_windows.c" />
     <ClCompile Include="..\..\source\main.c" />
     <ClCompile Include="..\..\source\connection_manager.c" />
+    <ClCompile Include="..\..\source\shadow-tasks\shadow_device_task.c" />
+    <ClCompile Include="..\..\source\shadow-tasks\shadow_update_task.c" />
+    <ClCompile Include="..\..\source\shadow_demo.c" />
     <ClCompile Include="..\..\source\simple_sub_pub_demo.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder_close_container_checked.c" />
@@ -79,6 +83,8 @@
     <ClInclude Include="..\..\lib\AWS\defender\source\include\defender_config_defaults.h" />
     <ClInclude Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.h" />
     <ClInclude Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.h" />
+    <ClInclude Include="..\..\lib\AWS\shadow\source\include\shadow.h" />
+    <ClInclude Include="..\..\lib\AWS\shadow\source\include\shadow_config_defaults.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreJSON\source\include\core_json.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt_config_defaults.h" />
@@ -138,6 +144,7 @@
     <ClInclude Include="..\..\source\configuration-files\FreeRTOSIPConfig.h" />
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h" />
     <ClInclude Include="..\..\source\configuration-files\ota_config.h" />
+    <ClInclude Include="..\..\source\configuration-files\shadow_config.h" />
     <ClInclude Include="..\..\source\defender-tools\metrics_collector.h" />
     <ClInclude Include="..\..\source\defender-tools\report_builder.h" />
     <ClInclude Include="..\..\source\subscription-manager\subscription_manager.h" />
@@ -198,7 +205,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include;..\..\lib\FreeRTOS\mqtt-agent-interface;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\AWS\shadow\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include;..\..\lib\FreeRTOS\mqtt-agent-interface;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MBEDTLS_CONFIG_FILE="mbedtls_config.h";WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0500;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
