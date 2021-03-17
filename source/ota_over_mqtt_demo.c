@@ -77,7 +77,7 @@
 #endif
 
 #if !defined( MQTT_AGENT_NETWORK_BUFFER_SIZE ) || ( MQTT_AGENT_NETWORK_BUFFER_SIZE < OTA_DATA_BLOCK_SIZE )
-    #error "Please define MQTT_AGENT_NETWORK_BUFFER_SIZE to adequate size as required by OTA data block"
+#error "MQTT agent buffer is too small. Please increase the buffer size to atleast the size required for OTA data block."
 #endif
 
 /**
