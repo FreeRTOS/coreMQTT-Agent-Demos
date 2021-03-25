@@ -34,10 +34,6 @@
 #include <stdio.h>
 #include <time.h>
 
-/* Visual studio intrinsics used so the __debugbreak() function is available
- * should an assert get hit. */
-#include <intrin.h>
-
 /* FreeRTOS includes. */
 #include <FreeRTOS.h>
 #include "task.h"
@@ -103,7 +99,6 @@ const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, configMAC_
 /* Use by the pseudo random number generator. */
 static UBaseType_t ulNextRand;
 
-
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -137,7 +132,6 @@ int main( void )
      * really applicable to the Win32 simulator port). */
     for( ; ; )
     {
-        __debugbreak();
     }
 }
 /*-----------------------------------------------------------*/
@@ -200,7 +194,6 @@ void vAssertCalled( const char * pcFile,
     {
         while( ulBlockVariable == 0UL )
         {
-            __debugbreak();
         }
     }
     taskENABLE_INTERRUPTS();
@@ -341,4 +334,23 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
 /*-----------------------------------------------------------*/
+
+void vApplicationMallocFailedHook( void )
+{
+	configASSERT( 0 );
+}
+
+void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    char *pcTaskName )
+
+{
+volatile uint32_t ulSetToZeroToStepOut = 1UL;
+
+	taskENTER_CRITICAL();
+	while( ulSetToZeroToStepOut != 0 )
+	{
+	}
+}
+
+
 

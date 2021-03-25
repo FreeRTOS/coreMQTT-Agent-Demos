@@ -51,10 +51,14 @@
 #include "task.h"
 #include "semphr.h"
 
+#include "ota_config.h"
 #include "demo_config.h"
 
 /* MQTT library includes. */
 #include "mqtt_agent.h"
+
+/* Subscription manager header include. */
+#include "subscription_manager.h"
 
 /* OTA Library include. */
 #include "ota.h"

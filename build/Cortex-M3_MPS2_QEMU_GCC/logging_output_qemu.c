@@ -35,15 +35,10 @@
  * the actual output.
  */
 
-#ifndef _MSC_VER
-    #warning This is a Windows specific implementation - not building.
-#else
-
 /* Standard includes. */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
-#include <io.h>
 #include <ctype.h>
 
 /* FreeRTOS includes. */
@@ -58,14 +53,15 @@
 /* Demo includes. */
 #include "logging.h"
 
+/* Dimensions the arrays into which print messages are created. */
+#define dlMAX_PRINT_STRING_LENGTH       2048
+
+#ifdef _WINDOWS_
 /*-----------------------------------------------------------*/
 
 /* The maximum size to which the log file may grow, before being renamed
  * to .ful. */
 #define dlLOGGING_FILE_SIZE             ( 40ul * 1024ul * 1024ul )
-
-/* Dimensions the arrays into which print messages are created. */
-#define dlMAX_PRINT_STRING_LENGTH       512
 
 /* The size of the stream buffer used to pass messages from FreeRTOS tasks to
  * the Win32 thread that is responsible for making any Win32 system calls that are
@@ -541,6 +537,111 @@ static void prvLogToFile( const char * pcMessage,
     }
 }
 /*-----------------------------------------------------------*/
+#else
 
-#endif /* _WINDOWS_ */
+#include "FreeRTOS.h"
 
+static char cPrintString[ dlMAX_PRINT_STRING_LENGTH ];
+char cOutputString[ dlMAX_PRINT_STRING_LENGTH ];
+
+void vLoggingPrintf( const char * pcFormat, ... )
+{
+    char * pcSource, * pcTarget, * pcBegin;
+    size_t xLength, xLength2, rc;
+    static BaseType_t xMessageNumber = 0;
+    static BaseType_t xAfterLineBreak = pdTRUE;
+    va_list args;
+    uint32_t ulIPAddress;
+    const char * pcTaskName;
+    const char * pcNoTask = "None";
+
+vTaskSuspendAll();
+
+    /* There are a variable number of parameters. */
+    va_start( args, pcFormat );
+
+    /* Additional info to place at the start of the log. */
+    if( xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED )
+    {
+        pcTaskName = pcTaskGetName( NULL );
+    }
+    else
+    {
+        pcTaskName = pcNoTask;
+    }
+
+    if( ( xAfterLineBreak == pdTRUE ) && ( strcmp( pcFormat, "\r\n" ) != 0 ) )
+    {
+        xLength = snprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, "%lu %lu [%s] ",
+                            xMessageNumber++,
+                            ( unsigned long ) xTaskGetTickCount(),
+                            pcTaskName );
+        xAfterLineBreak = pdFALSE;
+    }
+    else
+    {
+        xLength = 0;
+        memset( cPrintString, 0x00, dlMAX_PRINT_STRING_LENGTH );
+        xAfterLineBreak = pdTRUE;
+    }
+
+    xLength2 = vsnprintf( cPrintString + xLength, dlMAX_PRINT_STRING_LENGTH - xLength, pcFormat, args );
+
+    if( xLength2 < 0 )
+    {
+        /* Clean up. */
+        xLength2 = dlMAX_PRINT_STRING_LENGTH - 1 - xLength;
+        cPrintString[ dlMAX_PRINT_STRING_LENGTH - 1 ] = '\0';
+    }
+
+    xLength += xLength2;
+    va_end( args );
+
+    /* For ease of viewing, copy the string into another buffer, converting
+     * IP addresses to dot notation on the way. */
+    pcSource = cPrintString;
+    pcTarget = cOutputString;
+
+    while( ( *pcSource ) != '\0' )
+    {
+        *pcTarget = *pcSource;
+        pcTarget++;
+        pcSource++;
+
+        /* Look forward for an IP address denoted by 'ip'. */
+        if( ( isxdigit( pcSource[ 0 ] ) != pdFALSE ) && ( pcSource[ 1 ] == 'i' ) && ( pcSource[ 2 ] == 'p' ) )
+        {
+            *pcTarget = *pcSource;
+            pcTarget++;
+            *pcTarget = '\0';
+            pcBegin = pcTarget - 8;
+
+            while( ( pcTarget > pcBegin ) && ( isxdigit( pcTarget[ -1 ] ) != pdFALSE ) )
+            {
+                pcTarget--;
+            }
+
+            sscanf( pcTarget, "%8X", &ulIPAddress );
+            rc = sprintf( pcTarget, "%lu.%lu.%lu.%lu",
+                          ( unsigned long ) ( ulIPAddress >> 24UL ),
+                          ( unsigned long ) ( ( ulIPAddress >> 16UL ) & 0xffUL ),
+                          ( unsigned long ) ( ( ulIPAddress >> 8UL ) & 0xffUL ),
+                          ( unsigned long ) ( ulIPAddress & 0xffUL ) );
+            pcTarget += rc;
+            pcSource += 3; /* skip "<n>ip" */
+        }
+    }
+
+    /* How far through the buffer was written? */
+    xLength = ( BaseType_t ) ( pcTarget - cOutputString );
+
+    _write( 0, cOutputString, xLength );
+xTaskResumeAll();
+}
+void vLoggingInit( BaseType_t xLogToStdout,
+                   BaseType_t xLogToFile,
+                   BaseType_t xLogToUDP,
+                   uint32_t ulRemoteIPAddress,
+                   uint16_t usRemotePort ) {}
+
+#endif

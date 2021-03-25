@@ -1,3 +1,5 @@
+#warning Temporary copy of this file as the checked in version is specific to Windows.  This file is just to be able to build.
+
 /*
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
@@ -24,10 +26,6 @@
  * @file mbedtls_freertos_port.c
  * @brief Implements mbed TLS platform functions for FreeRTOS.
  */
-
-#ifndef _MSC_VER
-    #warning This is a Windows specific implementation - not building.
-#else
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
@@ -235,7 +233,7 @@ int mbedtls_platform_entropy_poll( void * data,
                                    size_t * olen )
 {
     int status = 0;
-    NTSTATUS rngStatus = 0;
+    uint32_t rngStatus = 0;
 
     configASSERT( output != NULL );
     configASSERT( olen != NULL );
@@ -245,8 +243,8 @@ int mbedtls_platform_entropy_poll( void * data,
 
     /* TLS requires a secure random number generator; use the RNG provided
      * by Windows. This function MUST be re-implemented for other platforms. */
-    rngStatus =
-        BCryptGenRandom( NULL, output, len, BCRYPT_USE_SYSTEM_PREFERRED_RNG );
+    rngStatus = rand();//_RB_ Replace.
+//_RB_ Windows function        BCryptGenRandom( NULL, output, len, BCRYPT_USE_SYSTEM_PREFERRED_RNG );
 
     if( rngStatus == 0 )
     {
@@ -288,5 +286,3 @@ int mbedtls_hardware_poll( void * data,
 }
 
 /*-----------------------------------------------------------*/
-#endif /* _WINDOWS_ */
-

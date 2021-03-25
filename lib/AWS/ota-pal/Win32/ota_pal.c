@@ -39,7 +39,7 @@
 /* Specify the OTA signature algorithm we support on this platform. */
 const char OTA_JsonFileSignatureKey[ OTA_FILE_SIG_KEY_STR_MAX_LENGTH ] = "sig-sha256-ecdsa";
 
-static OtaErr_t otaPal_CheckFileSignature( OtaFileContext_t * const C );
+static OtaPalMainStatus_t otaPal_CheckFileSignature( OtaFileContext_t * const C );
 static uint8_t * otaPal_ReadAndAssumeCertificate( const uint8_t * const pucCertName,
                                                   uint32_t * const ulSignerCertSize );
 
@@ -95,7 +95,7 @@ OtaPalStatus_t otaPal_CreateFileForRx( OtaFileContext_t* const C )
         LogError( ( "ERROR - Invalid file context provided.\r\n" ) );
     }
 
-    return OTA_PAL_COMBINE_ERR(mainErr,subErr); 
+    return OTA_PAL_COMBINE_ERR(mainErr,subErr);
 }
 
 
@@ -217,7 +217,7 @@ OtaPalStatus_t otaPal_CloseFile( OtaFileContext_t * const C )
 
         if( lWindowsError != 0 )
         {
-			LogError( ( "Failed to close OTA update file.\r\n" ) );
+            LogError( ( "Failed to close OTA update file.\r\n" ) );
             mainErr = OtaPalFileClose;
             subErr = errno;
         }
@@ -231,15 +231,15 @@ OtaPalStatus_t otaPal_CloseFile( OtaFileContext_t * const C )
             LogError( ( "Failed to pass %s signature verification: %d.\r\n",
                         OTA_JsonFileSignatureKey, OTA_PAL_COMBINE_ERR(mainErr,subErr) ) );
 
-			/* If we fail to verify the file signature that means the image is not valid. We need to set the image state to aborted. */
-			otaPal_SetPlatformImageState( C, OtaImageStateAborted );
+            /* If we fail to verify the file signature that means the image is not valid. We need to set the image state to aborted. */
+            otaPal_SetPlatformImageState( C, OtaImageStateAborted );
 
         }
     }
     else /* Invalid OTA Context. */
     {
         /* FIXME: Invalid error code for a null file context and file handle. */
-		LogError( ( "Invalid file context.\r\n" ) );
+        LogError( ( "Invalid file context.\r\n" ) );
         mainErr = OtaPalFileClose;
     }
 
@@ -296,7 +296,7 @@ static OtaPalMainStatus_t otaPal_CheckFileSignature( OtaFileContext_t * const C 
                         {
                             eResult = OtaPalSignatureCheckFailed;
                         }
-						pvSigVerifyContext = NULL;	/* The context has been freed by CRYPTO_SignatureVerificationFinal(). */
+                        pvSigVerifyContext = NULL;    /* The context has been freed by CRYPTO_SignatureVerificationFinal(). */
                     }
                     else
                     {
@@ -401,13 +401,13 @@ static uint8_t * otaPal_ReadAndAssumeCertificate( const uint8_t * const pucCertN
 
         if( lWindowsError != 0 )
         {
-			LogError( ( "File pointer operation failed.\r\n" ) );
+            LogError( ( "File pointer operation failed.\r\n" ) );
             pucSignerCert = NULL;
         }
     }
     else
     {
-		LogError( ( "No such certificate file: %s. Using aws_ota_codesigner_certificate.h.\r\n",
+        LogError( ( "No such certificate file: %s. Using aws_ota_codesigner_certificate.h.\r\n",
                     ( const char * ) pucCertName ) );
 
         /* Allocate memory for the signer certificate plus a terminating zero so we can copy it and return to the caller. */
@@ -422,7 +422,7 @@ static uint8_t * otaPal_ReadAndAssumeCertificate( const uint8_t * const pucCertN
         }
         else
         {
-			LogError( ( "No memory for certificate of size %d!\r\n", lSize ) );
+            LogError( ( "No memory for certificate of size %d!\r\n", lSize ) );
         }
     }
 
@@ -433,7 +433,7 @@ static uint8_t * otaPal_ReadAndAssumeCertificate( const uint8_t * const pucCertN
 
 OtaPalStatus_t otaPal_ResetDevice( OtaFileContext_t* const pFileContext )
 {
-	(void)pFileContext;
+    (void)pFileContext;
 
     /* Return no error.  Windows implementation does not reset device. */
     return OTA_PAL_COMBINE_ERR(OtaPalSuccess,0);
@@ -443,7 +443,7 @@ OtaPalStatus_t otaPal_ResetDevice( OtaFileContext_t* const pFileContext )
 
 OtaPalStatus_t otaPal_ActivateNewImage( OtaFileContext_t* const pFileContext )
 {
-	(void)pFileContext;
+    (void)pFileContext;
 
     /* Return no error. Windows implementation simply does nothing on activate.
      * To run the new firmware image, double click the newly downloaded exe */
@@ -458,7 +458,7 @@ OtaPalStatus_t otaPal_ActivateNewImage( OtaFileContext_t* const pFileContext )
 
 OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pFileContext, OtaImageState_t eState )
 {
-	(void)pFileContext;
+    (void)pFileContext;
 
     OtaPalMainStatus_t mainErr = OtaPalSuccess;
     OtaPalSubStatus_t subErr = 0;
@@ -475,7 +475,7 @@ OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pFileConte
             if( 1 != fwrite( &eState, sizeof( OtaImageState_t ), 1, pstPlatformImageState ) ) /*lint !e586 !e9029
                                                                                                 * C standard library call is being used for portability. */
             {
-				LogError( ( "Unable to write to image state file.\r\n" ) );
+                LogError( ( "Unable to write to image state file.\r\n" ) );
                 mainErr = OtaPalBadImageState;
                 subErr = errno;
             }
@@ -483,25 +483,25 @@ OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pFileConte
             /* Close PlatformImageState.txt. */
             if( 0 != fclose( pstPlatformImageState ) ) /*lint !e586 Allow call in this context. */
             {
-				LogError( ( "Unable to close image state file.\r\n" ) );
+                LogError( ( "Unable to close image state file.\r\n" ) );
                 mainErr = OtaPalBadImageState;
                 subErr = errno;
             }
         }
         else
         {
-			LogError( ( "Unable to open image state file.\r\n" ) );
+            LogError( ( "Unable to open image state file.\r\n" ) );
             mainErr = OtaPalBadImageState;
             subErr = errno;
         }
     } /*lint !e481 Allow fopen and fclose calls in this context. */
     else /* Image state invalid. */
     {
-		LogError( ( "ERROR - Invalid image state provided.\r\n" ) );
+        LogError( ( "ERROR - Invalid image state provided.\r\n" ) );
         mainErr = OtaPalBadImageState;
     }
 
-    return OTA_PAL_COMBINE_ERR(mainErr,subErr); 
+    return OTA_PAL_COMBINE_ERR(mainErr,subErr);
 }
 
 /* Get the state of the currently running image.
@@ -518,11 +518,11 @@ OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pFileConte
  */
 OtaPalImageState_t otaPal_GetPlatformImageState( OtaFileContext_t * const pFileContext )
 {
-	(void)pFileContext;
+    (void)pFileContext;
 
     FILE * pstPlatformImageState;
-	OtaImageState_t eSavedAgentState = OtaImageStateUnknown;
-	OtaPalImageState_t ePalState = OtaPalImageStateUnknown;
+    OtaImageState_t eSavedAgentState = OtaImageStateUnknown;
+    OtaPalImageState_t ePalState = OtaPalImageStateUnknown;
 
     pstPlatformImageState = fopen( "PlatformImageState.txt", "r+b" ); /*lint !e586
                                                                        * C standard library call is being used for portability. */
@@ -534,38 +534,38 @@ OtaPalImageState_t otaPal_GetPlatformImageState( OtaFileContext_t * const pFileC
         {
             /* If an error occured reading the file, mark the state as aborted. */
             LogError( ( "Unable to read image state file.\r\n" ) );
-			ePalState = ( OtaPalImageStateInvalid | (errno & OTA_PAL_ERR_MASK) );
+            ePalState = ( OtaPalImageStateInvalid | (errno & OTA_PAL_ERR_MASK) );
         }
-		else
-		{
-			switch (eSavedAgentState)
-			{
-				case OtaImageStateTesting:
-					ePalState = OtaPalImageStatePendingCommit;
-					break;
-				case OtaImageStateAccepted:
-					ePalState = OtaPalImageStateValid;
-					break;
-				case OtaImageStateRejected:
-				case OtaImageStateAborted:
-				default:
-					ePalState = OtaPalImageStateInvalid;
-					break;
-			}
-		}
+        else
+        {
+            switch (eSavedAgentState)
+            {
+                case OtaImageStateTesting:
+                    ePalState = OtaPalImageStatePendingCommit;
+                    break;
+                case OtaImageStateAccepted:
+                    ePalState = OtaPalImageStateValid;
+                    break;
+                case OtaImageStateRejected:
+                case OtaImageStateAborted:
+                default:
+                    ePalState = OtaPalImageStateInvalid;
+                    break;
+            }
+        }
 
 
         if( 0 != fclose( pstPlatformImageState ) ) /*lint !e586
                                                     * C standard library call is being used for portability. */
         {
             LogError( ( "Unable to close image state file.\r\n" ) );
-			ePalState = (OtaPalImageStateInvalid | ( errno & OTA_PAL_ERR_MASK ) );
+            ePalState = (OtaPalImageStateInvalid | ( errno & OTA_PAL_ERR_MASK ) );
         }
     }
     else
     {
         /* If no image state file exists, assume a factory image. */
-		ePalState = OtaPalImageStateValid; /*lint !e64 Allow assignment. */
+        ePalState = OtaPalImageStateValid; /*lint !e64 Allow assignment. */
     }
 
     return ePalState; /*lint !e64 !e480 !e481 I/O calls and return type are used per design. */

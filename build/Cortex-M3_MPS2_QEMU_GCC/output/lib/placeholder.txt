@@ -1,0 +1,2 @@
+The build process uses this directory.  This file exists to enable the otherwise
+empty directory to be checked into Git.

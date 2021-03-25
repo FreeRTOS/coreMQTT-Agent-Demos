@@ -74,17 +74,17 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define democonfigCREATE_LARGE_MESSAGE_SUB_PUB_TASK        0
 #define democonfigLARGE_MESSAGE_SUB_PUB_TASK_STACK_SIZE    ( configMINIMAL_STACK_SIZE )
 
-#define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE       0
+#define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE       1
 #define democonfigSIMPLE_SUB_PUB_TASK_STACK_SIZE           ( configMINIMAL_STACK_SIZE )
 
-#define democonfigCREATE_CODE_SIGNING_OTA_DEMO             1
+#define democonfigCREATE_CODE_SIGNING_OTA_DEMO             0
 #define democonfigCODE_SIGNING_OTA_TASK_STACK_SIZE         ( configMINIMAL_STACK_SIZE )
 
 
-#define democonfigCREATE_DEFENDER_DEMO                     1
+#define democonfigCREATE_DEFENDER_DEMO                     0
 #define democonfigDEFENDER_TASK_STACK_SIZE                 ( configMINIMAL_STACK_SIZE )
 
-#define democonfigCREATE_SHADOW_DEMO                       1
+#define democonfigCREATE_SHADOW_DEMO                       0
 #define democonfigSHADOW_TASK_STACK_SIZE                   ( configMINIMAL_STACK_SIZE )
 
 /**
@@ -129,7 +129,8 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_PORT    ( insert here. )
  */
-#define democonfigMQTT_BROKER_PORT        ( 8883 )
+//#define democonfigMQTT_BROKER_PORT        ( 8883 )
+#define democonfigMQTT_BROKER_PORT        ( 1883 )
 
 /**
  * @brief Server's root CA certificate.
