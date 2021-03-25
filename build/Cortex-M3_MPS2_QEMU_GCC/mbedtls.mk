@@ -33,7 +33,7 @@ $(LIB_OUTPUT_DIR)/$(IMAGE): $(OBJS_OUTPUT) Makefile
 	$(AR) -rc $(LIB_OUTPUT_DIR)/$(IMAGE) $(OBJS_OUTPUT)
 
 clean:
-	rm -f $(LIB_OUTPUT_DIR)/$(IMAGE) $(LIB_OUTPUT_DIR)/*.o
+	rm -f $(LIB_OUTPUT_DIR)/$(IMAGE) $(LIB_OUTPUT_DIR)/*.o $(LIB_OUTPUT_DIR)/*.d
 
 .PHONY: all clean
 
