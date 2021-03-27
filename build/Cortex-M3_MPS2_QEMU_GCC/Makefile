@@ -163,6 +163,7 @@ SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/subscription-manager/*.c)
 SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/shadow-tasks/*.c)
 SOURCE_FILES += $(wildcard *.c)
 
+include mbedtls.mk
 
 #build flags
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
@@ -178,11 +179,11 @@ DEP_OUTPUT = $(DEP_FILES_NO_PATH:%.d=$(OUTPUT_DIR)/%.d)
 all: $(OUTPUT_DIR)/$(IMAGE)
 
 %.o : %.c
-$(OUTPUT_DIR)/%.o : %.c $(OUTPUT_DIR)/%.d
+$(OUTPUT_DIR)/%.o : %.c $(OUTPUT_DIR)/%.d Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) $(LIB_OUTPUT_DIR)/libmbedtls.a Makefile  ./FreeRTOSConfig.h ./FreeRTOSIPConfig.h
-	$(LD) $(OBJS_OUTPUT) $(CFLAGS) -Xlinker -L $(LIB_OUTPUT_DIR) -Xlinker -l:libmbedtls.a -Xlinker --gc-sections -Xlinker -T ./mps2_m3.ld -Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo.map -specs=nano.specs -specs=nosys.specs -specs=rdimon.specs -o $(OUTPUT_DIR)/$(IMAGE)
+$(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile  ./FreeRTOSConfig.h ./FreeRTOSIPConfig.h
+	$(LD) $(OBJS_OUTPUT) $(CFLAGS) -Xlinker --gc-sections -Xlinker -T ./mps2_m3.ld -Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo.map -specs=nano.specs -specs=nosys.specs -specs=rdimon.specs -o $(OUTPUT_DIR)/$(IMAGE)
 
 $(DEP_OUTPUT):
 include $(wildcard $(DEP_OUTPUT))
@@ -193,4 +194,5 @@ clean:
 print-%  : ; @echo $* = $($*)
 
 .PHONY: all clean
+
 
