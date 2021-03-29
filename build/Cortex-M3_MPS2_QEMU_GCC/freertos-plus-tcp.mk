@@ -1,3 +1,7 @@
+#Intended to be included from the Makefile.  Builds the FreeRTOS+TCP library
+#and the correct Ethernet driver.
+
+
 #Core files
 FREERTOS_TCP_DIR += ./../../lib/FreeRTOS/freertos-plus-tcp
 

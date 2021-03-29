@@ -31,7 +31,6 @@ include aws-iot-device-defender.mk
 
 #Utility libraries
 include mbedtls-utils.mk #Implementation of the Mbed TLS port layer for FreeRTOS.
-#include iot-crypto.mk
 include backoff-algorithm.mk
 
 #Third party libraries

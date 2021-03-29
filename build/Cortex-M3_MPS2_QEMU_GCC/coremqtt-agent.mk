@@ -1,3 +1,7 @@
+#Intended to be included from the Makefile.  Builds the MQTT agent files along
+#with the appropriate interface, as well as the coreMQTT library itself.
+
+
 #Core files
 COREMQTT_AGENT_DIR += ./../../lib/FreeRTOS/coreMQTT-Agent/source
 COREMQTT_DIR = $(COREMQTT_AGENT_DIR)/dependency/coreMQTT/source

@@ -1,3 +1,6 @@
+#Intended to be included from the Makefile.  Builds the correct FreeRTOS kernel
+#port.
+
 KERNEL_DIR += ./../../lib/FreeRTOS/freertos-kernel
 INCLUDE_DIRS += -I$(KERNEL_DIR)/include \
 				-I$(KERNEL_DIR)/portable/GCC/ARM_CM3

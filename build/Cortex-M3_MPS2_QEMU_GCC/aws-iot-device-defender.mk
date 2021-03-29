@@ -1,3 +1,6 @@
+#Intended to be included from the Makefile.  Builds the AWS IoT Devices Defender
+#library.
+
 DEVICE_DEFENDER_DIR += ./../../lib/AWS/defender/source
 DEVICE_DEFENDER_TOOLS_DIR += ./../../source/defender-tools
 VPATH += $(DEVICE_DEFENDER_DIR) $(DEVICE_DEFENDER_TOOLS_DIR)

@@ -1,3 +1,7 @@
+#Intended to be included from the Makefile.  Builds the AWS IoT OTA (Over the Air
+#update) library and correct PAL (Platform Abstraction Layer) files.
+
+
 #AWS OTA PAL files - required for header file only as this points to a Win32
 # version of the c file.
 OTA_PAL_DIR += ./../../lib/AWS/ota-pal/Win32
