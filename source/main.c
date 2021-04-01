@@ -337,7 +337,7 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
 
 void vApplicationMallocFailedHook( void )
 {
-	configASSERT( 0 );
+    configASSERT( 0 );
 }
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
@@ -346,10 +346,10 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 {
 volatile uint32_t ulSetToZeroToStepOut = 1UL;
 
-	taskENTER_CRITICAL();
-	while( ulSetToZeroToStepOut != 0 )
-	{
-	}
+    taskENTER_CRITICAL();
+    while( ulSetToZeroToStepOut != 0 )
+    {
+    }
 }
 
 

@@ -68,7 +68,7 @@
  * functions.  mqttexampleMS_TO_WAIT_FOR_NOTIFICATION defines the time, in ticks,
  * to wait for such a callback.
  */
-#define mqttexampleMS_TO_WAIT_FOR_NOTIFICATION            ( 5000 )
+#define mqttexampleMS_TO_WAIT_FOR_NOTIFICATION            ( 10000 )
 
 /**
  * @brief Size of statically allocated buffers for holding topic names and
@@ -79,7 +79,7 @@
 /**
  * @brief Delay for the synchronous publisher task between publishes.
  */
-#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 500U )
+#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 50U )
 
 /**
  * @brief Number of publishes done by each task in this demo.
@@ -91,7 +91,7 @@
  * to be posted to the MQTT agent should the MQTT agent's command queue be full.
  * Tasks wait in the Blocked state, so don't use any CPU time.
  */
-#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS         ( 200 )
+#define mqttexampleMAX_COMMAND_SEND_BLOCK_TIME_MS         ( 500 )
 
 /*-----------------------------------------------------------*/
 
@@ -422,7 +422,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 }
 
 /*-----------------------------------------------------------*/
-
+volatile uint32_t ulQoS0FailureCount = 0UL, ulQoS1FailureCount = 0UL;
 static void prvSimpleSubscribePublishTask( void * pvParameters )
 {
     extern UBaseType_t uxRand( void );
@@ -471,7 +471,7 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     xCommandParams.cmdCompleteCallback = prvPublishCommandCallback;
     xCommandParams.pCmdCompleteCallbackContext = &xCommandContext;
 
-    /* For a finite number of publishes...*/
+    /* For a finite number of publishes... */
     for( ulValueToNotify = 0UL; ulValueToNotify < mqttexamplePUBLISH_COUNT; ulValueToNotify++ )
     {
         /* Create a payload to send with the publish message.  This contains
@@ -493,14 +493,14 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
                    payloadBuf,
                    pcTopicBuffer ) );
 
+        /* To ensure ulNotification doesn't accidentally hold the expected value
+         * as it is to be checked against the value sent from the callback.. */
+        ulNotification = ~ulValueToNotify;
+
         xCommandAdded = MQTTAgent_Publish( &xGlobalMqttAgentContext,
                                            &xPublishInfo,
                                            &xCommandParams );
         configASSERT( xCommandAdded == MQTTSuccess );
-
-        /* To ensure ulNotification doesn't accidentally hold the expected value
-         * as it is to be checked against the value sent from the callback.. */
-        ulNotification = ~ulValueToNotify;
 
         /* For QoS 1 and 2, wait for the publish acknowledgment.  For QoS0,
          * wait for the publish to be sent. */
@@ -512,19 +512,27 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         /* The value by the callback that executed when the publish was acked
          * came from the context passed into MQTTAgent_Publish() above, so
          * should match the value set in the context above. */
-        configASSERT( ulNotification == ulValueToNotify );
+        configASSERT( ( ulNotification == ulValueToNotify ) || ( xQoS == 0 ) );
 
         if( ulNotification == ulValueToNotify )
         {
-            LogInfo( ( "Received ack from publishing to topic %s. Sleeping for %d ms.",
-                       pcTopicBuffer,
-                       mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            LogInfo( ( "Received ack from publishing to topic %s.",
+                       pcTopicBuffer ) );
         }
         else
         {
-            LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s Sleeping for %d ms.",
-                       pcTopicBuffer,
-                       mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+        	if( xQoS == 0 )
+        	{
+        		ulQoS0FailureCount++;
+        	}
+        	else
+        	{
+        		ulQoS1FailureCount++;
+        	}
+
+            LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s",
+                       pcTopicBuffer ) );
+
         }
 
         /* Add a little randomness into the delay so the tasks don't remain
@@ -535,5 +543,6 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     }
 
     /* Delete the task if it is complete. */
+    LogInfo( ( "Task %s completed.", taskName ) );
     vTaskDelete( NULL );
 }

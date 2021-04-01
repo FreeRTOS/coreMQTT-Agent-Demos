@@ -201,9 +201,6 @@
     <ClCompile Include="..\..\source\main.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\logging_output_windows.c">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_ARP.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
     </ClCompile>
@@ -371,6 +368,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.c">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="local-source-and-headers\logging_output_windows.c">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

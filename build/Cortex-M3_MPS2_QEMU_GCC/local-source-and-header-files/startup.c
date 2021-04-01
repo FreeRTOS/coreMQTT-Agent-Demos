@@ -181,7 +181,7 @@ const uint32_t* isr_vector[] __attribute__((section(".isr_vector"))) =
     0,                    // Dial Timer
     0,                    // SPI0 SPI1
     0,                    // uart overflow 1, 2,3
-	(uint32_t*)xEMACHandler, // Ethernet   13
+    (uint32_t*)xEMACHandler, // Ethernet   13
 
 };
 
@@ -203,8 +203,8 @@ __attribute__((naked)) void exit(int status)
 
 void _start( void )
 {
-	/* Required to link but not used as the reset handler is read from the
-	vector table. */
+    /* Required to link but not used as the reset handler is read from the
+    vector table. */
 }
 
 /**
