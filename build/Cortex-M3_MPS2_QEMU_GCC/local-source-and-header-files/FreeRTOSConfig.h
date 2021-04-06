@@ -42,7 +42,7 @@
 #define configUSE_PREEMPTION                     1
 #define configUSE_TIME_SLICING                   1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  0
-#define configCHECK_FOR_STACK_OVERFLOW			 2
+#define configCHECK_FOR_STACK_OVERFLOW           2
 
 #define configUSE_IDLE_HOOK                      0
 #define configUSE_TICK_HOOK                      0
@@ -64,7 +64,7 @@
 #define configUSE_COUNTING_SEMAPHORES            1
 #define configSUPPORT_DYNAMIC_ALLOCATION         1
 #define configSUPPORT_STATIC_ALLOCATION          1
-#define  configNUM_TX_DESCRIPTORS                15
+#define configNUM_TX_DESCRIPTORS                15
 #define configSTREAM_BUFFER_TRIGGER_LEVEL_TEST_MARGIN 2
 
 /* Set the following definitions to 1 to include the API function, or zero
@@ -111,15 +111,16 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 |     10 console before the network is connected then a UDP port after the network has
 |      9 connected. */
 extern void vLoggingPrintf( const char *pcFormatString, ... );
+#define configPRINTF( X )    vLoggingPrintf X
 
 void vAssertCalled( const char * pcFile, uint32_t ulLine );
 #define configASSERT( x ) if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )
-#define configQUEUE_REGISTRY_SIZE                20
+#define configQUEUE_REGISTRY_SIZE              20
 
 
 /* Application specific definitions follow. **********************************/
 
-#define configMAC_INTERRUPT_PRIORITY 5
+#define configMAC_INTERRUPT_PRIORITY        255
 
 /* The address to which logging is sent should UDP logging be enabled. */
 #define configUDP_LOGGING_ADDR0             192
@@ -156,10 +157,10 @@ void vAssertCalled( const char * pcFile, uint32_t ulLine );
 /* Default DNS server configuration.  OpenDNS addresses are 208.67.222.222 and
  * 208.67.220.220.  Used in ipconfigUSE_DNS is set to 0, or ipconfigUSE_DNS is set
  * to 1 but a DNS server cannot be contacted.*/
-#define configDNS_SERVER_ADDR0  8
-#define configDNS_SERVER_ADDR1  8
-#define configDNS_SERVER_ADDR2  8
-#define configDNS_SERVER_ADDR3  8
+#define configDNS_SERVER_ADDR0              8
+#define configDNS_SERVER_ADDR1              8
+#define configDNS_SERVER_ADDR2              8
+#define configDNS_SERVER_ADDR3              8
 
 /* Default netmask configuration.  Used in ipconfigUSE_DNS is set to 0, or
  * ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */

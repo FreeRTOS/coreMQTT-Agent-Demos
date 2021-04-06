@@ -41,7 +41,7 @@
 extern void vPortSVCHandler( void );
 extern void xPortPendSVHandler( void );
 extern void xPortSysTickHandler( void );
-extern void xEMACHandler( void );
+extern void EthernetISR( void );
 extern void uart_init();
 extern int main( void );
 void uart_init( void );
@@ -181,7 +181,7 @@ const uint32_t* isr_vector[] __attribute__((section(".isr_vector"))) =
     0,                    // Dial Timer
     0,                    // SPI0 SPI1
     0,                    // uart overflow 1, 2,3
-    (uint32_t*)xEMACHandler, // Ethernet   13
+    (uint32_t*)EthernetISR, // Ethernet   13
 
 };
 

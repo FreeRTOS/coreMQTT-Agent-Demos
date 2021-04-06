@@ -10,9 +10,8 @@ INCLUDE_DIRS += -I$(COREMQTT_AGENT_DIR)/include \
 				-I$(COREMQTT_DIR)/include \
 				-I$(COREMQTT_DIR)/interface
 
-VPATH += $(COREMQTT_AGENT_DIR) $(COREMQTT_AGENT_DIR)/portable/freertos $(COREMQTT_DIR)
+VPATH += $(COREMQTT_AGENT_DIR) $(COREMQTT_DIR)
 SOURCE_FILES += $(wildcard $(COREMQTT_AGENT_DIR)/*.c)
-SOURCE_FILES += $(wildcard $(COREMQTT_AGENT_DIR)/portable/freertos/*.c)
 SOURCE_FILES += $(wildcard $(COREMQTT_DIR)/*.c)
 
 #MQTT agent interface

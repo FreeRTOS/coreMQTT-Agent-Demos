@@ -79,7 +79,7 @@
 /**
  * @brief Delay for the synchronous publisher task between publishes.
  */
-#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 50U )
+#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 500U )
 
 /**
  * @brief Number of publishes done by each task in this demo.
@@ -509,9 +509,11 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
                    ulValueToNotify ) );
         prvWaitForCommandAcknowledgment( &ulNotification );
 
-        /* The value by the callback that executed when the publish was acked
-         * came from the context passed into MQTTAgent_Publish() above, so
-         * should match the value set in the context above. */
+        /* The value received by the callback that executed when the publish was 
+         * acked came from the context passed into MQTTAgent_Publish() above, so
+         * should match the value set in the context above.  However QoS 0 does
+         * not provide guaranteed delivery so it is ok for the values not to match
+         * if xQos is 0.*/
         configASSERT( ( ulNotification == ulValueToNotify ) || ( xQoS == 0 ) );
 
         if( ulNotification == ulValueToNotify )

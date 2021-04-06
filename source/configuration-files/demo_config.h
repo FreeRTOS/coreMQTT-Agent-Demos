@@ -54,7 +54,7 @@
  * The function prints to the console before the network is connected;
  * then a UDP port after the network has connected. */
 extern void vLoggingPrintf( const char * pcFormatString,
-                            ... );
+                             ... );
 
 /* Map the SdkLog macro to the logging function to enable logging
  * on Windows simulator. */
@@ -129,8 +129,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_PORT    ( insert here. )
  */
-//#define democonfigMQTT_BROKER_PORT        ( 8883 )
-#define democonfigMQTT_BROKER_PORT        ( 1883 )
+#define democonfigMQTT_BROKER_PORT        ( 8883 )
 
 /**
  * @brief Server's root CA certificate.
