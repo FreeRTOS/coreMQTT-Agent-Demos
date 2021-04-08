@@ -422,7 +422,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 }
 
 /*-----------------------------------------------------------*/
-volatile uint32_t ulQoS0FailureCount = 0UL, ulQoS1FailureCount = 0UL;
+volatile uint32_t ulQoS0FailureCount = 0UL;
 static void prvSimpleSubscribePublishTask( void * pvParameters )
 {
     extern UBaseType_t uxRand( void );
@@ -523,14 +523,10 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         }
         else
         {
-        	if( xQoS == 0 )
-        	{
-        		ulQoS0FailureCount++;
-        	}
-        	else
-        	{
-        		ulQoS1FailureCount++;
-        	}
+            if( xQoS == 0 )
+            {
+                ulQoS0FailureCount++;
+            }
 
             LogInfo( ( "Error - Timed out or didn't receive ack from publishing to topic %s",
                        pcTopicBuffer ) );

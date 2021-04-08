@@ -186,7 +186,7 @@ void vAssertCalled( const char * pcFile,
     ( void ) pcFileName;
     ( void ) ulLineNumber;
 
-    printf( "vAssertCalled( %s, %u\n", pcFile, ulLine );
+    printf( "vAssertCalled( %s, %u\n", pcFile, ( unsigned int ) ulLine );
 
     /* Setting ulBlockVariable to a non-zero value in the debugger will allow
      * this function to be exited. */
@@ -228,6 +228,15 @@ static void prvMiscInitialisation( void )
     time_t xTimeNow;
     uint32_t ulLoggingIPAddress;
 
+    /* Perform any initialisation that is specific to a build.  This macro
+    can be defined in the build specific FreeRTOSConfig.h header file. */
+    #ifdef configBUILD_SPECIFIC_INITIALISATION
+    {
+		configBUILD_SPECIFIC_INITIALISATION();
+    }
+    #endif
+
+    /* Note the parameters are only used in the demo that uses the Windows port. */
     ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configUDP_LOGGING_ADDR0, configUDP_LOGGING_ADDR1, configUDP_LOGGING_ADDR2, configUDP_LOGGING_ADDR3 );
     vLoggingInit( xLogToStdout, xLogToFile, xLogToUDP, ulLoggingIPAddress, configPRINT_PORT );
 
@@ -337,8 +346,9 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
 
 void vApplicationMallocFailedHook( void )
 {
-    configASSERT( 0 );
+	LogDebug( ( "Malloc failed\n" ) );
 }
+/*-----------------------------------------------------------*/
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     char *pcTaskName )
@@ -347,6 +357,10 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 volatile uint32_t ulSetToZeroToStepOut = 1UL;
 
     taskENTER_CRITICAL();
+
+    LogDebug( ( "Stack overflow in %s\n", pcTaskName ) );
+    ( void ) xTask;
+
     while( ulSetToZeroToStepOut != 0 )
     {
     }

@@ -122,12 +122,6 @@ void vAssertCalled( const char * pcFile, uint32_t ulLine );
 
 #define configMAC_INTERRUPT_PRIORITY        255
 
-/* The address to which logging is sent should UDP logging be enabled. */
-#define configUDP_LOGGING_ADDR0             192
-#define configUDP_LOGGING_ADDR1             168
-#define configUDP_LOGGING_ADDR2             0
-#define configUDP_LOGGING_ADDR3             11
-
 /* Default MAC address configuration.  The demo creates a virtual network
  * connection that uses this MAC address by accessing the raw Ethernet/WiFi data
  * to and from a real network connection on the host PC.  See the
@@ -169,7 +163,19 @@ void vAssertCalled( const char * pcFile, uint32_t ulLine );
 #define configNET_MASK2                     255
 #define configNET_MASK3                     0
 
-#define configPRINT_PORT                    ( 15000 )
+/* These definitions are not used by the QEMU build but are included as they
+ * are required to build main.c.  Main.c is common to all builds. */
+#define configUDP_LOGGING_ADDR0             0
+#define configUDP_LOGGING_ADDR1             0
+#define configUDP_LOGGING_ADDR2             0
+#define configUDP_LOGGING_ADDR3             0
+#define configPRINT_PORT                    0
+
+/* This initialisation is specific to running this demo in QEMU. */
+#include "CMSIS/SMM_MPS2.h"
+#define configBUILD_SPECIFIC_INITIALISATION() \
+	NVIC_DisableIRQ( ETHERNET_IRQn ); \
+	NVIC_SetPriority( ETHERNET_IRQn, configMAC_INTERRUPT_PRIORITY );
 
 #endif /* FREERTOS_CONFIG_H */
 
