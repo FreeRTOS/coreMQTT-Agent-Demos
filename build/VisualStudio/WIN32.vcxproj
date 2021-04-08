@@ -140,14 +140,14 @@
     <ClInclude Include="..\..\source\configuration-files\core_mqtt_config.h" />
     <ClInclude Include="..\..\source\configuration-files\defender_config.h" />
     <ClInclude Include="..\..\source\configuration-files\demo_config.h" />
-    <ClInclude Include="..\..\source\configuration-files\FreeRTOSConfig.h" />
-    <ClInclude Include="..\..\source\configuration-files\FreeRTOSIPConfig.h" />
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h" />
     <ClInclude Include="..\..\source\configuration-files\ota_config.h" />
     <ClInclude Include="..\..\source\configuration-files\shadow_config.h" />
     <ClInclude Include="..\..\source\defender-tools\metrics_collector.h" />
     <ClInclude Include="..\..\source\defender-tools\report_builder.h" />
     <ClInclude Include="..\..\source\subscription-manager\subscription_manager.h" />
+    <ClInclude Include="local-source-and-headers\FreeRTOSConfig.h" />
+    <ClInclude Include="local-source-and-headers\FreeRTOSIPConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\lib\ThirdParty\WinPCap\wpcap.lib" />
