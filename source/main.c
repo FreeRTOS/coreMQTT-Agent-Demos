@@ -34,10 +34,6 @@
 #include <stdio.h>
 #include <time.h>
 
-/* Visual studio intrinsics used so the __debugbreak() function is available
- * should an assert get hit. */
-#include <intrin.h>
-
 /* FreeRTOS includes. */
 #include <FreeRTOS.h>
 #include "task.h"
@@ -103,7 +99,6 @@ const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, configMAC_
 /* Use by the pseudo random number generator. */
 static UBaseType_t ulNextRand;
 
-
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -137,7 +132,6 @@ int main( void )
      * really applicable to the Win32 simulator port). */
     for( ; ; )
     {
-        __debugbreak();
     }
 }
 /*-----------------------------------------------------------*/
@@ -192,7 +186,7 @@ void vAssertCalled( const char * pcFile,
     ( void ) pcFileName;
     ( void ) ulLineNumber;
 
-    printf( "vAssertCalled( %s, %u\n", pcFile, ulLine );
+    printf( "vAssertCalled( %s, %u\n", pcFile, ( unsigned int ) ulLine );
 
     /* Setting ulBlockVariable to a non-zero value in the debugger will allow
      * this function to be exited. */
@@ -200,7 +194,6 @@ void vAssertCalled( const char * pcFile,
     {
         while( ulBlockVariable == 0UL )
         {
-            __debugbreak();
         }
     }
     taskENABLE_INTERRUPTS();
@@ -235,6 +228,15 @@ static void prvMiscInitialisation( void )
     time_t xTimeNow;
     uint32_t ulLoggingIPAddress;
 
+    /* Perform any initialisation that is specific to a build.  This macro
+    can be defined in the build specific FreeRTOSConfig.h header file. */
+    #ifdef configBUILD_SPECIFIC_INITIALISATION
+    {
+		configBUILD_SPECIFIC_INITIALISATION();
+    }
+    #endif
+
+    /* Note the parameters are only used in the demo that uses the Windows port. */
     ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configUDP_LOGGING_ADDR0, configUDP_LOGGING_ADDR1, configUDP_LOGGING_ADDR2, configUDP_LOGGING_ADDR3 );
     vLoggingInit( xLogToStdout, xLogToFile, xLogToUDP, ulLoggingIPAddress, configPRINT_PORT );
 
@@ -341,4 +343,28 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
 /*-----------------------------------------------------------*/
+
+void vApplicationMallocFailedHook( void )
+{
+	LogDebug( ( "Malloc failed\n" ) );
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    char *pcTaskName )
+
+{
+volatile uint32_t ulSetToZeroToStepOut = 1UL;
+
+    taskENTER_CRITICAL();
+
+    LogDebug( ( "Stack overflow in %s\n", pcTaskName ) );
+    ( void ) xTask;
+
+    while( ulSetToZeroToStepOut != 0 )
+    {
+    }
+}
+
+
 

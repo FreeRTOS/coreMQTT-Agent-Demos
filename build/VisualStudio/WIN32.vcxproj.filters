@@ -201,9 +201,6 @@
     <ClCompile Include="..\..\source\main.c">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\logging_output_windows.c">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\FreeRTOS_ARP.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP</Filter>
     </ClCompile>
@@ -372,13 +369,13 @@
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.c">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
     </ClCompile>
+    <ClCompile Include="local-source-and-headers\logging_output_windows.c">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Kernel\portable\MSVC-MingW</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\configuration-files\FreeRTOSConfig.h">
-      <Filter>Configuration Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC\pack_struct_end.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\MSVC</Filter>
@@ -447,9 +444,6 @@
       <Filter>Configuration Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\demo_config.h">
-      <Filter>Configuration Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\configuration-files\FreeRTOSIPConfig.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h">
@@ -580,6 +574,12 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.h">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="local-source-and-headers\FreeRTOSConfig.h">
+      <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="local-source-and-headers\FreeRTOSIPConfig.h">
+      <Filter>Configuration Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
