@@ -1,0 +1,2 @@
+This directory contains Git submodules of the third party libraries built by the
+demo contained in this Git repository.

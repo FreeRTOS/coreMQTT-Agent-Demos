@@ -39,12 +39,12 @@ include mbedtls.mk
 
 #Application source files
 APPLICATION_DIR += ./../../source
-BUILD_SPECIFIC_FILES += ./local-source-and-header-files
-VPATH += $(APPLICATION_DIR) $(APPLICATION_DIR)/subscription-manager $(APPLICATION_DIR)/shadow-tasks $(BUILD_SPECIFIC_FILES)
+BUILD_SPECIFIC_FILES += ./target-specific-source
+VPATH += $(APPLICATION_DIR) $(APPLICATION_DIR)/subscription-manager $(APPLICATION_DIR)/demo-tasks $(BUILD_SPECIFIC_FILES)
 INCLUDE_DIRS += -I$(APPLICATION_DIR)/subscription-manager -I./CMSIS -I$(BUILD_SPECIFIC_FILES)
 SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/*.c)
 SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/subscription-manager/*.c)
-SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/shadow-tasks/*.c)
+SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/demo-tasks/*.c)
 SOURCE_FILES += $(wildcard $(BUILD_SPECIFIC_FILES)/*.c)
 
 #Create a list of object files with the desired output directory path.

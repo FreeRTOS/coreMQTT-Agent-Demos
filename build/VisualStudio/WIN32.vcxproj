@@ -58,14 +58,14 @@
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c" />
     <ClCompile Include="..\..\source\defender-tools\metrics_collector.c" />
     <ClCompile Include="..\..\source\defender-tools\report_builder.c" />
-    <ClCompile Include="..\..\source\defender_demo.c" />
-    <ClCompile Include="..\..\source\large_message_sub_pub_demo.c" />
+    <ClCompile Include="..\..\source\demo-tasks\defender_demo.c" />
+    <ClCompile Include="..\..\source\demo-tasks\large_message_sub_pub_demo.c" />
+    <ClCompile Include="..\..\source\demo-tasks\ota_over_mqtt_demo.c" />
+    <ClCompile Include="..\..\source\demo-tasks\shadow_demo.c" />
+    <ClCompile Include="..\..\source\demo-tasks\shadow_device_task.c" />
+    <ClCompile Include="..\..\source\demo-tasks\shadow_update_task.c" />
+    <ClCompile Include="..\..\source\demo-tasks\simple_sub_pub_demo.c" />
     <ClCompile Include="..\..\source\main.c" />
-    <ClCompile Include="..\..\source\connection_manager.c" />
-    <ClCompile Include="..\..\source\shadow-tasks\shadow_device_task.c" />
-    <ClCompile Include="..\..\source\shadow-tasks\shadow_update_task.c" />
-    <ClCompile Include="..\..\source\shadow_demo.c" />
-    <ClCompile Include="..\..\source\simple_sub_pub_demo.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder_close_container_checked.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborerrorstrings.c" />
@@ -74,9 +74,9 @@
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborpretty.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborpretty_stdio.c" />
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborvalidation.c" />
-    <ClCompile Include="..\..\source\ota_over_mqtt_demo.c" />
+    <ClCompile Include="..\..\source\mqtt-agent-task.c" />
     <ClCompile Include="..\..\source\subscription-manager\subscription_manager.c" />
-    <ClCompile Include="local-source-and-headers\logging_output_windows.c" />
+    <ClCompile Include="target-specific-source\logging_output_windows.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\AWS\defender\source\include\defender.h" />
@@ -157,6 +157,13 @@
     <None Include="..\..\lib\ThirdParty\tinycbor\src\LICENSE" />
     <None Include="..\..\lib\ThirdParty\tinycbor\src\README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\lib\AWS\directories.txt" />
+    <Text Include="..\..\lib\directories.txt" />
+    <Text Include="..\..\lib\FreeRTOS\directories.txt" />
+    <Text Include="..\..\lib\ThirdParty\directories.txt" />
+    <Text Include="..\..\source\directories.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C686325E-3261-42F7-AEB1-DDE5280E1CEB}</ProjectGuid>
     <ProjectName>RTOSDemo</ProjectName>
@@ -205,7 +212,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\local-source-and-headers;..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\AWS\shadow\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include;..\..\lib\FreeRTOS\mqtt-agent-interface;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\target-specific-source;..\..\lib\AWS;..\..\lib\FreeRTOS\utilities\crypto\include;..\..\lib\AWS\ota-pal\Win32;..\..\lib\ThirdParty\tinycbor\src;..\..\lib\FreeRTOS\coreJSON\source\include;..\..\lib\AWS\ota\source\portable\os;..\..\lib\AWS\ota\source\include;..\..\lib\AWS\defender\source\include;..\..\lib\AWS\shadow\source\include;..\..\lib\FreeRTOS\utilities\mbedtls_freertos;..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include;..\..\lib\ThirdParty\mbedtls\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\include;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface;..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include;..\..\lib\FreeRTOS\mqtt-agent-interface;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp;..\..\lib\FreeRTOS\utilities\logging;..\..\lib\FreeRTOS\freertos-plus-tcp\include;..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls;..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext;..\..\lib\FreeRTOS\freertos-plus-tcp\portable\Compiler\MSVC;..\..\source\subscription-manager;..\..\source\configuration-files;..\..\source\defender-tools;..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW;..\..\lib\FreeRTOS\freertos-kernel\include;..\..\lib\ThirdParty\WinPCap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MBEDTLS_CONFIG_FILE="mbedtls_config.h";WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0500;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

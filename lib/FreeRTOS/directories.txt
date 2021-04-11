@@ -1,0 +1,2 @@
+This directory contains Git submodules of the FreeRTOS and "core" libraries built
+by the demo contained in this Git repository.
