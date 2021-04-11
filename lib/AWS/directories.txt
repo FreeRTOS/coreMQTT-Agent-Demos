@@ -1,0 +1,8 @@
+This file describes the subdirectories contained in this directory.
+
+defender : Contains a Git sub-module of the AWS IoT Device Defender client library.
+ota      : Contains a Git sub-module of the AWS IoT OTA client library.
+ota-pal  : Contains implementations of the AWS IoT OTA client platform abstraction
+           layers - one per subdirectory.
+shadow   : Contains a Git sub-module of the AWS IoT Device Shadow client library.
+tools    : Contains tools that automate setup and provisioning actions.

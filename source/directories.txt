@@ -1,0 +1,12 @@
+This file describes the subdirectories contained in this directory.
+
+configuration-files : Contains configuration files for the library used by the
+                      demo contained in this directory - as well as a configuration
+                      file for the demo itself.
+defender-tools      : Contains utilities used by the AWS IoT Device Defender
+                      demo to collect metrics.
+demo-tasks          : Contains the files that implement all the AWS IoT and
+                      generic connectivity demos that use the MQTT agent.
+subscription-manager: Contains a utility that tracks the subscriptions created
+                      by the demo so subscriptions can be recreated if necessitated
+                      by a disconnect.

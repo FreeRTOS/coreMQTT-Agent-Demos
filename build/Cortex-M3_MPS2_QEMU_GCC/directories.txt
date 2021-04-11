@@ -1,0 +1,10 @@
+This file describes the subdirectories contained in this directory.
+
+target-specific-source  : While /source contains source and header files built
+                          by all the built projects projects contained in this
+                          Git repository, Cortex-M3_MPS2_QEMU_GCC/target-specific-source
+                          files contains the source and header files that are
+                          specific to the GCC project that targets a Cortex-M
+                          model in QEMU.
+
+
