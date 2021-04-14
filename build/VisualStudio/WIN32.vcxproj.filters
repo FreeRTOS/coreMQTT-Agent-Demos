@@ -166,11 +166,11 @@
     <Filter Include="Lib\AWS\Shadow\include">
       <UniqueIdentifier>{ff129ac5-3c99-4ce5-8968-5b9433332808}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\shadow-tasks">
-      <UniqueIdentifier>{66473abe-6956-449b-904a-fd3d655083c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Lib\FreeRTOS\MQTT-Agent-Interface">
       <UniqueIdentifier>{fefad340-836c-4887-afa9-8a31e570221e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\demo-tasks">
+      <UniqueIdentifier>{01af9f06-a4c2-47de-97b5-8c88ab6bd007}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -246,17 +246,11 @@
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_freertos_port.c">
       <Filter>Lib\FreeRTOS\utilities\mbedTLS-FreeRTOS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\connection_manager.c">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\backoff_algorithm.c">
       <Filter>Lib\FreeRTOS\utilities\Backoff-Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_mbedtls\using_mbedtls.c">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP\Using-mbedTLS</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\large_message_sub_pub_demo.c">
-      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\AWS\ota\source\ota.c">
       <Filter>Lib\AWS\OTA</Filter>
@@ -312,17 +306,8 @@
     <ClCompile Include="..\..\lib\AWS\ota-pal\Win32\ota_pal.c">
       <Filter>Lib\AWS\OTA-PAL\Win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ota_over_mqtt_demo.c">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\simple_sub_pub_demo.c">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\subscription-manager\subscription_manager.c">
       <Filter>Source\subscription-manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\defender_demo.c">
-      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\defender-tools\metrics_collector.c">
       <Filter>Source\defender-tools</Filter>
@@ -354,22 +339,37 @@
     <ClCompile Include="..\..\lib\AWS\shadow\source\shadow.c">
       <Filter>Lib\AWS\Shadow</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\shadow_demo.c">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\shadow-tasks\shadow_device_task.c">
-      <Filter>Source\shadow-tasks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\shadow-tasks\shadow_update_task.c">
-      <Filter>Source\shadow-tasks</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_agent_message.c">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.c">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
     </ClCompile>
-    <ClCompile Include="local-source-and-headers\logging_output_windows.c">
+    <ClCompile Include="..\..\source\demo-tasks\defender_demo.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\demo-tasks\large_message_sub_pub_demo.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\demo-tasks\ota_over_mqtt_demo.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\demo-tasks\shadow_demo.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\demo-tasks\shadow_device_task.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\demo-tasks\shadow_update_task.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\demo-tasks\simple_sub_pub_demo.c">
+      <Filter>Source\demo-tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\mqtt-agent-task.c">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="target-specific-source\logging_output_windows.c">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -597,5 +597,22 @@
     <None Include="..\..\lib\ThirdParty\tinycbor\src\README.md">
       <Filter>Lib\ThirdParty\tinyCBOR</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\source\directories.txt">
+      <Filter>Source</Filter>
+    </Text>
+    <Text Include="..\..\lib\directories.txt">
+      <Filter>Lib</Filter>
+    </Text>
+    <Text Include="..\..\lib\AWS\directories.txt">
+      <Filter>Lib\AWS</Filter>
+    </Text>
+    <Text Include="..\..\lib\FreeRTOS\directories.txt">
+      <Filter>Lib\FreeRTOS</Filter>
+    </Text>
+    <Text Include="..\..\lib\ThirdParty\directories.txt">
+      <Filter>Lib\ThirdParty</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -87,7 +87,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_USRDLL;MBEDTLS_EXPORTS;KRML_VERIFIED_UINT128;MBEDTLS_CONFIG_FILE="mbedtls_config.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>./local-source-and-headers;../../lib/FreeRTOS/utilities/mbedtls_freertos;../../lib/FreeRTOS/freertos-kernel/portable/MSVC-MingW;../../lib/FreeRTOS/freertos-kernel/include;../../source/configuration-files;../../lib/ThirdParty/mbedtls/library;../../lib/ThirdParty/mbedtls/include;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/everest;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/everest/vs2010;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/everest/kremlib;../../lib/ThirdParty/mbedtls/tests/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./target-specific-source;../../lib/FreeRTOS/utilities/mbedtls_freertos;../../lib/FreeRTOS/freertos-kernel/portable/MSVC-MingW;../../lib/FreeRTOS/freertos-kernel/include;../../source/configuration-files;../../lib/ThirdParty/mbedtls/library;../../lib/ThirdParty/mbedtls/include;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/everest;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/everest/vs2010;../../lib/ThirdParty/mbedtls/3rdparty/everest/include/everest/kremlib;../../lib/ThirdParty/mbedtls/tests/include</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>

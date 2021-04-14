@@ -1,0 +1,11 @@
+This file describes the subdirectories contained in this directory.
+
+AWS        : Contains Git submodules of libraries specific to the AWS IoT
+             services demonstrated by the projects contained in this Git
+             repository.
+FreeRTOS   : Contains Git submodules of generic and FreeRTOS specific libraries
+             (including the FreeRTOS kernel) used by the projects contained in
+             this Git repository.
+ThirdParty : Contains Git submodules of the ThirdParty libraries used by the
+             projects contained in this Git repository.
+

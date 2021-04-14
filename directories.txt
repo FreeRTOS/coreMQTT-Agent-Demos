@@ -1,0 +1,5 @@
+This file describes the subdirectories contained in this directory.
+
+build:  Contains projects that build this demo - one per sub-directory.
+lib:    Contains the libraries used by this demo.
+source: Contains the source files specific to this demo.

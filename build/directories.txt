@@ -1,0 +1,12 @@
+This file describes the subdirectories contained in this directory.
+
+VisualStudio            : Contains a Microsoft Visual Studio project that builds
+                          the demo contained in this Git repository.  The project
+                          is compatible with the free community edition of Visual
+                          Studio.  It targets the FreeRTOS Windows simulator.
+Cortex-M3_MPS2_QEMU_GCC : Contains makefiles and an Eclipse project, both of
+                          which build the demo contained in this git repository.
+                          The build uses arm-none-eabi-gcc and targets a Cortex-M3
+                          QEMU model.
+
+
