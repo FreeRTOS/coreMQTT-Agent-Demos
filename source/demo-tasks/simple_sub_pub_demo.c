@@ -215,8 +215,8 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
  * @brief Pass and fail counts for each created task.
  */
 #if democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE > 0
-    static volatile uint32_t ulQoS0FailCount[ democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ] = { 0UL }, ulQoS1FailCount[ democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ] = { 0UL };
-    static volatile uint32_t ulQoS0PassCount[ democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ] = { 0UL }, ulQoS1PassCount[ democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE ] = { 0UL };
+    static volatile uint32_t ulQoS0FailCount[ ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE + 1 ) / 2 ] = { 0UL }, ulQoS1FailCount[ ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE + 1 ) / 2 ] = { 0UL };
+    static volatile uint32_t ulQoS0PassCount[ ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE + 1 ) / 2 ] = { 0UL }, ulQoS1PassCount[ ( democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE + 1 ) / 2 ] = { 0UL };
 #else
     static volatile uint32_t ulQoS0FailCount[ 1 ] = { 0UL }, ulQoS1FailCount[ 1 ] = { 0UL };
     static volatile uint32_t ulQoS0PassCount[ 1 ] = { 0UL }, ulQoS1PassCount[ 1 ] = { 0UL };
