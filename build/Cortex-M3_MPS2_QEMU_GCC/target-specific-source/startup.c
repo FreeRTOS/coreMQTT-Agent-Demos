@@ -32,7 +32,8 @@
 #include "CMSIS/core_cm3.h"
 
 #define UART0_ADDR ((UART_t *)(0x40004000))
-#define UART_DR(baseaddr) (*(unsigned int *)(baseaddr))
+#define UART_DR( baseaddr ) (*(unsigned int *)(baseaddr))
+#define UART_STATE( baseaddr ) (*(unsigned int *)(baseaddr + 4))
 
 #define UART_STATE_TXFULL (1 << 0)
 #define UART_CTRL_TX_EN (1 << 0)
@@ -228,7 +229,8 @@ int _write(int file, char *buf, int len)
 
     for (todo = 0; todo < len; todo++)
     {
-        UART_DR(UART0_ADDR) = *buf++;
+        while( UART_STATE( UART0_ADDR ) & UART_STATE_TXFULL );
+        UART_DR( UART0_ADDR ) = *buf++;
     }
     return len;
 }

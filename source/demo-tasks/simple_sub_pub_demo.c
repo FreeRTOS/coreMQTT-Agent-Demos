@@ -79,7 +79,7 @@
 /**
  * @brief Delay for the synchronous publisher task between publishes.
  */
-#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 500U )
+#define mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS    ( 30U )
 
 /**
  * @brief Number of publishes done by each task in this demo.
