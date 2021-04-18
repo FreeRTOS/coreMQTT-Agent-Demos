@@ -4,38 +4,41 @@ IMAGE := RTOSDemo.elf
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-gcc
 
+SUB_MAKEFILE_DIR = ./library-makefiles
+
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
 		  -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 
 #must be the first include to ensure the correct FreeRTOSConfig.h is used.
-INCLUDE_DIRS += -I.
+INCLUDE_DIRS += -I./target-specific-source
+INCLUDE_DIRS += -I./target-specific-source/CMSIS
 INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/logging
 INCLUDE_DIRS += -I./../../source/configuration-files
 INCLUDE_DIRS += -I./../../lib/ThirdParty/mbedtls/include
 
 #FreeRTOS specific library includes
-include freertos-kernel.mk
-include freertos-plus-tcp.mk
+include $(SUB_MAKEFILE_DIR)/freertos-kernel.mk
+include $(SUB_MAKEFILE_DIR)/freertos-plus-tcp.mk
 
 #Standalone libraries, with the transport interface to link the coreMQTT library
 #to the FreeRTOS+TCP library.
-include coremqtt-agent.mk
-include corejson.mk
-include transport-interface.mk
+include $(SUB_MAKEFILE_DIR)/coremqtt-agent.mk
+include $(SUB_MAKEFILE_DIR)/corejson.mk
+include $(SUB_MAKEFILE_DIR)/transport-interface.mk
 
 #AWS IoT service client libraries
-include aws-iot-ota.mk
-include aws-iot-shadow.mk
-include aws-iot-device-defender.mk
+include $(SUB_MAKEFILE_DIR)/aws-iot-ota.mk
+include $(SUB_MAKEFILE_DIR)/aws-iot-shadow.mk
+include $(SUB_MAKEFILE_DIR)/aws-iot-device-defender.mk
 
 #Utility libraries
-include mbedtls-utils.mk #Implementation of the Mbed TLS port layer for FreeRTOS.
-include backoff-algorithm.mk
+include $(SUB_MAKEFILE_DIR)/mbedtls-utils.mk #Implementation of the Mbed TLS port layer for FreeRTOS.
+include $(SUB_MAKEFILE_DIR)/backoff-algorithm.mk
 
 #Third party libraries
-include tinycbor.mk
-include mbedtls.mk
+include $(SUB_MAKEFILE_DIR)/tinycbor.mk
+include $(SUB_MAKEFILE_DIR)/mbedtls.mk
 
 #Application source files
 APPLICATION_DIR += ./../../source

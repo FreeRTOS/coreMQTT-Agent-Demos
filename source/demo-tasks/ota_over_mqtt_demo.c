@@ -80,8 +80,10 @@
     #error "Please define the democonfigCLIENT_IDENTIFIER with the thing name for which OTA is performed"
 #endif
 
-#if !defined( MQTT_AGENT_NETWORK_BUFFER_SIZE ) || ( MQTT_AGENT_NETWORK_BUFFER_SIZE < OTA_DATA_BLOCK_SIZE )
-#error "MQTT agent buffer is too small. Please increase the buffer size to atleast the size required for OTA data block."
+#if( democonfigCREATE_DEFENDER_DEMO != 0 )
+    #if !defined( MQTT_AGENT_NETWORK_BUFFER_SIZE ) || ( MQTT_AGENT_NETWORK_BUFFER_SIZE < OTA_DATA_BLOCK_SIZE )
+        #error "MQTT agent buffer is too small. Please increase the buffer size to atleast the size required for OTA data block."
+    #endif
 #endif
 
 /**
@@ -1006,9 +1008,9 @@ static void setOtaInterfaces( OtaInterfaces_t * pOtaInterfaces )
     pOtaInterfaces->os.event.send = OtaSendEvent_FreeRTOS;
     pOtaInterfaces->os.event.recv = OtaReceiveEvent_FreeRTOS;
     pOtaInterfaces->os.event.deinit = OtaDeinitEvent_FreeRTOS;
-    pOtaInterfaces->os.timer.start = OtaStartTimer_FreeRTOS;
-    pOtaInterfaces->os.timer.stop = OtaStopTimer_FreeRTOS;
-    pOtaInterfaces->os.timer.delete = OtaDeleteTimer_FreeRTOS;
+    pOtaInterfaces->os.timer.startTimer = OtaStartTimer_FreeRTOS;
+    pOtaInterfaces->os.timer.stopTimer = OtaStopTimer_FreeRTOS;
+    pOtaInterfaces->os.timer.deleteTimer = OtaDeleteTimer_FreeRTOS;
     pOtaInterfaces->os.mem.malloc = Malloc_FreeRTOS;
     pOtaInterfaces->os.mem.free = Free_FreeRTOS;
 

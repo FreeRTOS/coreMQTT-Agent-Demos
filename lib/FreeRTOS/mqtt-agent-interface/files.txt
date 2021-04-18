@@ -1,0 +1,4 @@
+This directory contains an implementation of the MQTT agent interface functions
+that are specific to FreeRTOS.  The MQTT agent interface provides the functions
+that send messages into and receives messages from the MQTT agent task, as well
+as a thread safe pool of structures used with those functions.

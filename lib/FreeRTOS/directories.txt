@@ -1,2 +1,7 @@
 This directory contains Git submodules of the FreeRTOS and "core" libraries built
-by the demo contained in this Git repository.
+by the demo contained in this Git repository.  It also contains an implementation
+of the MQTT agent interface functions that are specific to FreeRTOS.  The MQTT
+agent interface provides the functions that send messages into and receive messages
+from the MQTT agent task, as well as a thread safe pool of structures used with
+those functions.
+
