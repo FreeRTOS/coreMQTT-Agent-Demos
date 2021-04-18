@@ -358,6 +358,7 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
 {
     static char pcMaxPayloadMessage[ mqttexampleMAX_PAYLOAD_LENGTH ];
     static char pcReceivedPublishPayload[ mqttexampleMAX_PAYLOAD_LENGTH ];
+    uint32_t ulLargeMessageFailures = 0, ulLargeMessagePasses = 0;
     MQTTPublishInfo_t xPublishInfo = { 0 };
     BaseType_t x;
     MQTTStatus_t xCommandAdded;
@@ -410,24 +411,36 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
         /* Only expect a single notification from the callback that executes
          * when the incoming publish (the message being echoed back) is
          * received. */
-        configASSERT( ulNotificationValue == 1 );
-
-        /* prvSubscribeCommandCallback() should have copied the payload form
-         * the incoming MQTT publish to receivedEchoPayload.  Check this matches
-         * the data that was published by this task. */
-        x = memcmp( pcMaxPayloadMessage, pcReceivedPublishPayload, mqttexampleMAX_PAYLOAD_LENGTH );
-        configASSERT( x == 0 );
-
-        if( x == 0 )
+        if( ulNotificationValue != 1 )
         {
-            LogInfo( ( "Received echoed message from publishing to topic %s. Sleeping for %d ms.",
-                       pcTopicFilter, mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            ulLargeMessageFailures++;
+
+            LogError( ( "Error - unexpected number of notifications (P%d:F%d).",
+                    ( int ) ulLargeMessagePasses,
+                    ( int ) ulLargeMessageFailures  ) );
         }
         else
         {
-            LogError( ( "Error - Timed out or didn't receive echoed message from publishing to topic %s Sleeping for %d ms.",
-                        pcTopicFilter,
-                        mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
+            /* prvSubscribeCommandCallback() should have copied the payload form
+             * the incoming MQTT publish to receivedEchoPayload.  Check this matches
+             * the data that was published by this task. */
+            x = memcmp( pcMaxPayloadMessage, pcReceivedPublishPayload, mqttexampleMAX_PAYLOAD_LENGTH );
+
+            if( x == 0 )
+            {
+                ulLargeMessagePasses++;
+                LogInfo( ( "Rx'ed ack from Tx to %s (P%d:F%d).",
+                           pcTopicFilter,
+                           ( int ) ulLargeMessagePasses,
+                           ( int ) ulLargeMessageFailures  ) );
+            }
+            else
+            {
+                LogError( ( "Timed out Rx'ing ack from Tx to %s (P%d:F%d)",
+                           pcTopicFilter,
+                           ( int ) ulLargeMessagePasses,
+                           ( int ) ulLargeMessageFailures  ) );
+            }
         }
 
         vTaskDelay( pdMS_TO_TICKS( mqttexampleDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) );
