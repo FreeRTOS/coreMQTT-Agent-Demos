@@ -273,9 +273,6 @@
     <ClCompile Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.c">
       <Filter>Lib\AWS\OTA\portable\os</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\coreJSON\source\core_json.c">
-      <Filter>Lib\FreeRTOS\coreJSON</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\ThirdParty\tinycbor\src\cborencoder.c">
       <Filter>Lib\ThirdParty\tinyCBOR</Filter>
     </ClCompile>
@@ -372,6 +369,9 @@
     <ClCompile Include="target-specific-source\logging_output_windows.c">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\lib\AWS\ota\source\dependency\coreJSON\source\core_json.c">
+      <Filter>Lib\FreeRTOS\coreJSON</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\portable\MSVC-MingW\portmacro.h">
@@ -457,9 +457,6 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\AWS\ota\source\portable\os\ota_os_freertos.h">
       <Filter>Lib\AWS\OTA\portable\os</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\coreJSON\source\include\core_json.h">
-      <Filter>Lib\FreeRTOS\coreJSON\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\cbor.h">
       <Filter>Lib\ThirdParty\tinyCBOR</Filter>
@@ -580,6 +577,9 @@
     </ClInclude>
     <ClInclude Include="target-specific-source\FreeRTOSIPConfig.h">
       <Filter>Configuration Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\AWS\ota\source\dependency\coreJSON\source\include\core_json.h">
+      <Filter>Lib\FreeRTOS\coreJSON\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
