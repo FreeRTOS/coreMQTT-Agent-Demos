@@ -528,19 +528,19 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         {
             if( xQoS == 0 )
             {
-                ( ulQoS0PassCount[ ulTaskNumber ] )++;
+                ( ulQoS0PassCount[ ulTaskNumber / 2 ] )++;
                 LogInfo( ( "Rx'ed QoS0 ack from Tx to %s (P%d:F%d).",
                            pcTopicBuffer,
-                           ( int ) ulQoS0PassCount[ ulTaskNumber ],
-                           ( int ) ulQoS0FailCount[ ulTaskNumber ] ) );
+                           ( int ) ulQoS0PassCount[ ulTaskNumber / 2 ],
+                           ( int ) ulQoS0FailCount[ ulTaskNumber / 2 ] ) );
             }
             else
             {
-                ( ulQoS1PassCount[ ulTaskNumber ] )++;
+                ( ulQoS1PassCount[ ulTaskNumber / 2 ] )++;
                 LogInfo( ( "Rx'ed QoS1 ack from Tx to %s (P%d:F%d).",
                            pcTopicBuffer,
-                           ( int ) ulQoS1PassCount[ ulTaskNumber ],
-                           ( int ) ulQoS1FailCount[ ulTaskNumber ] ) );
+                           ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
+                           ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
             }
 
         }
@@ -548,19 +548,19 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
         {
             if( xQoS == 0 )
             {
-                ( ulQoS0FailCount[ ulTaskNumber ] )++;
+                ( ulQoS0FailCount[ ulTaskNumber / 2 ] )++;
                 LogError( ( "Timed out Rx'ing QoS0 ack from Tx to %s (P%d:F%d)",
                            pcTopicBuffer,
-                           ( int ) ulQoS0PassCount[ ulTaskNumber ],
-                           ( int ) ulQoS0FailCount[ ulTaskNumber ] ) );
+                           ( int ) ulQoS0PassCount[ ulTaskNumber / 2 ],
+                           ( int ) ulQoS0FailCount[ ulTaskNumber / 2 ] ) );
             }
             else
             {
-                ( ulQoS1FailCount[ ulTaskNumber ] )++;
+                ( ulQoS1FailCount[ ulTaskNumber / 2 ] )++;
                 LogError( ( "Timed out Rx'ing QoS1 ack from Tx to %s (P%d:F%d)",
                            pcTopicBuffer,
-                           ( int ) ulQoS1PassCount[ ulTaskNumber ],
-                           ( int ) ulQoS1FailCount[ ulTaskNumber ] ) );
+                           ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
+                           ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
             }
         }
 
