@@ -25,7 +25,7 @@
  */
 
 /**
- * @file freertos_agent_message.h
+ * @file freertos_core_mqtt_agent_message_interface.h
  * @brief Functions to interact with queues.
  */
 #ifndef FREERTOS_AGENT_MESSAGE_H
@@ -40,7 +40,7 @@
 #include "queue.h"
 
 /* Include MQTT agent messaging interface. */
-#include "agent_message.h"
+#include "core_mqtt_agent_message_interface.h"
 
 /**
  * @ingroup mqtt_agent_struct_types

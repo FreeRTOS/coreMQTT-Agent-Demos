@@ -55,7 +55,7 @@
 #include "demo_config.h"
 
 /* MQTT library includes. */
-#include "mqtt_agent.h"
+#include "core_mqtt_agent.h"
 
 /* Subscription manager header include. */
 #include "subscription_manager.h"

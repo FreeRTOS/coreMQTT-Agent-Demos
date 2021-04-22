@@ -25,8 +25,8 @@
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt_serializer.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt_state.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\mqtt_agent.c" />
-    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\mqtt_agent_command_functions.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\core_mqtt_agent.c" />
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\core_mqtt_agent_command_functions.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_agent_message.c" />
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-kernel\event_groups.c" />
@@ -91,11 +91,11 @@
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt_serializer.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt_state.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\interface\transport_interface.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\agent_message.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\mqtt_agent.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\mqtt_agent_command_functions.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\core_mqtt_agent_message_interface.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\core_mqtt_agent.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\core_mqtt_agent_command_functions.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_agent_message.h" />
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_core_mqtt_agent_message_interface.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\event_groups.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\FreeRTOS.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-kernel\include\message_buffer.h" />
