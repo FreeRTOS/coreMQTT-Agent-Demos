@@ -140,7 +140,7 @@
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
-struct CommandContext
+struct MQTTAgentCommandContext
 {
     bool xReturnStatus;
 };
@@ -235,12 +235,12 @@ static bool prvSubscribeToShadowUpdateTopics( void )
     bool xReturnStatus = false;
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
 
     /* These must persist until the command is processed. */
     MQTTAgentSubscribeArgs_t xSubscribeArgs;
     MQTTSubscribeInfo_t xSubscribeInfo[ 2 ];
-    CommandContext_t xApplicationDefinedContext = { 0 };
+    MQTTAgentCommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Subscribe to shadow topic for accepted responses for submitted updates. */
     xSubscribeInfo[ 0 ].pTopicFilter = SHADOW_TOPIC_STRING_UPDATE_ACCEPTED( democonfigCLIENT_IDENTIFIER );
@@ -301,7 +301,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSuccess = false;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
 
     /* Check if the subscribe operation is a success. */
     if( pxReturnInfo->returnCode == MQTTSuccess )
@@ -536,7 +536,7 @@ void vShadowUpdateTask( void * pvParameters )
     bool xStatus = true;
     uint32_t ulNotificationValue;
     static MQTTPublishInfo_t xPublishInfo = { 0 };
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
     MQTTStatus_t xCommandAdded;
     uint32_t desiredState = 0;
 
@@ -551,7 +551,7 @@ void vShadowUpdateTask( void * pvParameters )
      * send a notification to this task. */
     xShadowUpdateTaskHandle = xTaskGetCurrentTaskHandle();
 
-    /* Set up the CommandInfo_t for the demo loop.
+    /* Set up the MQTTAgentCommandInfo_t for the demo loop.
      * We do not need a completion callback here since for publishes, we expect to get a
      * response on the appropriate topics for accepted or rejected reports. */
     xCommandParams.blockTimeMs = shadowexampleMAX_COMMAND_SEND_BLOCK_TIME_MS;

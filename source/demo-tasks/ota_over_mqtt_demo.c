@@ -193,7 +193,7 @@
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
-struct CommandContext
+struct MQTTAgentCommandContext
 {
     MQTTStatus_t xReturnStatus;
     TaskHandle_t xTaskToNotify;
@@ -775,7 +775,7 @@ bool vOTAProcessMessage( void * pvIncomingPublishCallbackContext,
 
 /*-----------------------------------------------------------*/
 
-static void prvCommandCallback( CommandContext_t * pCommandContext,
+static void prvCommandCallback( MQTTAgentCommandContext_t * pCommandContext,
                                 MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     pCommandContext->xReturnStatus = pxReturnInfo->returnCode;
@@ -800,8 +800,8 @@ static OtaMqttStatus_t prvMQTTSubscribe( const char * pTopicFilter,
     MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
     MQTTSubscribeInfo_t xSubscribeInfo = { 0 };
     BaseType_t result;
-    CommandInfo_t xCommandParams = { 0 };
-    CommandContext_t xApplicationDefinedContext = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandContext_t xApplicationDefinedContext = { 0 };
     OtaMqttStatus_t otaRet = OtaMqttSuccess;
 
     configASSERT( pTopicFilter != NULL );
@@ -870,8 +870,8 @@ static OtaMqttStatus_t prvMQTTPublish( const char * const pacTopic,
     BaseType_t result;
     MQTTStatus_t mqttStatus = MQTTBadParameter;
     MQTTPublishInfo_t publishInfo = { 0 };
-    CommandInfo_t xCommandParams = { 0 };
-    CommandContext_t xCommandContext = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandContext_t xCommandContext = { 0 };
 
     publishInfo.pTopicName = pacTopic;
     publishInfo.topicNameLength = topicLen;
@@ -932,8 +932,8 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
     MQTTAgentSubscribeArgs_t xSubscribeArgs = { 0 };
     MQTTSubscribeInfo_t xSubscribeInfo = { 0 };
     BaseType_t result;
-    CommandInfo_t xCommandParams = { 0 };
-    CommandContext_t xApplicationDefinedContext = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandContext_t xApplicationDefinedContext = { 0 };
     OtaMqttStatus_t otaRet = OtaMqttSuccess;
 
     configASSERT( pTopicFilter != NULL );

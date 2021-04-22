@@ -99,7 +99,7 @@
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
-struct CommandContext
+struct MQTTAgentCommandContext
 {
     MQTTStatus_t xReturnStatus;
     TaskHandle_t xTaskToNotify;
@@ -140,7 +140,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
  */
-static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
+static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                        MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -252,7 +252,7 @@ void vStartSimpleSubscribePublishTask( uint32_t ulNumberToCreate,
 
 /*-----------------------------------------------------------*/
 
-static void prvPublishCommandCallback( CommandContext_t * pxCommandContext,
+static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                        MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     /* Store the result in the application defined context so the task that
@@ -276,7 +276,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSubscriptionAdded = false;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
     MQTTAgentSubscribeArgs_t * pxSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pxApplicationDefinedContext->pArgs;
 
     /* Store the result in the application defined context so the task that
@@ -361,8 +361,8 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     MQTTAgentSubscribeArgs_t xSubscribeArgs;
     MQTTSubscribeInfo_t xSubscribeInfo;
     static int32_t ulNextSubscribeMessageID = 0;
-    CommandContext_t xApplicationDefinedContext = { 0UL };
-    CommandInfo_t xCommandParams = { 0UL };
+    MQTTAgentCommandContext_t xApplicationDefinedContext = { 0UL };
+    MQTTAgentCommandInfo_t xCommandParams = { 0UL };
 
     /* Create a unique number of the subscribe that is about to be sent.  The number
      * is used as the command context and is sent back to this task as a notification
@@ -441,13 +441,13 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     MQTTPublishInfo_t xPublishInfo = { 0UL };
     char payloadBuf[ mqttexampleSTRING_BUFFER_LENGTH ];
     char taskName[ mqttexampleSTRING_BUFFER_LENGTH ];
-    CommandContext_t xCommandContext;
+    MQTTAgentCommandContext_t xCommandContext;
     uint32_t ulNotification = 0U, ulValueToNotify = 0UL;
     MQTTStatus_t xCommandAdded;
     uint32_t ulTaskNumber = ( uint32_t ) pvParameters;
     MQTTQoS_t xQoS;
     TickType_t xTicksToDelay;
-    CommandInfo_t xCommandParams = { 0UL };
+    MQTTAgentCommandInfo_t xCommandParams = { 0UL };
     char * pcTopicBuffer = topicBuf[ ulTaskNumber ];
 
     /* Have different tasks use different QoS.  0 and 1.  2 can also be used

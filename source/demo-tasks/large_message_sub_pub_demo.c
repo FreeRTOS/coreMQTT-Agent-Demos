@@ -95,7 +95,7 @@
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
-struct CommandContext
+struct MQTTAgentCommandContext
 {
     MQTTStatus_t xReturnStatus; /* Pass out the result of the operation. */
     TaskHandle_t xTaskToNotify; /* Handle of the task to send a notification to. */
@@ -205,7 +205,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSubscriptionAdded = false;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
@@ -239,7 +239,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 static void prvIncomingPublishCallback( void * pxSubscriptionContext,
                                         MQTTPublishInfo_t * pxPublishInfo )
 {
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxSubscriptionContext;
 
     /* Check the incoming message will fit in the buffer before writing it to
      * buffer so the demo task can check the data received from the topic
@@ -297,10 +297,10 @@ static void prvSubscribeToTopic( char * pcReceivedPublishPayload )
     MQTTSubscribeInfo_t xSubscribeInfo;
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
 
     /* Context must persist as long as subscription persists. */
-    static CommandContext_t xApplicationDefinedContext = { 0 };
+    static MQTTAgentCommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Record the handle of this task in the context that will be used within
     * the callbacks so the callbacks can send a notification to this task. */
@@ -363,7 +363,7 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
     BaseType_t x;
     MQTTStatus_t xCommandAdded;
     uint32_t ulNotificationValue;
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
 
     ( void ) pvParameters;
 

@@ -374,7 +374,7 @@ MQTTAgentContext_t xGlobalMqttAgentContext;
 
 static uint8_t xNetworkBuffer[ MQTT_AGENT_NETWORK_BUFFER_SIZE ];
 
-static AgentMessageContext_t xCommandQueue;
+static MQTTAgentMessageContext_t xCommandQueue;
 
 /**
  * @brief The global array of subscription elements.
@@ -412,9 +412,9 @@ static MQTTStatus_t prvMQTTInit( void )
     TransportInterface_t xTransport;
     MQTTStatus_t xReturn;
     MQTTFixedBuffer_t xFixedBuffer = { .pBuffer = xNetworkBuffer, .size = MQTT_AGENT_NETWORK_BUFFER_SIZE };
-    static uint8_t staticQueueStorageArea[ MQTT_AGENT_COMMAND_QUEUE_LENGTH * sizeof( Command_t * ) ];
+    static uint8_t staticQueueStorageArea[ MQTT_AGENT_COMMAND_QUEUE_LENGTH * sizeof( MQTTAgentCommand_t * ) ];
     static StaticQueue_t staticQueueStructure;
-    AgentMessageInterface_t messageInterface = {
+    MQTTAgentMessageInterface_t messageInterface = {
         .pMsgCtx = NULL,
         .send = Agent_MessageSend,
         .recv = Agent_MessageReceive,
@@ -424,7 +424,7 @@ static MQTTStatus_t prvMQTTInit( void )
 
     LogDebug( ( "Creating command queue." ) );
     xCommandQueue.queue = xQueueCreateStatic( MQTT_AGENT_COMMAND_QUEUE_LENGTH,
-                                              sizeof( Command_t * ),
+                                              sizeof( MQTTAgentCommand_t * ),
                                               staticQueueStorageArea,
                                               &staticQueueStructure );
     configASSERT( xCommandQueue.queue );
@@ -545,7 +545,7 @@ static MQTTStatus_t prvHandleResubscribe( void )
     /* These variables need to stay in scope until command completes. */
     static MQTTAgentSubscribeArgs_t xSubArgs = { 0 };
     static MQTTSubscribeInfo_t xSubInfo[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS ] = { 0 };
-    static CommandInfo_t xCommandParams = { 0 };
+    static MQTTAgentCommandInfo_t xCommandParams = { 0 };
 
     /* Loop through each subscription in the subscription list and add a subscribe
      * command to the command queue. */
@@ -786,7 +786,7 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;

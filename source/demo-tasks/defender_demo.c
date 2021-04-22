@@ -166,7 +166,7 @@
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
-struct CommandContext
+struct MQTTAgentCommandContext
 {
     MQTTStatus_t xReturnStatus;
     TaskHandle_t xTaskToNotify;
@@ -364,14 +364,14 @@ static bool prvSubscribeToDefenderTopics( void )
 {
     MQTTStatus_t xStatus;
     uint32_t ulNotificationValue;
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
 
     /* These must persist until the command is processed. */
     static MQTTAgentSubscribeArgs_t xSubscribeArgs;
     static MQTTSubscribeInfo_t xSubscribeInfo[ 2 ];
 
     /* Context must persist as long as subscription persists. */
-    static CommandContext_t xApplicationDefinedContext = { 0 };
+    static MQTTAgentCommandContext_t xApplicationDefinedContext = { 0 };
 
     /* Record the handle of this task in the context that will be used within
     * the callbacks so the callbacks can send a notification to this task. */
@@ -438,7 +438,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSubscriptionAdded = false;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxCommandContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
@@ -485,7 +485,7 @@ static void prvIncomingAcceptedPublishCallback( void * pxSubscriptionContext,
                                                 MQTTPublishInfo_t * pxPublishInfo )
 {
     bool xValidationResult;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxSubscriptionContext;
 
     /* Check if the response is valid and is for the report we
      * published. If so, report was accepted. */
@@ -511,7 +511,7 @@ static void prvIncomingRejectedPublishCallback( void * pxSubscriptionContext,
                                                 MQTTPublishInfo_t * pxPublishInfo )
 {
     bool xValidationResult;
-    CommandContext_t * pxApplicationDefinedContext = ( CommandContext_t * ) pxSubscriptionContext;
+    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxSubscriptionContext;
 
     /* Check if the response is valid and is for the report we
      * published. If so, report was rejected. */
@@ -679,7 +679,7 @@ static bool prvGenerateDeviceMetricsReport( uint32_t * pulOutReportLength )
 static bool prvPublishDeviceMetricsReport( uint32_t reportLength )
 {
     static MQTTPublishInfo_t xPublishInfo = { 0 };
-    CommandInfo_t xCommandParams = { 0 };
+    MQTTAgentCommandInfo_t xCommandParams = { 0 };
     MQTTStatus_t xCommandAdded;
 
     xPublishInfo.qos = MQTTQoS1;
