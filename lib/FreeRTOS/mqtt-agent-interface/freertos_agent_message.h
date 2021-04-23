@@ -25,7 +25,7 @@
  */
 
 /**
- * @file freertos_agent_message.h
+ * @file freertos_core_mqtt_agent_message_interface.h
  * @brief Functions to interact with queues.
  */
 #ifndef FREERTOS_AGENT_MESSAGE_H
@@ -40,13 +40,13 @@
 #include "queue.h"
 
 /* Include MQTT agent messaging interface. */
-#include "agent_message.h"
+#include "core_mqtt_agent_message_interface.h"
 
 /**
  * @ingroup mqtt_agent_struct_types
  * @brief Context with which tasks may deliver messages to the agent.
  */
-struct AgentMessageContext
+struct MQTTAgentMessageContext
 {
     QueueHandle_t queue;
 };
@@ -63,8 +63,8 @@ struct AgentMessageContext
  *
  * @return `true` if send was successful, else `false`.
  */
-bool Agent_MessageSend( const AgentMessageContext_t * pMsgCtx,
-                        Command_t * const * pCommandToSend,
+bool Agent_MessageSend( const MQTTAgentMessageContext_t * pMsgCtx,
+                        MQTTAgentCommand_t * const * pCommandToSend,
                         uint32_t blockTimeMs );
 
 /**
@@ -77,8 +77,8 @@ bool Agent_MessageSend( const AgentMessageContext_t * pMsgCtx,
  *
  * @return `true` if receive was successful, else `false`.
  */
-bool Agent_MessageReceive( const AgentMessageContext_t * pMsgCtx,
-                           Command_t ** pReceivedCommand,
+bool Agent_MessageReceive( const MQTTAgentMessageContext_t * pMsgCtx,
+                           MQTTAgentCommand_t ** pReceivedCommand,
                            uint32_t blockTimeMs );
 
 #endif /* FREERTOS_AGENT_MESSAGE_H */

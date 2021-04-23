@@ -321,10 +321,10 @@
     <ClCompile Include="..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\tcp_netstat.c">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\tcp_utilities</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\mqtt_agent.c">
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\core_mqtt_agent.c">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\mqtt_agent_command_functions.c">
+    <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\core_mqtt_agent_command_functions.c">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\core_mqtt.c">
@@ -536,13 +536,13 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\tools\tcp_utilities\include\tcp_netstat.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\tcp_utilities\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\agent_message.h">
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\core_mqtt_agent_message_interface.h">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\mqtt_agent.h">
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\core_mqtt_agent.h">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\mqtt_agent_command_functions.h">
+    <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\include\core_mqtt_agent_command_functions.h">
       <Filter>Lib\FreeRTOS\coreMQTT-Agent\source\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\coreMQTT-Agent\source\dependency\coreMQTT\source\include\core_mqtt.h">
@@ -569,7 +569,7 @@
     <ClInclude Include="..\..\source\configuration-files\shadow_config.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_agent_message.h">
+    <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_core_mqtt_agent_message_interface.h">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.h">
