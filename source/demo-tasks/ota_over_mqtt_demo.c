@@ -80,7 +80,7 @@
     #error "Please define the democonfigCLIENT_IDENTIFIER with the thing name for which OTA is performed"
 #endif
 
-#if( democonfigCREATE_DEFENDER_DEMO != 0 )
+#if ( democonfigCREATE_DEFENDER_DEMO != 0 )
     #if !defined( MQTT_AGENT_NETWORK_BUFFER_SIZE ) || ( MQTT_AGENT_NETWORK_BUFFER_SIZE < OTA_DATA_BLOCK_SIZE )
         #error "MQTT agent buffer is too small. Please increase the buffer size to atleast the size required for OTA data block."
     #endif

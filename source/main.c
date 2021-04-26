@@ -229,11 +229,11 @@ static void prvMiscInitialisation( void )
     uint32_t ulLoggingIPAddress;
 
     /* Perform any initialisation that is specific to a build.  This macro
-    can be defined in the build specific FreeRTOSConfig.h header file. */
+     * can be defined in the build specific FreeRTOSConfig.h header file. */
     #ifdef configBUILD_SPECIFIC_INITIALISATION
-    {
-		configBUILD_SPECIFIC_INITIALISATION();
-    }
+        {
+            configBUILD_SPECIFIC_INITIALISATION();
+        }
     #endif
 
     /* Note the parameters are only used in the demo that uses the Windows port. */
@@ -346,15 +346,15 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
 
 void vApplicationMallocFailedHook( void )
 {
-	LogDebug( ( "Malloc failed\n" ) );
+    LogDebug( ( "Malloc failed\n" ) );
 }
 /*-----------------------------------------------------------*/
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                    char *pcTaskName )
+                                    char * pcTaskName )
 
 {
-volatile uint32_t ulSetToZeroToStepOut = 1UL;
+    volatile uint32_t ulSetToZeroToStepOut = 1UL;
 
     taskENTER_CRITICAL();
 
@@ -365,6 +365,3 @@ volatile uint32_t ulSetToZeroToStepOut = 1UL;
     {
     }
 }
-
-
-

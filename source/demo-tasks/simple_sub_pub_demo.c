@@ -542,7 +542,6 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
                            ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
                            ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
             }
-
         }
         else
         {
@@ -550,17 +549,17 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
             {
                 ( ulQoS0FailCount[ ulTaskNumber / 2 ] )++;
                 LogError( ( "Timed out Rx'ing QoS0 ack from Tx to %s (P%d:F%d)",
-                           pcTopicBuffer,
-                           ( int ) ulQoS0PassCount[ ulTaskNumber / 2 ],
-                           ( int ) ulQoS0FailCount[ ulTaskNumber / 2 ] ) );
+                            pcTopicBuffer,
+                            ( int ) ulQoS0PassCount[ ulTaskNumber / 2 ],
+                            ( int ) ulQoS0FailCount[ ulTaskNumber / 2 ] ) );
             }
             else
             {
                 ( ulQoS1FailCount[ ulTaskNumber / 2 ] )++;
                 LogError( ( "Timed out Rx'ing QoS1 ack from Tx to %s (P%d:F%d)",
-                           pcTopicBuffer,
-                           ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
-                           ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
+                            pcTopicBuffer,
+                            ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
+                            ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
             }
         }
 

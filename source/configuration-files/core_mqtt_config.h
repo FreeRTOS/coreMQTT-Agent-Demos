@@ -75,12 +75,12 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * macro sets the limit on how many simultaneous PUBLISH states an MQTT
  * context maintains.
  */
-#define MQTT_STATE_ARRAY_MAX_COUNT          ( 20U )
-#define MQTT_RECV_POLLING_TIMEOUT_MS        ( 1000 )
+#define MQTT_STATE_ARRAY_MAX_COUNT                   ( 20U )
+#define MQTT_RECV_POLLING_TIMEOUT_MS                 ( 1000 )
 
 /*_RB_ To document and add to the mqtt config defaults header file. */
-#define MQTT_AGENT_COMMAND_QUEUE_LENGTH     ( 25 )
-#define MQTT_COMMAND_CONTEXTS_POOL_SIZE     ( 10 )
+#define MQTT_AGENT_COMMAND_QUEUE_LENGTH              ( 25 )
+#define MQTT_COMMAND_CONTEXTS_POOL_SIZE              ( 10 )
 
 /**
  * @brief The maximum number of subscriptions to track for a single connection.
@@ -100,13 +100,13 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * characters. The higher this number is the greater the agent's RAM consumption
  * will be.
  */
-#define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH ( 100 )
+#define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH    ( 100 )
 
 /**
  * @brief Dimensions the buffer used to serialise and deserialise MQTT packets.
  * @note Specified in bytes.  Must be large enough to hold the maximum
  * anticipated MQTT payload.
  */
-#define MQTT_AGENT_NETWORK_BUFFER_SIZE    ( 5000 )
+#define MQTT_AGENT_NETWORK_BUFFER_SIZE               ( 5000 )
 
 #endif /* ifndef CORE_MQTT_CONFIG_H */

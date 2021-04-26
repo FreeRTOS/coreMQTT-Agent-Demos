@@ -54,7 +54,7 @@
  * The function prints to the console before the network is connected;
  * then a UDP port after the network has connected. */
 extern void vLoggingPrintf( const char * pcFormatString,
-                             ... );
+                            ... );
 
 /* Map the SdkLog macro to the logging function to enable logging
  * on Windows simulator. */
@@ -98,7 +98,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *!!! hard coded constant.
  *
  */
-#define democonfigCLIENT_IDENTIFIER              "...insert here..."
+#define democonfigCLIENT_IDENTIFIER                        "...insert here..."
 
 /**
  * @brief Endpoint of the MQTT broker to connect to.
@@ -114,7 +114,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * AWS CLI command line tool).
  *
  */
-#define democonfigMQTT_BROKER_ENDPOINT           "...insert here..."
+#define democonfigMQTT_BROKER_ENDPOINT                     "...insert here..."
 
 /**
  * @brief The port to use for the demo.
@@ -129,7 +129,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigMQTT_BROKER_PORT    ( insert here. )
  */
-#define democonfigMQTT_BROKER_PORT        ( 8883 )
+#define democonfigMQTT_BROKER_PORT                         ( 8883 )
 
 /**
  * @brief Server's root CA certificate.
@@ -151,7 +151,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigROOT_CA_PEM    "...insert here..."
  */
-#define democonfigROOT_CA_PEM                    "...insert here..."
+#define democonfigROOT_CA_PEM                              "...insert here..."
 
 /**
  * @brief Client certificate.
@@ -169,7 +169,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_CERTIFICATE_PEM    "...insert here..."
  */
-#define democonfigCLIENT_CERTIFICATE_PEM         "...insert here..."
+#define democonfigCLIENT_CERTIFICATE_PEM                   "...insert here..."
 
 /**
  * @brief Client's private key.
@@ -195,7 +195,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  *
  * #define democonfigCLIENT_PRIVATE_KEY_PEM    "...insert here..."
  */
-#define democonfigCLIENT_PRIVATE_KEY_PEM         "...insert here..."
+#define democonfigCLIENT_PRIVATE_KEY_PEM                   "...insert here..."
 
 
 

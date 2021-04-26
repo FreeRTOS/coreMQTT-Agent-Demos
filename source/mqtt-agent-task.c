@@ -414,11 +414,12 @@ static MQTTStatus_t prvMQTTInit( void )
     MQTTFixedBuffer_t xFixedBuffer = { .pBuffer = xNetworkBuffer, .size = MQTT_AGENT_NETWORK_BUFFER_SIZE };
     static uint8_t staticQueueStorageArea[ MQTT_AGENT_COMMAND_QUEUE_LENGTH * sizeof( MQTTAgentCommand_t * ) ];
     static StaticQueue_t staticQueueStructure;
-    MQTTAgentMessageInterface_t messageInterface = {
-        .pMsgCtx = NULL,
-        .send = Agent_MessageSend,
-        .recv = Agent_MessageReceive,
-        .getCommand = Agent_GetCommand,
+    MQTTAgentMessageInterface_t messageInterface =
+    {
+        .pMsgCtx        = NULL,
+        .send           = Agent_MessageSend,
+        .recv           = Agent_MessageReceive,
+        .getCommand     = Agent_GetCommand,
         .releaseCommand = Agent_ReleaseCommand
     };
 
@@ -787,6 +788,7 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
     MQTTAgentCommandInfo_t xCommandParams = { 0 };
+
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;

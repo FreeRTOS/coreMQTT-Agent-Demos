@@ -416,8 +416,8 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
             ulLargeMessageFailures++;
 
             LogError( ( "Error - unexpected number of notifications (P%d:F%d).",
-                    ( int ) ulLargeMessagePasses,
-                    ( int ) ulLargeMessageFailures  ) );
+                        ( int ) ulLargeMessagePasses,
+                        ( int ) ulLargeMessageFailures ) );
         }
         else
         {
@@ -432,14 +432,14 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
                 LogInfo( ( "Rx'ed ack from Tx to %s (P%d:F%d).",
                            pcTopicFilter,
                            ( int ) ulLargeMessagePasses,
-                           ( int ) ulLargeMessageFailures  ) );
+                           ( int ) ulLargeMessageFailures ) );
             }
             else
             {
                 LogError( ( "Timed out Rx'ing ack from Tx to %s (P%d:F%d)",
-                           pcTopicFilter,
-                           ( int ) ulLargeMessagePasses,
-                           ( int ) ulLargeMessageFailures  ) );
+                            pcTopicFilter,
+                            ( int ) ulLargeMessagePasses,
+                            ( int ) ulLargeMessageFailures ) );
             }
         }
 
