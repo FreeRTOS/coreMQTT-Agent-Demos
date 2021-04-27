@@ -39,8 +39,8 @@
  *    #define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE 3
  *
  *    then the initial task will create the task implemented in
- *    LargeMessageSubScribePublish.c and three instances of the task
- *    implemented in SimpleSubscribePublishT.c.  See the comments at the top
+ *    large_message_sub_pub_demo.c and three instances of the task
+ *    implemented in simple_sub_pub_demo.c.  See the comments at the top
  *    of those files for more information.
  *
  * 3) After creating the demo tasks the initial task could create the MQTT
@@ -414,11 +414,12 @@ static MQTTStatus_t prvMQTTInit( void )
     MQTTFixedBuffer_t xFixedBuffer = { .pBuffer = xNetworkBuffer, .size = MQTT_AGENT_NETWORK_BUFFER_SIZE };
     static uint8_t staticQueueStorageArea[ MQTT_AGENT_COMMAND_QUEUE_LENGTH * sizeof( MQTTAgentCommand_t * ) ];
     static StaticQueue_t staticQueueStructure;
-    MQTTAgentMessageInterface_t messageInterface = {
-        .pMsgCtx = NULL,
-        .send = Agent_MessageSend,
-        .recv = Agent_MessageReceive,
-        .getCommand = Agent_GetCommand,
+    MQTTAgentMessageInterface_t messageInterface =
+    {
+        .pMsgCtx        = NULL,
+        .send           = Agent_MessageSend,
+        .recv           = Agent_MessageReceive,
+        .getCommand     = Agent_GetCommand,
         .releaseCommand = Agent_ReleaseCommand
     };
 
@@ -787,6 +788,7 @@ static BaseType_t prvSocketDisconnect( NetworkContext_t * pxNetworkContext )
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
     MQTTAgentCommandInfo_t xCommandParams = { 0 };
+
     /* Just to avoid compiler warnings.  The socket is not used but the function
      * prototype cannot be changed because this is a callback function. */
     ( void ) pxSocket;

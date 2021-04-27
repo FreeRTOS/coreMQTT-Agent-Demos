@@ -228,7 +228,7 @@ eMetricsCollectorStatus eGetEstablishedConnections( Connection_t * pxOutConnecti
 
     if( eStatus == eMetricsCollectorSuccess )
     {
-        /* Fill the output array with as many TCP socket infos as will fit in
+        /* Fill the output array with as much TCP socket info as will fit in
          * the given array. */
         if( pxOutConnectionsArray != NULL )
         {

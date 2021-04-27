@@ -25,8 +25,8 @@
 
 /*
  * This file demonstrates using the MQTT agent API to send MQTT packets that
- * contain a payload nearly equal to the buffer size used to serialise and
- * deserialise MQTT packets.  It can be used to test behaviour when the MQTT
+ * contain a payload nearly equal to the buffer size used to serialize and
+ * deserialize MQTT packets.  It can be used to test behavior when the MQTT
  * packet is larger than the TCP/IP buffers.  The task can run simultaneously
  * to other demo tasks that also use the MQTT agent API to interact over the
  * same MQTT connection to the same MQTT broker.
@@ -83,7 +83,7 @@
 
 /**
  * @brief Create an MQTT payload that almost fills the buffer allocated for
- * MQTT message serialisation, leaving a little room for the MQTT protocol
+ * MQTT message serialization, leaving a little room for the MQTT protocol
  * headers themselves.
  */
 #define mqttexamplePROTOCOL_OVERHEAD                      ( 50 )
@@ -152,7 +152,7 @@ static uint32_t prvWaitForCommandAcknowledgment( void );
 
 
 /**
- * @brief Create a buffer of data that is easily recognisable in WireShark.
+ * @brief Create a buffer of data that is easily recognizable in WireShark.
  * Completely fill the MQTT network buffer, other than leaving a space for the
  * MQTT protocol headers themselves.
  *
@@ -416,8 +416,8 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
             ulLargeMessageFailures++;
 
             LogError( ( "Error - unexpected number of notifications (P%d:F%d).",
-                    ( int ) ulLargeMessagePasses,
-                    ( int ) ulLargeMessageFailures  ) );
+                        ( int ) ulLargeMessagePasses,
+                        ( int ) ulLargeMessageFailures ) );
         }
         else
         {
@@ -432,14 +432,14 @@ static void prvLargeMessageSubscribePublishTask( void * pvParameters )
                 LogInfo( ( "Rx'ed ack from Tx to %s (P%d:F%d).",
                            pcTopicFilter,
                            ( int ) ulLargeMessagePasses,
-                           ( int ) ulLargeMessageFailures  ) );
+                           ( int ) ulLargeMessageFailures ) );
             }
             else
             {
                 LogError( ( "Timed out Rx'ing ack from Tx to %s (P%d:F%d)",
-                           pcTopicFilter,
-                           ( int ) ulLargeMessagePasses,
-                           ( int ) ulLargeMessageFailures  ) );
+                            pcTopicFilter,
+                            ( int ) ulLargeMessagePasses,
+                            ( int ) ulLargeMessageFailures ) );
             }
         }
 

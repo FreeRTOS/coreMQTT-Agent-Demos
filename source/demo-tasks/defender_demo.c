@@ -31,7 +31,7 @@
  * related to device defender.
  *
  * This demo subscribes to the device defender topics. It then collects metrics
- * for the open ports and sockets on the device using FreeRTOS+TCP. Additonally
+ * for the open ports and sockets on the device using FreeRTOS+TCP. Additionally
  * the stack high water mark and task ids are collected for custom metrics.
  * These metrics are uses to generate a device defender report. The
  * report is then published, and the demo waits for a response from the device
@@ -133,7 +133,7 @@
 #define defenderexampleDEVICE_METRICS_REPORT_MINOR_VERSION    0
 
 /**
- * @brief Time in ms to wait between consequtive defender reports
+ * @brief Time in ms to wait between consecutive defender reports
  */
 #define defenderexampleMS_BETWEEN_REPORTS                     ( 15000U )
 
@@ -266,7 +266,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 /**
  * @brief The callback to execute when there is an incoming publish on the
  * topic for accepted report responses. It verifies the response and sets the
- * report reponse state accordingly.
+ * report response state accordingly.
  *
  * @param[in] pvIncomingPublishCallbackContext Context of the initial command.
  * @param[in] pxPublishInfo Deserialized publish.
@@ -277,7 +277,7 @@ static void prvIncomingAcceptedPublishCallback( void * pxSubscriptionContext,
 /**
  * @brief The callback to execute when there is an incoming publish on the
  * topic for rejected report responses. It verifies the response and sets the
- * report reponse state accordingly.
+ * report response state accordingly.
  *
  * @param[in] pvIncomingPublishCallbackContext Context of the initial command.
  * @param[in] pxPublishInfo Deserialized publish.
