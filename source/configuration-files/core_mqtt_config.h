@@ -103,7 +103,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define MQTT_AGENT_MAX_SUBSCRIPTION_FILTER_LENGTH    ( 100 )
 
 /**
- * @brief Dimensions the buffer used to serialise and deserialise MQTT packets.
+ * @brief Dimensions the buffer used to serialize and deserialize MQTT packets.
  * @note Specified in bytes.  Must be large enough to hold the maximum
  * anticipated MQTT payload.
  */

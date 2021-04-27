@@ -39,8 +39,8 @@
  *    #define democonfigNUM_SIMPLE_SUB_PUB_TASKS_TO_CREATE 3
  *
  *    then the initial task will create the task implemented in
- *    LargeMessageSubScribePublish.c and three instances of the task
- *    implemented in SimpleSubscribePublishT.c.  See the comments at the top
+ *    large_message_sub_pub_demo.c and three instances of the task
+ *    implemented in simple_sub_pub_demo.c.  See the comments at the top
  *    of those files for more information.
  *
  * 3) After creating the demo tasks the initial task could create the MQTT

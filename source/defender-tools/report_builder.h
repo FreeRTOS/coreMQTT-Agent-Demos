@@ -74,7 +74,7 @@ typedef struct ReportMetrics
  * @param[in] ulMajorReportVersion Major version of the report.
  * @param[in] ulMinorReportVersion Minor version of the report.
  * @param[in] ulReportId Value to be used as the ulReportId in the generated report.
- * @param[out] pulOutReprotLength The length of the generated report.
+ * @param[out] pulOutReportLength The length of the generated report.
  *
  * @return #ReportBuilderSuccess if the report is successfully generated;
  * #ReportBuilderBadParameter if invalid parameters are passed;

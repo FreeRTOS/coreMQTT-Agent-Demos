@@ -25,7 +25,7 @@
  */
 
 /*
- * Demo task for requsting updates to a device shadow using the Device Shadow library's API.
+ * Demo task for requesting updates to a device shadow using the Device Shadow library's API.
  * This task flips the powerOn state in the device shadow on a fixed interval.
  *
  * This example assumes there is a powerOn state in the device shadow. It does the
@@ -103,7 +103,7 @@
  * @brief The expected size of #SHADOW_DESIRED_JSON.
  *
  * Since all of the format specifiers in #SHADOW_DESIRED_JSON include a length,
- * its actual size can be pre-calculated at compile time from the difference between
+ * its actual size can be precalculated at compile time from the difference between
  * the lengths of the format strings and their formatted output. We must subtract 2
  * from the length as according the following formula:
  * 1. The length of the format string "%1u" is 3.

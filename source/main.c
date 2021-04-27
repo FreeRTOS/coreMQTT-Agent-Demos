@@ -228,7 +228,7 @@ static void prvMiscInitialisation( void )
     time_t xTimeNow;
     uint32_t ulLoggingIPAddress;
 
-    /* Perform any initialisation that is specific to a build.  This macro
+    /* Perform any initialization that is specific to a build.  This macro
      * can be defined in the build specific FreeRTOSConfig.h header file. */
     #ifdef configBUILD_SPECIFIC_INITIALISATION
         {

@@ -34,7 +34,7 @@
  * thread safety of the MQTT operations and allows OTA agent to share the same MQTT
  * broker connection with other tasks. OTA agent invokes the callback implementations to
  * publish job related control information, as well as receive chunks
- * of pre-signed firmware image from the MQTT broker.
+ * of presigned firmware image from the MQTT broker.
  *
  * See https://freertos.org/mqtt/mqtt-agent-demo.html
  * See https://freertos.org/ota/ota-mqtt-agent-demo.html
@@ -123,7 +123,7 @@
 /**
  * @brief Wildcard topic filter for job notification.
  * The filter is used to match the constructed job notify topic filter from OTA agent and register
- * appropirate callback for it.
+ * appropriate callback for it.
  */
 #define OTA_JOB_NOTIFY_TOPIC_FILTER                      OTA_TOPIC_PREFIX "jobs/notify-next"
 
@@ -149,7 +149,7 @@
 /**
  * @brief Wildcard topic filter for matching OTA data packets.
  *  The filter is used to match the constructed data stream topic filter from OTA agent and register
- * appropirate callback for it.
+ * appropriate callback for it.
  */
 #define OTA_DATA_STREAM_TOPIC_FILTER           OTA_TOPIC_PREFIX  "streams/#"
 
@@ -205,16 +205,16 @@ struct MQTTAgentCommandContext
  *
  * The implementation uses MQTT agent to queue a publish request. It then waits
  * for the request complete notification from the agent. The notification along with result of the
- * operation is sent back to the caller task using xTaksNotify API. For publishes involving QOS 1 and
- * QOS2 the operation is complete once an acknwoledgment (PUBACK) is received. OTA agent uses this function
- * to fetch new job, provide status update and send other control related messges to the MQTT broker.
+ * operation is sent back to the caller task using xTaskNotify API. For publishes involving QOS 1 and
+ * QOS2 the operation is complete once an acknowledgment (PUBACK) is received. OTA agent uses this function
+ * to fetch new job, provide status update and send other control related messages to the MQTT broker.
  *
  * @param[in] pacTopic Topic to publish the control packet to.
  * @param[in] topicLen Length of the topic string.
  * @param[in] pMsg Message to publish.
  * @param[in] msgSize Size of the message to publish.
  * @param[in] qos Qos for the publish.
- * @return OtaMqttSuccess if successful. Appropirate error code otherwise.
+ * @return OtaMqttSuccess if successful. Appropriate error code otherwise.
  */
 static OtaMqttStatus_t prvMQTTPublish( const char * const pacTopic,
                                        uint16_t topicLen,
@@ -236,7 +236,7 @@ static OtaMqttStatus_t prvMQTTPublish( const char * const pacTopic,
  * @param[in] pTopicFilter The topic filter used to subscribe for packets.
  * @param[in] topicFilterLength Length of the topic filter string.
  * @param[in] ucQoS Intended qos value for the messages received on this topic.
- * @return OtaMqttSuccess if successful. Appropirate error code otherwise.
+ * @return OtaMqttSuccess if successful. Appropriate error code otherwise.
  */
 static OtaMqttStatus_t prvMQTTSubscribe( const char * pTopicFilter,
                                          uint16_t topicFilterLength,
@@ -251,10 +251,10 @@ static OtaMqttStatus_t prvMQTTSubscribe( const char * pTopicFilter,
  * subscription from its memory so any future
  * packets on this topic will not be routed to the OTA agent.
  *
- * @param[in] pTopicFilter Topic filter to be unsubscibed.
+ * @param[in] pTopicFilter Topic filter to be unsubscribed.
  * @param[in] topicFilterLength Length of the topic filter.
  * @param[in] ucQos Qos value for the topic.
- * @return OtaMqttSuccess if successful. Appropirate error code otherwise.
+ * @return OtaMqttSuccess if successful. Appropriate error code otherwise.
  *
  */
 static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
@@ -269,7 +269,7 @@ static OtaMqttStatus_t prvMQTTUnsubscribe( const char * pTopicFilter,
  * within ota_config.h. This function is used to fetch a free buffer from the pool for processing
  * by the OTA agent task. It uses a mutex for thread safe access to the pool.
  *
- * @return A pointer to an unusued buffer. NULL if there are no buffers available.
+ * @return A pointer to an unused buffer. NULL if there are no buffers available.
  */
 static OtaEventData_t * prvOTAEventBufferGet( void );
 
@@ -330,7 +330,7 @@ static void prvProcessIncomingData( void * pxSubscriptionContext,
  *
  * Callback gets invoked for any OTA job related control messages from the MQTT broker.
  * The function is registered with MQTT agent's subscription manger along with the topic filter for
- * job stream. The function fetches a free event buffer from the pool and queues the appropirate event type
+ * job stream. The function fetches a free event buffer from the pool and queues the appropriate event type
  * based on the control message received.
  *
  * @param[in] pxSubscriptionContext Context which is passed unmodified from the MQTT agent.
