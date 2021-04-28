@@ -22,7 +22,7 @@ git submodule update --init --recursive
 ```
 
 ## Getting started
-The [documentation page](https://freertos.org/mqtt/mqtt-agent-demo.html) for this repository contains information on the MQTT agent and the contained demo project.  There is also a [supplemental documentation page](https://freertos.org/ota/ota-mqtt-agent-demo.html) that describes how to run an Over the Air (OTA) update agent as one of the RTOS tasks that share the same MQTT connection.
+The [documentation page](https://freertos.org/mqtt/mqtt-agent-demo.html) for this repository contains information on the MQTT agent and the contained demo project.  There is also a [supplemental documentation page](https://freertos.org/ota/ota-mqtt-agent-demo.html) that describes how to run an Over-the-Air (OTA) update agent as one of the RTOS tasks that share the same MQTT connection.
 
 ## Building Demos
 This repository contains build files for the FreeRTOS Windows port - able to be run with the free [Community version of Visual Studio](https://visualstudio.microsoft.com/vs/community/) - and an ARM Cortex M model in the [QEMU hardware emulator](https://www.qemu.org/).
@@ -61,4 +61,3 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 ## License
 
 This library is licensed under the MIT License. See the [LICENSE](LICENSE.md) file.
-
