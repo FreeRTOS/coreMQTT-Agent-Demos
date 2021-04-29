@@ -60,7 +60,7 @@ Use the QEMU command contained in the [start_qemu.bat](build/Cortex-M3_MPS2_QEMU
 
 Note these QEMU command lines assume there is a network tap driver called "TAP0".
 
-**Obtaing network access from QEMU on windows**
+**Obtaining network access from QEMU on Windows**
 
 1. Install the [OpenVPN TAP driver for Windows](https://openvpn.net/).
 
