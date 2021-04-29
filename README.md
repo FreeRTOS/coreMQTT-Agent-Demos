@@ -64,7 +64,7 @@ Note these QEMU command lines assume there is a network tap driver called "TAP0"
 
 1. Install the [OpenVPN TAP driver for Windows](https://openvpn.net/).
 
-1. Name the installed TAP interface "TAP0".  This can be done by selecting "Change adaptor settings" from the Windows' Network Properties window (Control Panel\Network and Internet\Network Connections) to view all network adaptors, selecting the installed TAP adapter, then pressing F2 to edit the adaptor's name.
+1. Name the installed TAP interface "TAP0".  This can be done by selecting "Change adapter settings" from Windows' Network Properties window (Control Panel\Network and Internet\Network Connections) to view all network adapters, selecting the installed TAP adapter, and then pressing F2 to edit the adapter's name.
 
 1. From the same window, configure a real wired network interface to have a static IP address that is compatible with whichever IP address would otherwise be allocated by a DHCP server on your local network.
 
