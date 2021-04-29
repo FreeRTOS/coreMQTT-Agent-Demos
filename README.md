@@ -58,7 +58,7 @@ In both cases, the generated executable can be found at `build/Cortex-M3_MPS2_QE
 
 Use the QEMU command contained in the [start_qemu.bat](build/Cortex-M3_MPS2_QEMU_GCC/start_qemu.bat) batch file to run the generated `RTOSDemo.elf` file directly.  Alternatively, use the command contained in the [start_qemu_and_wait.bat](build/Cortex-M3_MPS2_QEMU_GCC/start_qemu_and_wait.bat) batch file to start QEMU and wait for a GBD connection on port 1234.  The Eclipse project contains a suitable debug configuration.
 
-Note these QEMU command lines assume there is a network tap driver called "TAP0".
+Note that these QEMU commands assume there is a network tap driver called "TAP0".
 
 **Obtaining network access from QEMU on Windows**
 
