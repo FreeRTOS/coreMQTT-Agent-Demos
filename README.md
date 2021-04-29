@@ -25,7 +25,7 @@ git submodule update --init --recursive
 The [documentation page](https://freertos.org/mqtt/mqtt-agent-demo.html) for this repository contains information on the MQTT agent and the contained demo project.  There is also a [supplemental documentation page](https://freertos.org/ota/ota-mqtt-agent-demo.html) that describes how to run an Over-the-Air (OTA) update agent as one of the RTOS tasks that share the same MQTT connection.
 
 ## Building Demos
-This repository contains both a Visual Studio project that uses the FreeRTOS Windows port and can be built using the free [Community version of Visual Studio](https://visualstudio.microsoft.com/vs/community/), and a GCC/makefile project that build the FreeRTOS ARM Cortex-M3 port and targets the [QEMU hardware emulator](https://www.qemu.org/).  The makefile can be built form the command line or the provided Eclipse project, and works on both Windows and Linux hosts.
+This repository contains both a Visual Studio project that uses the FreeRTOS Windows port and can be built using the free [Community version of Visual Studio](https://visualstudio.microsoft.com/vs/community/), and a GCC/makefile project that build the FreeRTOS ARM Cortex-M3 port and targets the [QEMU hardware emulator](https://www.qemu.org/).  The makefile can be built from the command line or the provided Eclipse project, and works on both Windows and Linux hosts.
 
 ### Visual Studio
 
