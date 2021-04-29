@@ -25,11 +25,11 @@ git submodule update --init --recursive
 The [documentation page](https://freertos.org/mqtt/mqtt-agent-demo.html) for this repository contains information on the MQTT agent and the contained demo project.  There is also a [supplemental documentation page](https://freertos.org/ota/ota-mqtt-agent-demo.html) that describes how to run an Over-the-Air (OTA) update agent as one of the RTOS tasks that share the same MQTT connection.
 
 ## Building Demos
-This repository contains both a Visual Studio project using the free [Community version of Visual Studio](https://visualstudio.microsoft.com/vs/community/) and builds the FreeRTOS Windows port, and a GCC/makefile project that build the FreeRTOS ARM Cortex-M3 port and targets the [QEMU hardware emulator](https://www.qemu.org/).  The makefile can be built form the command line or the provided Eclipse project, and works on both Windows and Linux targets.
+This repository contains both a Visual Studio project that uses the FreeRTOS Windows port and can be built using the free [Community version of Visual Studio](https://visualstudio.microsoft.com/vs/community/), and a GCC/makefile project that build the FreeRTOS ARM Cortex-M3 port and targets the [QEMU hardware emulator](https://www.qemu.org/).  The makefile can be built form the command line or the provided Eclipse project, and works on both Windows and Linux hosts.
 
 ### Visual Studio
 
-1. Ensure to follow the instructions on the above linked demo documentation page to configure the build for network access.
+1. Ensure to follow the instructions on the above linked demo documentation page to configure the build as required to access your network.
 
 1. From the Visual Studio IDE, open the `mqtt_multitask_demo.sln` Visual Studio solution file in the `build/VisualStudio/` directory.
 
@@ -54,17 +54,17 @@ This repository contains both a Visual Studio project using the free [Community 
 
 In both cases, the generated executable can be found at `build/Cortex-M3_MPS2_QEMU_GCC/output/RTOSDemo.elf`.
 
-**QEMU**
+**Running the makefile build in QEMU**
 
-Use the QEMU command line contained in the [start_qemu.bat](https://github.com/FreeRTOS/coreMQTT-Agent-Demos/blob/main/build/Cortex-M3_MPS2_QEMU_GCC/start_qemu.bat) batch file to run the output RTOSDemo.elf file.  Alternatively use the command line contained in the [start_qemu_and_wait.bat](https://github.com/FreeRTOS/coreMQTT-Agent-Demos/blob/main/build/Cortex-M3_MPS2_QEMU_GCC/start_qemu_and_wait.bat) batch file to start QEMU and wait for a GBD connection on port 1234.  The Eclipse project contains a suitable debug configuration.
+Use the QEMU command line contained in the [start_qemu.bat](https://github.com/FreeRTOS/coreMQTT-Agent-Demos/blob/main/build/Cortex-M3_MPS2_QEMU_GCC/start_qemu.bat) batch file to run the generated 'RTOSDemo.elf' file directly.  Alternatively use the command line contained in the [start_qemu_and_wait.bat](https://github.com/FreeRTOS/coreMQTT-Agent-Demos/blob/main/build/Cortex-M3_MPS2_QEMU_GCC/start_qemu_and_wait.bat) batch file to start QEMU and wait for a GBD connection on port 1234.  The Eclipse project contains a suitable debug configuration.
 
 Note these QEMU command lines assume there is a network tap driver called "TAP0".
 
-To obtain network access from QEMU on windows:
+**Obtaing network access from QEMU on windows**
 
 1. Install the [OpenVPN TAP driver for Windows](https://openvpn.net/).
 
-1. Name the installed TAP interface "TAP0" - this can be done by selecting "Change adaptor settings" in the Windows Network Properties window (Control Panel\Network and Internet\Network Connections), then editing the name directly in window that shows all your network interfaces.
+1. Name the installed TAP interface "TAP0".  This can be done by selecting "Change adaptor settings" from the Windows' Network Properties window (Control Panel\Network and Internet\Network Connections) to view all network adaptors, selecting the installed TAP adapter, then pressing F2 to edit the adaptor's name.
 
 1. From the same window, configure a real wired network interface to have a static IP address that is compatible with whichever IP address would otherwise be allocated by a DHCP server on your local network.
 
