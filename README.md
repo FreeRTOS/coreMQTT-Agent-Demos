@@ -1,9 +1,6 @@
-## MQTT Agent and Demo Tasks (including OTA) - Using coreMQTT
+## coreMQTT Agent and Demo Tasks (including OTA)
 
-This repository provides demonstration examples of using the [coreMQTT Agent library](https://github.com/FreeRTOS/coreMQTT-Agent) with FreeRTOS. The coreMQTT Agent library is an extension on top of [coreMQTT](https://github.com/FreeRTOS/coreMQTT) that provides MQTT APIs with thread safety. The examples here share a single MQTT connection amongst multiple concurrent tasks, without requiring the management of any synchronization primitives from the application.
-
-### What is coreMQTT?
-[coreMQTT](https://github.com/FreeRTOS/coreMQTT) is an MIT licensed open source C MQTT client library for microcontrollers and small microprocessor based IoT devices. Its design is intentionally simple to ensure it has no dependency on any other library or operating system, and to better enable static analysis including [memory safety proofs](https://www.freertos.org/2020/02/ensuring-the-memory-safety-of-freertos-part-1.html). That simplicity and lack of operating system dependency (coreMQTT does not require multithreading at all) means coreMQTT does not build thread safety directly into its implementation. Instead thread safety must be provided by higher level software. The coreMQTT Agent library is an extension to the coreMQTT library to provide the higher level thread-safe MQTT API functionality in the form of an MQTT agent (or MQTT daemon).
+This repository demonstrates examples of using AWS IoT Device Shadow, Device Defender, and OTA from multiple threads. It uses FreeRTOS and the [coreMQTT Agent library](https://github.com/FreeRTOS/coreMQTT-Agent), an extension on top of [coreMQTT](https://github.com/FreeRTOS/coreMQTT) that provides MQTT APIs with thread safety. The examples here share a single MQTT connection amongst multiple concurrent tasks, without requiring the management of any synchronization primitives from the application.
 
 ## Cloning this repository
 This repo uses [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to bring in dependent components.
@@ -55,7 +52,7 @@ This repository contains build files for the FreeRTOS Windows port - able to be 
 In both cases, the generated executable can be found at `build/Cortex-M3_MPS2_QEMU_GCC/output/RTOSDemo.elf`.
 
 ## Getting help
-You can use your Github login to get support from both the FreeRTOS community and directly from the primary FreeRTOS developers on our [active support forum](https://forums.freertos.org).  The [FAQ](https://www.freertos.org/FAQ.html) provides another support resource.
+You can use your Github login to get support from both the FreeRTOS community and directly from the primary FreeRTOS developers on our [active support forum](https://forums.freertos.org). You can also find a list of frequently asked questions [here](https://www.freertos.org/FAQ.html).
 
 ## Security
 
