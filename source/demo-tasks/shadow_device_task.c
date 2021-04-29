@@ -206,7 +206,7 @@ static bool prvSubscribeToShadowUpdateTopics( void );
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxReturnInfo The result of the command.
  */
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -334,11 +334,10 @@ static bool prvSubscribeToShadowUpdateTopics( void )
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSuccess = false;
-    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
 
     /* Check if the subscribe operation is a success. */
     if( pxReturnInfo->returnCode == MQTTSuccess )
@@ -393,7 +392,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
-    pxApplicationDefinedContext->xReturnStatus = xSuccess;
+    pxCommandContext->xReturnStatus = xSuccess;
 
     xTaskNotifyGive( xShadowDeviceTaskHandle );
 }

@@ -260,7 +260,7 @@ static bool prvSubscribeToDefenderTopics( void );
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
  */
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -434,15 +434,14 @@ static bool prvSubscribeToDefenderTopics( void )
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSubscriptionAdded = false;
-    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
-    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+    pxCommandContext->xReturnStatus = pxReturnInfo->returnCode;
 
     /* Check if the subscribe operation is a success. */
     if( pxReturnInfo->returnCode == MQTTSuccess )
@@ -453,7 +452,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                               DEFENDER_API_JSON_ACCEPTED( democonfigCLIENT_IDENTIFIER ),
                                               DEFENDER_API_LENGTH_JSON_ACCEPTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
                                               prvIncomingAcceptedPublishCallback,
-                                              pxApplicationDefinedContext );
+                                              pxCommandContext );
 
         if( xSubscriptionAdded == false )
         {
@@ -466,7 +465,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                               DEFENDER_API_JSON_REJECTED( democonfigCLIENT_IDENTIFIER ),
                                               DEFENDER_API_LENGTH_JSON_REJECTED( democonfigCLIENT_IDENTIFIER_LENGTH ),
                                               prvIncomingRejectedPublishCallback,
-                                              pxApplicationDefinedContext );
+                                              pxCommandContext );
 
         if( xSubscriptionAdded == false )
         {
@@ -476,7 +475,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
         }
     }
 
-    xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
+    xTaskNotifyGive( pxCommandContext->xTaskToNotify );
 }
 
 /*-----------------------------------------------------------*/

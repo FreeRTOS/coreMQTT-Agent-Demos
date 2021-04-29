@@ -575,10 +575,10 @@
     <ClInclude Include="..\..\lib\FreeRTOS\mqtt-agent-interface\freertos_command_pool.h">
       <Filter>Lib\FreeRTOS\MQTT-Agent-Interface</Filter>
     </ClInclude>
-    <ClInclude Include="local-source-and-headers\FreeRTOSConfig.h">
+    <ClInclude Include="target-specific-source\FreeRTOSConfig.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
-    <ClInclude Include="local-source-and-headers\FreeRTOSIPConfig.h">
+    <ClInclude Include="target-specific-source\FreeRTOSIPConfig.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
   </ItemGroup>
