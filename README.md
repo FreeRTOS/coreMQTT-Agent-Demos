@@ -68,7 +68,7 @@ Note these QEMU command lines assume there is a network tap driver called "TAP0"
 
 1. From the same window, configure a real wired network interface to have a static IP address that is compatible with whichever IP address would otherwise be allocated by a DHCP server on your local network.
 
-1. Still in the same window, select both the real network adaptor and the TAP adapter at the same, then right click, and select "Bridge Connections" from the pop up menu.
+1. Still in the same window, select both the real network adapter and the TAP adapter at the same, then right click, and select "Bridge Connections" from the pop up menu.
 
 ## Getting help
 You can use your Github login to get support from both the FreeRTOS community and directly from the primary FreeRTOS developers on our [active support forum](https://forums.freertos.org). You can also find a list of frequently asked questions [here](https://www.freertos.org/FAQ.html).
