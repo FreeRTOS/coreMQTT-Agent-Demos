@@ -116,7 +116,7 @@ struct MQTTAgentCommandContext
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
  */
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -201,15 +201,14 @@ void vStartLargeMessageSubscribePublishTask( configSTACK_DEPTH_TYPE uxStackSize,
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSubscriptionAdded = false;
-    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
 
     /* Store the result in the application defined context so the calling task
      * can check it. */
-    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+    pxCommandContext->xReturnStatus = pxReturnInfo->returnCode;
 
     /* Check if the subscribe operation is a success. Only one topic is
      * subscribed by this demo. */
@@ -221,7 +220,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
                                               pcTopicFilter,
                                               ( uint16_t ) strlen( pcTopicFilter ),
                                               prvIncomingPublishCallback,
-                                              pxApplicationDefinedContext );
+                                              pxCommandContext );
 
         if( xSubscriptionAdded == false )
         {
@@ -231,7 +230,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
         }
     }
 
-    xTaskNotifyGive( pxApplicationDefinedContext->xTaskToNotify );
+    xTaskNotifyGive( pxCommandContext->xTaskToNotify );
 }
 
 /*-----------------------------------------------------------*/

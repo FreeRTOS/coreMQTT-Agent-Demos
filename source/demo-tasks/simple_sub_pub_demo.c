@@ -123,7 +123,7 @@ struct MQTTAgentCommandContext
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
  */
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -272,18 +272,17 @@ static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandCont
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscribeCommandCallback( void * pxCommandContext,
+static void prvSubscribeCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                          MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     bool xSubscriptionAdded = false;
-    MQTTAgentCommandContext_t * pxApplicationDefinedContext = ( MQTTAgentCommandContext_t * ) pxCommandContext;
-    MQTTAgentSubscribeArgs_t * pxSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pxApplicationDefinedContext->pArgs;
+    MQTTAgentSubscribeArgs_t * pxSubscribeArgs = ( MQTTAgentSubscribeArgs_t * ) pxCommandContext->pArgs;
 
     /* Store the result in the application defined context so the task that
      * initiated the subscribe can check the operation's status.  Also send the
      * status as the notification value.  These things are just done for
      * demonstration purposes. */
-    pxApplicationDefinedContext->xReturnStatus = pxReturnInfo->returnCode;
+    pxCommandContext->xReturnStatus = pxReturnInfo->returnCode;
 
     /* Check if the subscribe operation is a success. Only one topic is
      * subscribed by this demo. */
@@ -305,7 +304,7 @@ static void prvSubscribeCommandCallback( void * pxCommandContext,
         }
     }
 
-    xTaskNotify( pxApplicationDefinedContext->xTaskToNotify,
+    xTaskNotify( pxCommandContext->xTaskToNotify,
                  ( uint32_t ) ( pxReturnInfo->returnCode ),
                  eSetValueWithOverwrite );
 }

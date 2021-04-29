@@ -146,8 +146,8 @@
     <ClInclude Include="..\..\source\defender-tools\metrics_collector.h" />
     <ClInclude Include="..\..\source\defender-tools\report_builder.h" />
     <ClInclude Include="..\..\source\subscription-manager\subscription_manager.h" />
-    <ClInclude Include="local-source-and-headers\FreeRTOSConfig.h" />
-    <ClInclude Include="local-source-and-headers\FreeRTOSIPConfig.h" />
+    <ClInclude Include="target-specific-source\FreeRTOSConfig.h" />
+    <ClInclude Include="target-specific-source\FreeRTOSIPConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\lib\ThirdParty\WinPCap\wpcap.lib" />
