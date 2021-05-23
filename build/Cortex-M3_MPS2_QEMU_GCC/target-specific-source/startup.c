@@ -31,25 +31,16 @@
 #include "CMSIS/CMSDK_CM3.h"
 #include "CMSIS/core_cm3.h"
 
-#define UART0_ADDR ((UART_t *)(0x40004000))
-#define UART_DR( baseaddr ) (*(unsigned int *)(baseaddr))
-#define UART_STATE( baseaddr ) (*(unsigned int *)(baseaddr + 4))
+/* UART peripheral register addresses and bits. */
+#define UART0_ADDR             ( ( UART_t * ) ( 0x40004000 ) )
+#define UART_DR( baseaddr )    ( *( uint32_t * ) ( baseaddr ) )
+#define UART_STATE( baseaddr ) ( *( uint32_t * ) ( baseaddr + 4 ) )
+#define UART_STATE_TXFULL      ( 1 << 0 )
+#define UART_CTRL_TX_EN        ( 1 << 0 )
+#define UART_CTRL_RX_EN        ( 1 << 1 )
 
-#define UART_STATE_TXFULL (1 << 0)
-#define UART_CTRL_TX_EN (1 << 0)
-#define UART_CTRL_RX_EN (1 << 1)
-
-extern void vPortSVCHandler( void );
-extern void xPortPendSVHandler( void );
-extern void xPortSysTickHandler( void );
-extern void EthernetISR( void );
-extern void uart_init();
-extern int main( void );
-void uart_init( void );
-
-void __attribute__((weak)) EthernetISR (void);
-
-typedef struct UART_t {
+typedef struct UART_t
+{
     volatile uint32_t DATA;
     volatile uint32_t STATE;
     volatile uint32_t CTRL;
@@ -57,14 +48,68 @@ typedef struct UART_t {
     volatile uint32_t BAUDDIV;
 } UART_t;
 
+
+/* FreeRTOS interrupt handlers. */
+extern void vPortSVCHandler( void );
+extern void xPortPendSVHandler( void );
+extern void xPortSysTickHandler( void );
+
+/* Exception handlers. */
+static void HardFault_Handler( void ) __attribute__( ( naked ) );
+static void Default_Handler( void ) __attribute__( ( naked ) );
+void Reset_Handler( void );
+
+/* Peripheral interrupt handlers. */
+extern void EthernetISR( void );
+
+static void uart_init( void );
+extern int main( void );
+extern uint32_t _estack;
+
+/* Vector table. */
+const uint32_t* isr_vector[] __attribute__((section(".isr_vector"))) =
+{
+    ( uint32_t * ) &_estack,
+    ( uint32_t * ) &Reset_Handler,     // Reset                -15
+    ( uint32_t * ) &Default_Handler,   // NMI_Handler          -14
+    ( uint32_t * ) &HardFault_Handler, // HardFault_Handler    -13
+    ( uint32_t * ) &Default_Handler,   // MemManage_Handler    -12
+    ( uint32_t * ) &Default_Handler,   // BusFault_Handler     -11
+    ( uint32_t * ) &Default_Handler,   // UsageFault_Handler   -10
+    0, // reserved
+    0, // reserved
+    0, // reserved
+    0, // reserved   -6
+    ( uint32_t * ) &vPortSVCHandler,    // SVC_Handler              -5
+    ( uint32_t * ) &Default_Handler,    // DebugMon_Handler         -4
+    0, // reserved
+    ( uint32_t * ) &xPortPendSVHandler, // PendSV handler    -2
+    ( uint32_t * ) &xPortSysTickHandler,// SysTick_Handler   -1
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    ( uint32_t * ) EthernetISR, // Ethernet   13
+};
+
 void Reset_Handler( void )
 {
     uart_init();
     main();
 }
 
-/* These are volatile to try and prevent the compiler/linker optimising them
-away as the variables never actually get used. */
+/* Variables used to store the value of registers at the time a hardfault
+ * occurs.  These are volatile to try and prevent the compiler/linker optimising
+ * them away as the variables never actually get used. */
 volatile uint32_t r0;
 volatile uint32_t r1;
 volatile uint32_t r2;
@@ -74,6 +119,9 @@ volatile uint32_t lr; /* Link register. */
 volatile uint32_t pc; /* Program counter. */
 volatile uint32_t psr;/* Program status register. */
 
+/* Called from the hardfault handler to provide information on the processor
+ * state at the time of the faul.
+ */
 void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
 {
     r0 = pulFaultStackAddress[ 0 ];
@@ -92,26 +140,23 @@ void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
     for( ;; );
 }
 
-static void Default_Handler( void ) __attribute__( ( naked ) );
-void Default_Handler(void)
+
+void Default_Handler( void )
 {
     __asm volatile
     (
-        "Default_Handler: \n"
-        "    ldr r3, NVIC_INT_CTRL_CONST  \n"
-        "    ldr r2, [r3, #0]\n"
-        "    uxtb r2, r2\n"
-        "Infinite_Loop:\n"
-        "    b  Infinite_Loop\n"
-        ".size  Default_Handler, .-Default_Handler\n"
-        ".align 4\n"
-        "NVIC_INT_CTRL_CONST: .word 0xe000ed04\n"
+        " ldr r3, NVIC_INT_CTRL_CONST            \n" /* Load the address of the interrupt control register into r3. */
+        " ldr r2, [r3, #0]                       \n" /* Load the value of the interrupt control register into r2. */
+        " uxtb r2, r2                            \n" /* The interrupt number is in the least significant byte - clear all other bits. */
+        "Infinite_Loop:                          \n" /* Sit in an infinite loop - the number of the executing interrupt is held in r2. */
+        " b  Infinite_Loop                       \n"
+        ".align 4                                \n"
+        "NVIC_INT_CTRL_CONST: .word 0xe000ed04   \n"
     );
 }
-static void HardFault_Handler( void ) __attribute__( ( naked ) );
-void Default_Handler2(void)
-{
 
+void HardFault_Handler( void )
+{
     __asm volatile
     (
         " tst lr, #4                                                \n"
@@ -125,96 +170,14 @@ void Default_Handler2(void)
     );
 }
 
-void Default_Handler3(void)
-{
-    for (;;) { }
-}
-
-void Default_Handler4(void)
-{
-    for (;;) { }
-}
-
-void Default_Handler5(void)
-{
-    for (;;) { }
-}
-
-void Default_Handler6(void)
-{
-    for (;;) { }
-}
-
-void Default_Handler13(void)
-{
-    for (;;) { }
-}
-
-extern uint32_t _estack;
-const uint32_t* isr_vector[] __attribute__((section(".isr_vector"))) =
-{
-    (uint32_t*)&_estack,
-    (uint32_t*)&Reset_Handler,    // Reset                -15
-    (uint32_t*)&Default_Handler,  // NMI_Handler          -14
-    (uint32_t*)&Default_Handler2, // HardFault_Handler    -13
-    (uint32_t*)&Default_Handler3, // MemManage_Handler    -12
-    (uint32_t*)&Default_Handler4, // BusFault_Handler     -11
-    (uint32_t*)&Default_Handler5, // UsageFault_Handler   -10
-    0, // reserved
-    0, // reserved
-    0, // reserved
-    0, // reserved   -6
-    (uint32_t*)&vPortSVCHandler,  // SVC_Handler              -5
-    (uint32_t*)&Default_Handler6, // DebugMon_Handler         -4
-    0, // reserved
-    (uint32_t*)&xPortPendSVHandler,      // PendSV handler    -2
-    (uint32_t*)&xPortSysTickHandler,     // SysTick_Handler   -1
-    0,                    // uart0 receive 0
-    0,                    // uart0 transmit
-    0,                    // uart1 receive
-    0,                    // uart1 transmit
-    0,                    // uart 2 receive
-    0,                    // uart 2 transmit
-    0,                    // GPIO 0 combined interrupt
-    0,                    // GPIO 2 combined interrupt
-    0,                    // Timer 0
-    0,                    // Timer 1
-    0,                    // Dial Timer
-    0,                    // SPI0 SPI1
-    0,                    // uart overflow 1, 2,3
-    (uint32_t*)EthernetISR, // Ethernet   13
-
-};
 
 
-__attribute__((naked)) void exit(int status)
-{
-    // Force qemu to exit using ARM Semihosting
-    __asm volatile (
-        "mov r1, r0\n"
-        "cmp r1, #0\n"
-        "bne .notclean\n"
-        "ldr r1, =0x20026\n" // ADP_Stopped_ApplicationExit, a clean exit
-        ".notclean:\n"
-        "movs r0, #0x18\n" // SYS_EXIT
-        "bkpt 0xab\n"
-        "end: b end\n"
-        );
-}
-
-void _start( void )
-{
-    /* Required to link but not used as the reset handler is read from the
-    vector table. */
-}
 
 /**
  * @brief initializes the UART emulated hardware
  */
-void uart_init( void )
+static void uart_init( void )
 {
-    /* This is not checking the STATE register to ensure the UART is ready for
-    the next character - but that doesn't seem to be an issue in QEMU. */
     UART0_ADDR->BAUDDIV = 16;
     UART0_ADDR->CTRL = UART_CTRL_TX_EN;
 
@@ -222,10 +185,12 @@ void uart_init( void )
     NVIC_SetPriority( ETHERNET_IRQn, 255 );
 }
 
-
-int _write(int file, char *buf, int len)
+/* Output to UART. */
+int _write( int file, char *buf, int len )
 {
     int todo;
+
+    ( void ) file;
 
     for (todo = 0; todo < len; todo++)
     {

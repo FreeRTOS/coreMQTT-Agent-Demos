@@ -595,15 +595,22 @@ void vShadowUpdateTask( void * pvParameters )
                                                &xPublishInfo,
                                                &xCommandParams );
 
-            /* Wait for the response to our report. When the Device shadow service receives the request it will
-             * publish a response to  the /update/accepted or update/rejected */
-            ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( shadowexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
-
-            if( ulNotificationValue == 0 )
+            if( xCommandAdded != MQTTSuccess )
             {
-                LogError( ( "Timed out waiting for response to report." ) );
+            	LogInfo( ( "Failed to publish to shadow update." ) );
             }
+            else
+            {
+				/* Wait for the response to our report. When the Device shadow service receives the request it will
+				 * publish a response to  the /update/accepted or update/rejected */
+				ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( shadowexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
 
+				if( ulNotificationValue == 0 )
+				{
+					LogError( ( "Timed out waiting for response to report." ) );
+				}
+
+            }
             /* Clear the client token */
             ulClientToken = 0;
 
