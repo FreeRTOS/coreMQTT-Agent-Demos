@@ -95,14 +95,14 @@
 
 #define reportbuilderJSON_REPORT_FORMAT_PART4 \
     ","                                       \
-    "\"%s\": %lu"                              \
+    "\"%s\": %lu"                             \
     "}"                                       \
     "}"                                       \
     "},"                                      \
     "\"%s\": {"                               \
     "\"stack_high_water_mark\": ["            \
     "{"                                       \
-    "\"%s\": %lu"                              \
+    "\"%s\": %lu"                             \
     "}"                                       \
     "],"                                      \
     "\"task_numbers\": ["                     \

@@ -159,7 +159,7 @@ bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
                 if( isMatched == true )
                 {
                     pxSubscriptionList[ ulIndex ].pxIncomingPublishCallback( pxSubscriptionList[ ulIndex ].pvIncomingPublishCallbackContext,
-                                                                            pxPublishInfo );
+                                                                             pxPublishInfo );
                     publishHandled = true;
                 }
             }

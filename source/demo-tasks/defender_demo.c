@@ -898,7 +898,7 @@ void prvDefenderDemoTask( void * pvParameters )
 
             if( ulNotificationValue == 0 )
             {
-            	LogInfo( ( "Failed to receive defender report receipt notification." ) );
+                LogInfo( ( "Failed to receive defender report receipt notification." ) );
             }
             else
             {
