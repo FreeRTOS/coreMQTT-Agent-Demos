@@ -58,15 +58,15 @@
 
 #define reportbuilderJSON_CONNECTION_OBJECT_FORMAT \
     "{"                                            \
-    "\"%s\": %u,"                                  \
-    "\"%s\": \"%u.%u.%u.%u:%u\""                   \
+    "\"%s\": %hu,"                                 \
+    "\"%s\": \"%lu.%lu.%lu.%lu:%hu\""              \
     "},"
 
 #define reportbuilderJSON_REPORT_FORMAT_PART1 \
     "{"                                       \
     "\"%s\": {"                               \
-    "\"%s\": %u,"                             \
-    "\"%s\": \"%u.%u\""                       \
+    "\"%s\": %lu,"                            \
+    "\"%s\": \"%lu.%lu\""                     \
     "},"                                      \
     "\"%s\": {"                               \
     "\"%s\": {"                               \
@@ -74,20 +74,20 @@
 
 #define reportbuilderJSON_REPORT_FORMAT_PART2 \
     ","                                       \
-    "\"%s\": %u"                              \
+    "\"%s\": %lu"                             \
     "},"                                      \
     "\"%s\": {"                               \
     "\"%s\": "
 
 #define reportbuilderJSON_REPORT_FORMAT_PART3 \
     ","                                       \
-    "\"%s\": %u"                              \
+    "\"%s\": %lu"                             \
     "},"                                      \
     "\"%s\": {"                               \
-    "\"%s\": %u,"                             \
-    "\"%s\": %u,"                             \
-    "\"%s\": %u,"                             \
-    "\"%s\": %u"                              \
+    "\"%s\": %lu,"                            \
+    "\"%s\": %lu,"                            \
+    "\"%s\": %lu,"                            \
+    "\"%s\": %lu"                             \
     "},"                                      \
     "\"%s\": {"                               \
     "\"%s\": {"                               \
@@ -95,14 +95,14 @@
 
 #define reportbuilderJSON_REPORT_FORMAT_PART4 \
     ","                                       \
-    "\"%s\": %u"                              \
+    "\"%s\": %lu"                             \
     "}"                                       \
     "}"                                       \
     "},"                                      \
     "\"%s\": {"                               \
     "\"stack_high_water_mark\": ["            \
     "{"                                       \
-    "\"%s\": %u"                              \
+    "\"%s\": %lu"                             \
     "}"                                       \
     "],"                                      \
     "\"task_numbers\": ["                     \
@@ -313,10 +313,10 @@ static eReportBuilderStatus prvWriteConnectionsArray( char * pcBuffer,
                                        DEFENDER_REPORT_LOCAL_PORT_KEY,
                                        pxConn->usLocalPort,
                                        DEFENDER_REPORT_REMOTE_ADDR_KEY,
-                                       ( pxConn->ulRemoteIp >> 24 ) & 0xFF,
-                                       ( pxConn->ulRemoteIp >> 16 ) & 0xFF,
-                                       ( pxConn->ulRemoteIp >> 8 ) & 0xFF,
-                                       ( pxConn->ulRemoteIp ) & 0xFF,
+                                       ( pxConn->ulRemoteIp >> 24 ) & 0xFFUL,
+                                       ( pxConn->ulRemoteIp >> 16 ) & 0xFFUL,
+                                       ( pxConn->ulRemoteIp >> 8 ) & 0xFFUL,
+                                       ( pxConn->ulRemoteIp ) & 0xFFUL,
                                        pxConn->usRemotePort );
 
         if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )
@@ -394,7 +394,7 @@ static eReportBuilderStatus prvWriteTaskIdsArray( char * pcBuffer,
     {
         lCharactersWritten = snprintf( pcCurrentWritePos,
                                        ulRemainingBufferLength,
-                                       "%u,",
+                                       "%lu,",
                                        pulTaskIdsArray[ i ] );
 
         if( !reportbuilderSNPRINTF_SUCCESS( lCharactersWritten, ulRemainingBufferLength ) )

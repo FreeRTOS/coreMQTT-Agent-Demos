@@ -896,10 +896,17 @@ void prvDefenderDemoTask( void * pvParameters )
             /* Wait for the response to our report. */
             ulNotificationValue = ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( defenderexampleMS_TO_WAIT_FOR_NOTIFICATION ) );
 
-            if( xReportStatus == ReportStatusNotReceived )
+            if( ulNotificationValue == 0 )
             {
-                LogError( ( "Failed to receive response from AWS IoT Device Defender Service." ) );
-                xStatus = false;
+                LogInfo( ( "Failed to receive defender report receipt notification." ) );
+            }
+            else
+            {
+                if( xReportStatus == ReportStatusNotReceived )
+                {
+                    LogError( ( "Failed to receive response from AWS IoT Device Defender Service." ) );
+                    xStatus = false;
+                }
             }
 
             LogDebug( ( "Sleeping until next report." ) );

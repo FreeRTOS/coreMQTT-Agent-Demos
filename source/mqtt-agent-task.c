@@ -288,7 +288,7 @@ static MQTTStatus_t prvHandleResubscribe( void );
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in] pxReturnInfo The result of the command.
  */
-static void prvSubscriptionCommandCallback( void * pxCommandContext,
+static void prvSubscriptionCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                             MQTTAgentReturnInfo_t * pxReturnInfo );
 
 /**
@@ -601,7 +601,7 @@ static MQTTStatus_t prvHandleResubscribe( void )
 
 /*-----------------------------------------------------------*/
 
-static void prvSubscriptionCommandCallback( void * pxCommandContext,
+static void prvSubscriptionCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
                                             MQTTAgentReturnInfo_t * pxReturnInfo )
 {
     size_t lIndex = 0;
@@ -652,7 +652,7 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
             /* ALPN protocols must be a NULL-terminated list of strings. Therefore,
              * the first entry will contain the actual ALPN protocol string while the
              * second entry must remain NULL. */
-            char * pcAlpnProtocols[] = { NULL, NULL };
+            const char * pcAlpnProtocols[] = { NULL, NULL };
 
             /* The ALPN string changes depending on whether username/password authentication is used. */
             #ifdef democonfigCLIENT_USERNAME

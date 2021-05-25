@@ -102,7 +102,7 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
                          const char * pcTopicFilterString,
                          uint16_t usTopicFilterLength )
 {
-    int32_t lIndex = 0;
+    uint32_t ulIndex = 0;
 
     if( ( pxSubscriptionList == NULL ) ||
         ( pcTopicFilterString == NULL ) ||
@@ -116,13 +116,13 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
     }
     else
     {
-        for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
+        for( ulIndex = 0U; ulIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; ulIndex++ )
         {
-            if( pxSubscriptionList[ lIndex ].usFilterStringLength == usTopicFilterLength )
+            if( pxSubscriptionList[ ulIndex ].usFilterStringLength == usTopicFilterLength )
             {
-                if( strncmp( pxSubscriptionList[ lIndex ].pcSubscriptionFilterString, pcTopicFilterString, usTopicFilterLength ) == 0 )
+                if( strncmp( pxSubscriptionList[ ulIndex ].pcSubscriptionFilterString, pcTopicFilterString, usTopicFilterLength ) == 0 )
                 {
-                    memset( &( pxSubscriptionList[ lIndex ] ), 0x00, sizeof( SubscriptionElement_t ) );
+                    memset( &( pxSubscriptionList[ ulIndex ] ), 0x00, sizeof( SubscriptionElement_t ) );
                 }
             }
         }
@@ -134,7 +134,7 @@ void removeSubscription( SubscriptionElement_t * pxSubscriptionList,
 bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
                               MQTTPublishInfo_t * pxPublishInfo )
 {
-    int32_t lIndex = 0;
+    uint32_t ulIndex = 0;
     bool isMatched = false, publishHandled = false;
 
     if( ( pxSubscriptionList == NULL ) ||
@@ -146,20 +146,20 @@ bool handleIncomingPublishes( SubscriptionElement_t * pxSubscriptionList,
     }
     else
     {
-        for( lIndex = 0; lIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; lIndex++ )
+        for( ulIndex = 0U; ulIndex < SUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS; ulIndex++ )
         {
-            if( pxSubscriptionList[ lIndex ].usFilterStringLength > 0 )
+            if( pxSubscriptionList[ ulIndex ].usFilterStringLength > 0 )
             {
                 MQTT_MatchTopic( pxPublishInfo->pTopicName,
                                  pxPublishInfo->topicNameLength,
-                                 pxSubscriptionList[ lIndex ].pcSubscriptionFilterString,
-                                 pxSubscriptionList[ lIndex ].usFilterStringLength,
+                                 pxSubscriptionList[ ulIndex ].pcSubscriptionFilterString,
+                                 pxSubscriptionList[ ulIndex ].usFilterStringLength,
                                  &isMatched );
 
                 if( isMatched == true )
                 {
-                    pxSubscriptionList[ lIndex ].pxIncomingPublishCallback( pxSubscriptionList[ lIndex ].pvIncomingPublishCallbackContext,
-                                                                            pxPublishInfo );
+                    pxSubscriptionList[ ulIndex ].pxIncomingPublishCallback( pxSubscriptionList[ ulIndex ].pvIncomingPublishCallbackContext,
+                                                                             pxPublishInfo );
                     publishHandled = true;
                 }
             }
