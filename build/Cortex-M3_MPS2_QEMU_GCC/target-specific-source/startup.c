@@ -120,7 +120,7 @@ volatile uint32_t pc; /* Program counter. */
 volatile uint32_t psr;/* Program status register. */
 
 /* Called from the hardfault handler to provide information on the processor
- * state at the time of the faul.
+ * state at the time of the fault.
  */
 void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
 {
