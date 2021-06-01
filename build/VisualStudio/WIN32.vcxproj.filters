@@ -49,9 +49,6 @@
     <Filter Include="Lib\FreeRTOS\utilities">
       <UniqueIdentifier>{d4391c0b-8983-4b8d-a77c-ab0be9e87631}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib\FreeRTOS\utilities\Logging">
-      <UniqueIdentifier>{f8fbc949-d7fb-46cb-b54c-66f10a00ac60}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Lib\ThirdParty">
       <UniqueIdentifier>{e9175352-aed6-4693-b338-871170ced3eb}</UniqueIdentifier>
     </Filter>
@@ -419,15 +416,6 @@
     <ClInclude Include="..\..\lib\FreeRTOS\freertos-plus-tcp\include\NetworkInterface.h">
       <Filter>Lib\FreeRTOS\FreeRTOS-Plus-TCP\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging.h">
-      <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_levels.h">
-      <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_stack.h">
-      <Filter>Lib\FreeRTOS\utilities\Logging</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\sockets_wrapper.h">
       <Filter>Lib\FreeRTOS\Network-Transport\FreeRTOS-Plus-TCP</Filter>
     </ClInclude>
@@ -580,6 +568,9 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\AWS\ota\source\dependency\coreJSON\source\include\core_json.h">
       <Filter>Lib\FreeRTOS\coreJSON\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\configuration-files\logging_config.h">
+      <Filter>Configuration Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

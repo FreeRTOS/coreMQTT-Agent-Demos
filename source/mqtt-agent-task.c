@@ -392,7 +392,7 @@ SubscriptionElement_t xGlobalSubscriptionList[ SUBSCRIPTION_MANAGER_MAX_SUBSCRIP
 /*
  * @brief Create the task that demonstrates the MQTT Connection sharing demo.
  */
-void vStartSimpleMQTTDemo( void )
+void vStartMQTTAgentDemo( void )
 {
     /* prvConnectAndCreateDemoTasks() connects to the MQTT broker, creates the
      * tasks that will interact with the broker via the MQTT agent, then turns

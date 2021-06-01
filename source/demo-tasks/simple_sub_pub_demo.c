@@ -356,7 +356,6 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
 {
     MQTTStatus_t xCommandAdded;
     BaseType_t xCommandAcknowledged = pdFALSE;
-    uint32_t ulSubscribeMessageID;
     MQTTAgentSubscribeArgs_t xSubscribeArgs;
     MQTTSubscribeInfo_t xSubscribeInfo;
     static int32_t ulNextSubscribeMessageID = 0;
@@ -371,7 +370,6 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
     taskENTER_CRITICAL();
     {
         ulNextSubscribeMessageID++;
-        ulSubscribeMessageID = ulNextSubscribeMessageID;
     }
     taskEXIT_CRITICAL();
 
@@ -400,7 +398,7 @@ static bool prvSubscribeToTopic( MQTTQoS_t xQoS,
      * calling this function. */
     LogInfo( ( "Sending subscribe request to agent for topic filter: %s with id %d",
                pcTopicFilter,
-               ( int ) ulSubscribeMessageID ) );
+               ( int ) ulNextSubscribeMessageID ) );
 
     do
     {

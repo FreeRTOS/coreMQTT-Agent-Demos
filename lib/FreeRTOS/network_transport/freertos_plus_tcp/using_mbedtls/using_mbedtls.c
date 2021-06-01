@@ -221,6 +221,9 @@ static void sslContextInit( SSLContext_t * pSslContext )
     mbedtls_debug_set_threshold( MBEDTLS_DEBUG_THRESHOLD );
 #endif
 
+    /* Prevent compiler warnings when LogDebug() is defined away. */
+    ( void ) pNoLowLevelMbedTlsCodeStr;
+    ( void ) pNoHighLevelMbedTlsCodeStr;
 }
 /*-----------------------------------------------------------*/
 

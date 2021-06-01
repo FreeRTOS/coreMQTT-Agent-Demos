@@ -42,9 +42,6 @@
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 
-/* Demo logging includes. */
-#include "logging.h"
-
 /* Demo Specific configs. */
 #include "demo_config.h"
 
@@ -52,9 +49,9 @@
  * Prototypes for the demos that can be started from this project.  Note the
  * MQTT demo is not actually started until the network is already, which is
  * indicated by vApplicationIPNetworkEventHook() executing - hence
- * prvStartSimpleMQTTDemo() is called from inside vApplicationIPNetworkEventHook().
+ * prvStartMQTTAgentDemo() is called from inside vApplicationIPNetworkEventHook().
  */
-extern void vStartSimpleMQTTDemo( void );
+extern void vStartMQTTAgentDemo( void );
 
 /*
  * Just seeds the simple pseudo random number generator.
@@ -80,14 +77,6 @@ static const uint8_t ucNetMask[ 4 ] = { configNET_MASK0, configNET_MASK1, config
 static const uint8_t ucGatewayAddress[ 4 ] = { configGATEWAY_ADDR0, configGATEWAY_ADDR1, configGATEWAY_ADDR2, configGATEWAY_ADDR3 };
 static const uint8_t ucDNSServerAddress[ 4 ] = { configDNS_SERVER_ADDR0, configDNS_SERVER_ADDR1, configDNS_SERVER_ADDR2, configDNS_SERVER_ADDR3 };
 
-/* Set the following constant to pdTRUE to log using the method indicated by the
- * name of the constant, or pdFALSE to not log using the method indicated by the
- * name of the constant.  Options include to standard out (xLogToStdout), to a disk
- * file (xLogToFile), and to a UDP port (xLogToUDP).  If xLogToUDP is set to pdTRUE
- * then UDP messages are sent to the IP address configured as the UDP logging server
- * address (see the configUDP_LOGGING_ADDR0 definitions in FreeRTOSConfig.h) and
- * the port number set by configPRINT_PORT in FreeRTOSConfig.h. */
-const BaseType_t xLogToStdout = pdTRUE, xLogToFile = pdFALSE, xLogToUDP = pdFALSE;
 
 /* Default MAC address configuration.  The demo creates a virtual network
  * connection that uses this MAC address by accessing the raw Ethernet data
@@ -154,7 +143,7 @@ void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
             /* Demos that use the network are created after the network is
              * up. */
             LogInfo( ( "---------STARTING DEMO---------\r\n" ) );
-            vStartSimpleMQTTDemo();
+            vStartMQTTAgentDemo();
             xTasksAlreadyCreated = pdTRUE;
         }
 
@@ -186,7 +175,7 @@ void vAssertCalled( const char * pcFile,
     ( void ) pcFileName;
     ( void ) ulLineNumber;
 
-    printf( "vAssertCalled( %s, %u\n", pcFile, ( unsigned int ) ulLine );
+    LogError( ( "vAssertCalled( %s, %u\n", pcFile, ( unsigned int ) ulLine ) );
 
     /* Setting ulBlockVariable to a non-zero value in the debugger will allow
      * this function to be exited. */
@@ -212,7 +201,7 @@ UBaseType_t uxRand( void )
      * devices should use a True Random Number Generator (TRNG).
      */
     ulNextRand = ( ulMultiplier * ulNextRand ) + ulIncrement;
-    return( ( int ) ( ulNextRand >> 16UL ) & 0x7fffUL );
+    return ulNextRand;
 }
 /*-----------------------------------------------------------*/
 
@@ -226,7 +215,6 @@ static void prvSRand( UBaseType_t ulSeed )
 static void prvMiscInitialisation( void )
 {
     time_t xTimeNow;
-    uint32_t ulLoggingIPAddress;
 
     /* Perform any initialization that is specific to a build.  This macro
      * can be defined in the build specific FreeRTOSConfig.h header file. */
@@ -236,9 +224,7 @@ static void prvMiscInitialisation( void )
         }
     #endif
 
-    /* Note the parameters are only used in the demo that uses the Windows port. */
-    ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configUDP_LOGGING_ADDR0, configUDP_LOGGING_ADDR1, configUDP_LOGGING_ADDR2, configUDP_LOGGING_ADDR3 );
-    vLoggingInit( xLogToStdout, xLogToFile, xLogToUDP, ulLoggingIPAddress, configPRINT_PORT );
+    vLoggingInit();
 
     /*
      * Seed random number generator.
@@ -360,6 +346,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 
     LogDebug( ( "Stack overflow in %s\n", pcTaskName ) );
     ( void ) xTask;
+    ( void ) pcTaskName; /* Remove compiler warnings if LogDebug() is not defined. */
 
     while( ulSetToZeroToStepOut != 0 )
     {
