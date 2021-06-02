@@ -44,7 +44,7 @@
  * shown here:"#define LogDebug( message )"
  *
  * If you want to print out additional metadata then update the
- * xLoggingPringMetadata() function prototype and implementation so it accepts
+ * xLoggingPrintMetadata() function prototype and implementation so it accepts
  * more parameters, then update the implementation of the macros before to pass
  * the additional information.  For example, if you want the logs to print out
  * the name of the function that called the logging macro then add an additional
@@ -55,12 +55,13 @@
  *
  * Then update the call to xLoggingPrintMetadata to pass the additional parameter:
  *
- * xLoggingPringMetadata( "ERROR", __FUNCTION__ ); << Added __FUNCTION__ as second parameter.
+ * xLoggingPrintMetadata( "ERROR", __FUNCTION__ ); << Added __FUNCTION__ as second parameter.
  *
- * ....and of course update the implementation of xLoggingPringMetadata() to
+ * ....and of course update the implementation of xLoggingPrintMetadata() to
  * actually print the function name passed in to it.
  */
-void vLoggingPrintf( const char * const pcFormatString, ... );
+void vLoggingPrintf( const char * const pcFormatString,
+                     ... );
 int32_t xLoggingPrintMetadata( const char * const pcLevel );
 void vLoggingInit( void );
 
@@ -68,9 +69,9 @@ void vLoggingInit( void );
  * of the logging and adding data such as the function that called the logging
  * macro to the logged output.
  */
-#define LogError( message )    do{ xLoggingPrintMetadata( "ERROR" ); vLoggingPrintf message ;} while( 0 )
-#define LogWarn( message )     do{ xLoggingPrintMetadata( "WARN" ); vLoggingPrintf message ;} while( 0 )
-#define LogInfo( message )     do{ xLoggingPrintMetadata( "INFO" ); vLoggingPrintf message ;} while( 0 )
+#define LogError( message )    do { xLoggingPrintMetadata( "ERROR" ); vLoggingPrintf message; } while( 0 )
+#define LogWarn( message )     do { xLoggingPrintMetadata( "WARN" ); vLoggingPrintf message; } while( 0 )
+#define LogInfo( message )     do { xLoggingPrintMetadata( "INFO" ); vLoggingPrintf message; } while( 0 )
 #define LogDebug( message )    /*do{ xLoggingPrintMetadata( "DEBUG" ); vLoggingPrintf message ;} while( 0 )*//* Uncomment to output debug level logging. */
 
 #endif /* LOGGING_CONFIG_H */

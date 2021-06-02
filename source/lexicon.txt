@@ -54,10 +54,12 @@ ifdef
 ifndef
 inc
 init
+int
 iot
 ip
 json
 keepalive
+logdebug
 mac
 mbed
 metadata
@@ -81,8 +83,11 @@ pbincomingpublishcallbackcontext
 pc
 pcbuffer
 pcdefenderresponse
+pcfunctionname
+pclevel
 pclientidentifier
 pcreceivedpublishpayload
+pctaskname
 pctopicfilterstring
 pdata
 pdfail
@@ -112,7 +117,7 @@ prvincomingpublishupdaterejectedcallback
 prvlargemessagesubscribepublishtask
 prvmqttagenttask
 prvsimplesubscribepublishtask
-prvstartsimplemqttdemo
+prvstartmqttagentdemo
 prvstartsimplemqttdemos
 prvsubscribecommandcallback
 prvsubscribetodefendertopics
@@ -227,6 +232,7 @@ vapplicationgetidletaskmemory
 vapplicationgettimertaskmemory
 vapplicationipnetworkeventhook
 ve
+vloggingprintf
 vshadowdevicetask
 vshadowupdatetask
 vsimplesubscribepublishtask
@@ -237,6 +243,7 @@ xbuffersize
 xcleansession
 xcommandparams
 xcommandqueue
+xlogingprintmetadata
 xlogtofile
 xlogtostdout
 xlogtoudp
