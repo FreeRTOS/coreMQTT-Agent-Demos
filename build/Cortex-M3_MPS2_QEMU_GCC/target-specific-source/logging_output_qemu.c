@@ -50,13 +50,15 @@
 /*-----------------------------------------------------------*/
 
 /* Dimensions the arrays into which print messages are created. */
-#define dlMAX_PRINT_STRING_LENGTH       2048
+#define dlMAX_PRINT_STRING_LENGTH    2048
 
 /* Maximum amount of time to wait for the semaphore that protects the local
-buffers and the serial output. */
-#define dlMAX_SEMAPHORE_WAIT_TIME		( pdMS_TO_TICKS( 2000UL ) )
+ * buffers and the serial output. */
+#define dlMAX_SEMAPHORE_WAIT_TIME    ( pdMS_TO_TICKS( 2000UL ) )
 
-int _write( int fd, const void *buffer, unsigned int count );
+int _write( int fd,
+            const void * buffer,
+            unsigned int count );
 
 static char cPrintString[ dlMAX_PRINT_STRING_LENGTH ];
 static char cOutputString[ dlMAX_PRINT_STRING_LENGTH ];
@@ -102,14 +104,15 @@ int32_t xLoggingPrintMetadata( const char * const pcLevel )
                             xMessageNumber++,
                             ( unsigned long ) xTaskGetTickCount() );
 
-		_write( 0, cPrintString, iLength );
+        _write( 0, cPrintString, iLength );
     }
 
     return iLength;
 }
 /*-----------------------------------------------------------*/
 
-void vLoggingPrintf( const char * const pcFormat, ... )
+void vLoggingPrintf( const char * const pcFormat,
+                     ... )
 {
     int32_t iLength;
     va_list args;
@@ -124,13 +127,13 @@ void vLoggingPrintf( const char * const pcFormat, ... )
     {
         /* There are a variable number of parameters. */
         va_start( args, pcFormat );
-		iLength = vsnprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, pcFormat, args );
-		va_end( args );
+        iLength = vsnprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, pcFormat, args );
+        va_end( args );
 
-		_write( 0, cPrintString, iLength );
-		_write( 0, pcNewline, strlen( pcNewline ) );
+        _write( 0, cPrintString, iLength );
+        _write( 0, pcNewline, strlen( pcNewline ) );
 
-		xSemaphoreGive( xMutex );
+        xSemaphoreGive( xMutex );
     }
 }
 /*-----------------------------------------------------------*/
@@ -141,65 +144,66 @@ void vLoggingPrintf( const char * const pcFormat, ... )
  * without first calling xLoggingPrintMetadata() so both obtains and releases
  * the mutex within the same file.
  */
-void vTCPLoggingPrintf( const char * const pcFormat, ... )
+void vTCPLoggingPrintf( const char * const pcFormat,
+                        ... )
 {
-    char *pcSource, *pcTarget, *pcBegin;
+    char * pcSource, * pcTarget, * pcBegin;
     int32_t iLength, rc;
     va_list args;
     uint32_t ulIPAddress;
     const char * const pcNewline = "\r\n";
 
-    configASSERT( xMutex);
+    configASSERT( xMutex );
 
     if( xSemaphoreTake( xMutex, dlMAX_SEMAPHORE_WAIT_TIME ) != pdFAIL )
     {
         /* There are a variable number of parameters. */
         va_start( args, pcFormat );
-		iLength = vsnprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, pcFormat, args );
-		va_end( args );
+        iLength = vsnprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, pcFormat, args );
+        va_end( args );
 
-		/* For ease of viewing, copy the string into another buffer, converting
-		 * IP addresses to dot notation on the way. */
-		pcSource = cPrintString;
-		pcTarget = cOutputString;
+        /* For ease of viewing, copy the string into another buffer, converting
+         * IP addresses to dot notation on the way. */
+        pcSource = cPrintString;
+        pcTarget = cOutputString;
 
-		while( ( *pcSource ) != '\0' )
-		{
-			*pcTarget = *pcSource;
-			pcTarget++;
-			pcSource++;
+        while( ( *pcSource ) != '\0' )
+        {
+            *pcTarget = *pcSource;
+            pcTarget++;
+            pcSource++;
 
-			/* Look forward for an IP address denoted by 'ip'. */
-			if( ( isxdigit( ( int ) pcSource[ 0 ] ) != pdFALSE ) && ( pcSource[ 1 ] == 'i' ) && ( pcSource[ 2 ] == 'p' ) )
-			{
-				*pcTarget = *pcSource;
-				pcTarget++;
-				*pcTarget = '\0';
-				pcBegin = pcTarget - 8;
+            /* Look forward for an IP address denoted by 'ip'. */
+            if( ( isxdigit( ( int ) pcSource[ 0 ] ) != pdFALSE ) && ( pcSource[ 1 ] == 'i' ) && ( pcSource[ 2 ] == 'p' ) )
+            {
+                *pcTarget = *pcSource;
+                pcTarget++;
+                *pcTarget = '\0';
+                pcBegin = pcTarget - 8;
 
-				while( ( pcTarget > pcBegin ) && ( isxdigit( ( int ) pcTarget[ -1 ] ) != pdFALSE ) )
-				{
-					pcTarget--;
-				}
+                while( ( pcTarget > pcBegin ) && ( isxdigit( ( int ) pcTarget[ -1 ] ) != pdFALSE ) )
+                {
+                    pcTarget--;
+                }
 
-				sscanf( pcTarget, "%8X", ( unsigned int * ) &ulIPAddress );
-				rc = sprintf( pcTarget, "%lu.%lu.%lu.%lu",
-							  ( unsigned long ) ( ulIPAddress >> 24UL ),
-							  ( unsigned long ) ( ( ulIPAddress >> 16UL ) & 0xffUL ),
-							  ( unsigned long ) ( ( ulIPAddress >> 8UL ) & 0xffUL ),
-							  ( unsigned long ) ( ulIPAddress & 0xffUL ) );
-				pcTarget += rc;
-				pcSource += 3; /* skip "<n>ip" */
-			}
-		}
+                sscanf( pcTarget, "%8X", ( unsigned int * ) &ulIPAddress );
+                rc = sprintf( pcTarget, "%lu.%lu.%lu.%lu",
+                              ( unsigned long ) ( ulIPAddress >> 24UL ),
+                              ( unsigned long ) ( ( ulIPAddress >> 16UL ) & 0xffUL ),
+                              ( unsigned long ) ( ( ulIPAddress >> 8UL ) & 0xffUL ),
+                              ( unsigned long ) ( ulIPAddress & 0xffUL ) );
+                pcTarget += rc;
+                pcSource += 3; /* skip "<n>ip" */
+            }
+        }
 
-		/* How far through the buffer was written? */
-		iLength = ( BaseType_t ) ( pcTarget - cOutputString );
+        /* How far through the buffer was written? */
+        iLength = ( BaseType_t ) ( pcTarget - cOutputString );
 
-		_write( 0, cOutputString, iLength );
-		_write( 0, pcNewline, strlen( pcNewline ) );
+        _write( 0, cOutputString, iLength );
+        _write( 0, pcNewline, strlen( pcNewline ) );
 
-		xSemaphoreGive( xMutex );
+        xSemaphoreGive( xMutex );
     }
 }
 /*-----------------------------------------------------------*/
@@ -207,8 +211,7 @@ void vTCPLoggingPrintf( const char * const pcFormat, ... )
 void vLoggingInit( void )
 {
     /* Create the semaphore used to protect the local buffers and the serial
-    port. */
+     * port. */
     xMutex = xSemaphoreCreateMutex();
 }
-
 

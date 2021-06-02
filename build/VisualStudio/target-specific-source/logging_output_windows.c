@@ -67,8 +67,8 @@
 #define dlLOGGING_STREAM_BUFFER_SIZE    32768
 
 /* Maximum amount of time to wait for the semaphore that protects the local
-buffers and the serial output. */
-#define dlMAX_SEMAPHORE_WAIT_TIME		( pdMS_TO_TICKS( 2000UL ) )
+ * buffers and the serial output. */
+#define dlMAX_SEMAPHORE_WAIT_TIME       ( pdMS_TO_TICKS( 2000UL ) )
 
 /*-----------------------------------------------------------*/
 
@@ -160,11 +160,11 @@ int32_t xLoggingPrintMetadata( const char * const pcLevel )
 
         xSpaceInBuffer = uxStreamBufferGetSpace( xLogStreamBuffer );
 
-        if( xSpaceInBuffer >= ( size_t) iLength )
+        if( xSpaceInBuffer >= ( size_t ) iLength )
         {
             /* The calling task can access the stream buffer because it holds the
-            mutex but must also raise its priority to be above the priority of the
-            windows thread that reads from the stream buffer. */
+             * mutex but must also raise its priority to be above the priority of the
+             * windows thread that reads from the stream buffer. */
             uxStreamBufferAdd( xLogStreamBuffer, 0, ( const uint8_t * ) cPrintString, ( size_t ) iLength );
 
             /* xDirectPrint is initialized to pdTRUE, and while it remains true the
@@ -175,7 +175,7 @@ int32_t xLoggingPrintMetadata( const char * const pcLevel )
             if( xDirectPrint != pdFALSE )
             {
                 /* While starting up, the thread which calls prvWin32LoggingThread()
-                    * is not running yet and xDirectPrint will be pdTRUE. */
+                 * is not running yet and xDirectPrint will be pdTRUE. */
                 prvLoggingFlushBuffer();
             }
             else if( pvLoggingThreadEvent != NULL )
@@ -191,7 +191,8 @@ int32_t xLoggingPrintMetadata( const char * const pcLevel )
 }
 /*-----------------------------------------------------------*/
 
-void vLoggingPrintf( const char * const pcFormat, ... )
+void vLoggingPrintf( const char * const pcFormat,
+                     ... )
 {
     size_t xSpaceInBuffer;
     int32_t iLength;
@@ -207,8 +208,8 @@ void vLoggingPrintf( const char * const pcFormat, ... )
     if( xSemaphoreGetMutexHolder( xStreamBufferMutex ) == xTaskGetCurrentTaskHandle() )
     {
         /* There are a variable number of parameters.  Write the message at
-        an offset that allows the length of the message to be written at the
-        start of the buffer. */
+         * an offset that allows the length of the message to be written at the
+         * start of the buffer. */
         va_start( args, pcFormat );
         iLength = vsnprintf( cPrintString + iMessageLengthBytes, dlMAX_PRINT_STRING_LENGTH - iMessageLengthBytes - iNewlineStringLength, pcFormat, args );
         va_end( args );
@@ -226,8 +227,8 @@ void vLoggingPrintf( const char * const pcFormat, ... )
         if( xSpaceInBuffer >= ( size_t ) iLength )
         {
             /* The calling task can access the stream buffer because it holds the
-            mutex but must also raise its priority to be above the priority of the
-            windows thread that reads from the stream buffer. */
+             * mutex but must also raise its priority to be above the priority of the
+             * windows thread that reads from the stream buffer. */
             uxStreamBufferAdd( xLogStreamBuffer, 0, ( const uint8_t * ) cPrintString, ( size_t ) iLength );
 
             /* xDirectPrint is initialized to pdTRUE, and while it remains true the
@@ -238,13 +239,13 @@ void vLoggingPrintf( const char * const pcFormat, ... )
             if( xDirectPrint != pdFALSE )
             {
                 /* While starting up, the thread which calls prvWin32LoggingThread()
-                    * is not running yet and xDirectPrint will be pdTRUE. */
+                 * is not running yet and xDirectPrint will be pdTRUE. */
                 prvLoggingFlushBuffer();
             }
             else if( pvLoggingThreadEvent != NULL )
             {
                 /* While running, wake up prvWin32LoggingThread() to send the
-                    * logging data. */
+                 * logging data. */
                 SetEvent( pvLoggingThreadEvent );
             }
         }
@@ -260,7 +261,8 @@ void vLoggingPrintf( const char * const pcFormat, ... )
  * without first calling xLoggingPrintMetadata() so both obtains and releases
  * the mutex within the same file.
  */
-void vTCPLoggingPrintf( const char * pcFormat, ... )
+void vTCPLoggingPrintf( const char * pcFormat,
+                        ... )
 {
     char cPrintString[ dlMAX_PRINT_STRING_LENGTH ];
     char cOutputString[ dlMAX_PRINT_STRING_LENGTH ];
@@ -319,10 +321,10 @@ void vTCPLoggingPrintf( const char * pcFormat, ... )
 
             sscanf( pcTarget, "%8X", ( unsigned int * ) &ulIPAddress );
             rc = sprintf( pcTarget, "%lu.%lu.%lu.%lu",
-                            ( unsigned long ) ( ulIPAddress >> 24UL ),
-                            ( unsigned long ) ( ( ulIPAddress >> 16UL ) & 0xffUL ),
-                            ( unsigned long ) ( ( ulIPAddress >> 8UL ) & 0xffUL ),
-                            ( unsigned long ) ( ulIPAddress & 0xffUL ) );
+                          ( unsigned long ) ( ulIPAddress >> 24UL ),
+                          ( unsigned long ) ( ( ulIPAddress >> 16UL ) & 0xffUL ),
+                          ( unsigned long ) ( ( ulIPAddress >> 8UL ) & 0xffUL ),
+                          ( unsigned long ) ( ulIPAddress & 0xffUL ) );
             pcTarget += rc;
             pcSource += 3; /* skip "<n>ip" */
         }
@@ -332,7 +334,7 @@ void vTCPLoggingPrintf( const char * pcFormat, ... )
     iLength = ( int32_t ) ( pcTarget - cOutputString );
 
     /* Adjust for the fact that space was left at the beginning of the buffer
-    to hold the message length. */
+     * to hold the message length. */
     iLength -= iMessageLengthBytes;
 
     /* Write the message length in the beginning of the buffer. */
@@ -349,25 +351,25 @@ void vTCPLoggingPrintf( const char * pcFormat, ... )
         if( xSpaceInBuffer >= ( size_t ) ( iLength + iMessageLengthBytes ) )
         {
             /* The calling task can access the stream buffer because it holds the
-            mutex but must also raise its priority to be above the priority of the
-            windows thread that reads from the stream buffer. */
+             * mutex but must also raise its priority to be above the priority of the
+             * windows thread that reads from the stream buffer. */
             uxStreamBufferAdd( xLogStreamBuffer, 0, ( const uint8_t * ) cOutputString, ( size_t ) ( iLength + iMessageLengthBytes ) );
 
             /* xDirectPrint is initialized to pdTRUE, and while it remains true the
-                * logging output function is called directly.  When the system is running
-                * the output function cannot be called directly because it would get
-                * called from both FreeRTOS tasks and Win32 threads - so instead wake the
-                * Win32 thread responsible for the actual output. */
+             * logging output function is called directly.  When the system is running
+             * the output function cannot be called directly because it would get
+             * called from both FreeRTOS tasks and Win32 threads - so instead wake the
+             * Win32 thread responsible for the actual output. */
             if( xDirectPrint != pdFALSE )
             {
                 /* While starting up, the thread which calls prvWin32LoggingThread()
-                    * is not running yet and xDirectPrint will be pdTRUE. */
+                 * is not running yet and xDirectPrint will be pdTRUE. */
                 prvLoggingFlushBuffer();
             }
             else if( pvLoggingThreadEvent != NULL )
             {
                 /* While running, wake up prvWin32LoggingThread() to send the
-                    * logging data. */
+                 * logging data. */
                 SetEvent( pvLoggingThreadEvent );
             }
         }
@@ -385,7 +387,7 @@ void vLoggingInit( void )
     configASSERT( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED );
 
     /* Create the semaphore used to protect the local buffers and the serial
-    port. */
+     * port. */
     xStreamBufferMutex = xSemaphoreCreateMutex();
 
     /* Printing system calls cannot be made from FreeRTOS tasks so create a
@@ -462,4 +464,3 @@ static DWORD WINAPI prvWin32LoggingThread( void * pvParameter )
     }
 }
 /*-----------------------------------------------------------*/
-
