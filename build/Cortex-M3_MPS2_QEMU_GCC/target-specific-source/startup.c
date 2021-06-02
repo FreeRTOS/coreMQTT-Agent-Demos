@@ -57,20 +57,29 @@ extern void xPortSysTickHandler( void );
 /* Exception handlers. */
 static void HardFault_Handler( void ) __attribute__( ( naked ) );
 static void Default_Handler( void ) __attribute__( ( naked ) );
-void Reset_Handler( void );
+void _start( void );
 
 /* Peripheral interrupt handlers. */
 extern void EthernetISR( void );
 
 static void uart_init( void );
 extern int main( void );
-extern uint32_t _estack;
+extern uint32_t __stack;
+
+#include <sys/time.h>
+int gettimeofday (struct timeval *__restrict __p,
+			  void *__restrict __tz)
+{
+	(void) __p;
+	(void) __tz;
+	return -1;
+}
 
 /* Vector table. */
-const uint32_t* isr_vector[] __attribute__((section(".isr_vector"))) =
+const uint32_t* __interrupt_vector[] __attribute__((section(".data.init.enter"))) =
 {
-    ( uint32_t * ) &_estack,
-    ( uint32_t * ) &Reset_Handler,     // Reset                -15
+    ( uint32_t * ) &__stack,
+    ( uint32_t * ) &_start,     // Reset                -15
     ( uint32_t * ) &Default_Handler,   // NMI_Handler          -14
     ( uint32_t * ) &HardFault_Handler, // HardFault_Handler    -13
     ( uint32_t * ) &Default_Handler,   // MemManage_Handler    -12
@@ -101,10 +110,11 @@ const uint32_t* isr_vector[] __attribute__((section(".isr_vector"))) =
     ( uint32_t * ) EthernetISR, // Ethernet   13
 };
 
-void Reset_Handler( void )
+void
+__attribute__((__constructor__))
+FreeRTOSInit(void)
 {
     uart_init();
-    main();
 }
 
 /* Variables used to store the value of registers at the time a hardfault
