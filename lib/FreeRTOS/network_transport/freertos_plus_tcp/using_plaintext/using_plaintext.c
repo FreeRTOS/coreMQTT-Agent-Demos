@@ -140,5 +140,15 @@ int32_t Plaintext_FreeRTOS_send( NetworkContext_t * pNetworkContext,
         socketStatus = 0;
     }
 
+    #if ( configUSE_PREEMPTION == 1 )
+        {
+            /* Allow packet to be sent instantly. Fixes a bug in MQTT_Connect() where
+             * the CONNECT packet is not sent before the task waits for the CONNACK from the broker,
+             * resulting in return code MQTTNoDataAvailable due to timeout.
+             */
+            taskYIELD();
+        }
+    #endif
+
     return socketStatus;
 }
