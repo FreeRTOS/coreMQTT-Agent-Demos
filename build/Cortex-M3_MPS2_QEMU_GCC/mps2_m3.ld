@@ -24,73 +24,10 @@
  *
  */
 
-MEMORY
-{
-    FLASH (xr) : ORIGIN = 0x00000000, LENGTH = 4M /* to 0x00003FFF = 0x007FFFFF*/
-    RAM (rw)  : ORIGIN = 0x20000000, LENGTH = 4M /* to 0x21FFFFFF = 0xFFFFFF */
-}
-ENTRY(Reset_Handler)
+__flash = 0x00000000;
+__flash_size = 4M;
+__ram =   0x20000000;
+__ram_size = 4M;
+__stack_size = 0x4000;
 
-_Min_Heap_Size = 0x40000 ;        /* Required amount of heap. _RB_*/
-_Min_Stack_Size = 0x4000 ;       /* Required amount of stack. */
-M_VECTOR_RAM_SIZE = (16 + 48) * 4;
-_estack = ORIGIN(RAM) + LENGTH(RAM);
-
-
-SECTIONS
-{
-    .isr_vector :
-    {
-        __vector_table = .;
-        KEEP(*(.isr_vector))
-        . = ALIGN(4);
-    } > FLASH
-
-    .text :
-    {
-        *(.text)
-        *(.rodata*)
-        *(.constdata*)
-        _etext = .;
-        _sidata = .;
-    } > FLASH
-
-    .data : AT (ADDR(.text) + SIZEOF(.text))
-    {
-        _data = .;
-        _sdata = .;
-        *(vtable)
-        *(.data)
-        _edata = .;
-    } > RAM
-
-    .bss :
-    {
-        _bss = .;
-        _sbss = .;
-        *(.bss)
-        _ebss = .;
-    } > RAM
-    
-    .heap :
-    {
-        . = ALIGN(8);
-        PROVIDE ( end = . );
-        PROVIDE ( _end = . );
-        _heap_bottom = .;
-        . = . + _Min_Heap_Size;
-        _heap_top = .;
-        . = . + _Min_Stack_Size;
-        . = ALIGN(8);
-   } >RAM
-   
-   /* Set stack top to end of RAM, and stack limit move down by
-    * size of stack_dummy section */
-   __StackTop = ORIGIN(RAM) + LENGTH(RAM);
-   __StackLimit = __StackTop - _Min_Stack_Size;
-   PROVIDE(__stack = __StackTop);
-     
-  /* Check if data + heap + stack exceeds RAM limit */
-  ASSERT(__StackLimit >= _heap_top, "region RAM overflowed with stack")
-  
-}
+INCLUDE "picolibc.ld"

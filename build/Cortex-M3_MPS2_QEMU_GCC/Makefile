@@ -20,7 +20,7 @@ MAKE = make
 #mbedTLS is built to an archive to speed up the application build.
 MBED_TLS_LIB = $(OUTPUT_DIR)/mbedTLS/mbedTLS.a
 
-CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
+CFLAGS += $(INCLUDE_DIRS) --specs=picolibc.specs -DPICOLIBC_INTEGER_PRINTF_SCANF --oslib=semihost -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
 		  -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>' -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 
@@ -88,9 +88,9 @@ $(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile FORCE_MBED_TLS_ARCH
 	@echo ""
 	@echo "--- Final linking ---"
 	@echo ""
-	$(LD) $(OBJS_OUTPUT) $(MBED_TLS_LIB) $(CFLAGS) -Xlinker --gc-sections -Xlinker -T ./mps2_m3.ld \
-		-Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo.map -specs=nano.specs \
-		-specs=nosys.specs -specs=rdimon.specs -o $(OUTPUT_DIR)/$(IMAGE)
+	$(LD) $(OBJS_OUTPUT) $(MBED_TLS_LIB) $(CFLAGS) -Xlinker --gc-sections -T ./mps2_m3.ld \
+		-Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo.map \
+		-o $(OUTPUT_DIR)/$(IMAGE)
 
 $(DEP_OUTPUT):
 include $(wildcard $(DEP_OUTPUT))
