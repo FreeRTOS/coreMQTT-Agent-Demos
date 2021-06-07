@@ -22,7 +22,7 @@ MBED_TLS_LIB = $(OUTPUT_DIR)/mbedTLS/mbedTLS.a
 
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
-		  -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
+		  -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>' -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 
 #must be the first include paths to ensure the correct FreeRTOSConfig.h is used.
 INCLUDE_DIRS += -I./target-specific-source

@@ -38,12 +38,21 @@
 	</linkedResources>
 	<filteredResources>
 		<filter>
-			<id>1616452940728</id>
+			<id>1623012786911</id>
 			<name>lib/FreeRTOS/freertos-kernel/portable</name>
 			<type>9</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-GCC</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1623012786922</id>
+			<name>lib/FreeRTOS/freertos-kernel/portable</name>
+			<type>9</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-MemMang</arguments>
 			</matcher>
 		</filter>
 		<filter>
@@ -53,6 +62,15 @@
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-ARM_CM3</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1623012807283</id>
+			<name>lib/FreeRTOS/freertos-kernel/portable/MemMang</name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-heap_4.c</arguments>
 			</matcher>
 		</filter>
 		<filter>

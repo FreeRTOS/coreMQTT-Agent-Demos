@@ -342,12 +342,11 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 {
     volatile uint32_t ulSetToZeroToStepOut = 1UL;
 
-    taskENTER_CRITICAL();
-
     LogDebug( ( "Stack overflow in %s\n", pcTaskName ) );
     ( void ) xTask;
     ( void ) pcTaskName; /* Remove compiler warnings if LogDebug() is not defined. */
 
+    taskENTER_CRITICAL();
     while( ulSetToZeroToStepOut != 0 )
     {
     }

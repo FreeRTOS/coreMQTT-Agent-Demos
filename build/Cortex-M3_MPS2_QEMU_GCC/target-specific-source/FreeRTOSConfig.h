@@ -158,13 +158,6 @@ void vAssertCalled( const char * pcFile, uint32_t ulLine );
 #define configNET_MASK2                     255
 #define configNET_MASK3                     0
 
-/* These definitions are not used by the QEMU build but are included as they
- * are required to build main.c.  Main.c is common to all builds. */
-#define configUDP_LOGGING_ADDR0             0
-#define configUDP_LOGGING_ADDR1             0
-#define configUDP_LOGGING_ADDR2             0
-#define configUDP_LOGGING_ADDR3             0
-#define configPRINT_PORT                    0
 
 /* This initialisation is specific to running this demo in QEMU. */
 #include "CMSIS/SMM_MPS2.h"

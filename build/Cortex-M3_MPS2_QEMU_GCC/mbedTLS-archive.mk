@@ -10,7 +10,7 @@ SUB_MAKEFILE_DIR = ./library-makefiles
 
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
-		  -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
+		  -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>' -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 
 #must be first in the include paths to ensure the correct FreeRTOSConfig.h is
 #used.
@@ -19,6 +19,8 @@ INCLUDE_DIRS += -I./target-specific-source/CMSIS
 INCLUDE_DIRS += -I./../../source/configuration-files
 INCLUDE_DIRS += -I./../../lib/ThirdParty/mbedtls/include
 INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/mbedtls_freertos
+INCLUDE_DIRS += -I./../../lib/FreeRTOS/freertos-plus-tcp/include
+INCLUDE_DIRS += -I./../../lib/FreeRTOS/freertos-plus-tcp/tools/tcp_utilities/include
 
 KERNEL_DIR += ./../../lib/FreeRTOS/freertos-kernel
 KERNEL_PORT_DIR += $(KERNEL_DIR)/portable/GCC/ARM_CM3
