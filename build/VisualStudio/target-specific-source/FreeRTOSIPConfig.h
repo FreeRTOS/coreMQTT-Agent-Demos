@@ -39,7 +39,7 @@
 /* Prototype for the function used to print out.  In this case it prints to the
  * console before the network is connected then a UDP port after the network has
  * connected. */
-extern void vLoggingPrintf( const char * pcFormatString,
+extern void vTCPLoggingPrintf( const char * pcFormatString,
                             ... );
 
 /* Set to 1 to print out debug messages.  If ipconfigHAS_DEBUG_PRINTF is set to
@@ -47,7 +47,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * out the debugging messages. */
 #define ipconfigHAS_DEBUG_PRINTF    0
 #if ( ipconfigHAS_DEBUG_PRINTF == 1 )
-    #define FreeRTOS_debug_printf( X )    vLoggingPrintf X
+    #define FreeRTOS_debug_printf( X )    vTCPLoggingPrintf X
 #endif
 
 /* Set to 1 to print out non debugging messages, for example the output of the
@@ -56,7 +56,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * messages. */
 #define ipconfigHAS_PRINTF    1
 #if ( ipconfigHAS_PRINTF == 1 )
-    #define FreeRTOS_printf( X )    vLoggingPrintf X
+    #define FreeRTOS_printf( X )    vTCPLoggingPrintf X
 #endif
 
 /* Define the byte order of the target MCU (the MCU FreeRTOS+TCP is executing

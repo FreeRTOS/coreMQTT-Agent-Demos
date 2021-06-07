@@ -49,7 +49,7 @@
 
 
 
-#define CRYPTO_PRINT( X )    configPRINTF( X )
+#define CRYPTO_PRINT    LogDebug
 
 /**
  * @brief Internal signature verification context structure

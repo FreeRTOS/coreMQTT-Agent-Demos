@@ -16,7 +16,6 @@ CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 #used.
 INCLUDE_DIRS += -I./target-specific-source
 INCLUDE_DIRS += -I./target-specific-source/CMSIS
-INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/logging
 INCLUDE_DIRS += -I./../../source/configuration-files
 INCLUDE_DIRS += -I./../../lib/ThirdParty/mbedtls/include
 INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/mbedtls_freertos

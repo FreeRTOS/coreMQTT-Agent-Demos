@@ -131,12 +131,6 @@
  * used. */
 #define configNETWORK_INTERFACE_TO_USE      ( 0L )
 
-/* The address to which logging is sent should UDP logging be enabled. */
-#define configUDP_LOGGING_ADDR0             192
-#define configUDP_LOGGING_ADDR1             168
-#define configUDP_LOGGING_ADDR2             0
-#define configUDP_LOGGING_ADDR3             11
-
 /* Default MAC address configuration.  The demo creates a virtual network
  * connection that uses this MAC address by accessing the raw Ethernet/WiFi data
  * to and from a real network connection on the host PC.  See the
@@ -178,9 +172,6 @@
 #define configNET_MASK2                     255
 #define configNET_MASK3                     0
 
-/* The UDP port to which print messages are sent. */
-#define configPRINT_PORT                    ( 15000 )
-
 
 #if ( defined( _MSC_VER ) && ( _MSC_VER <= 1600 ) && !defined( snprintf ) )
     /* Map to Windows names. */
@@ -193,11 +184,6 @@
 #define strncasecmp    _strnicmp
 #define strcmpi        _strcmpi
 
-/* Prototype for the function used to print out.  In this case it prints to the
- * console before the network is connected then a UDP port after the network has
- * connected. */
-extern void vLoggingPrintf( const char * pcFormatString,
-                            ... );
-#define configPRINTF( X )    vLoggingPrintf X
+#include "logging_config.h"
 
 #endif /* FREERTOS_CONFIG_H */

@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\lib\FreeRTOS\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\crypto\include\iot_crypto.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\backoffAlgorithm\source\include\backoff_algorithm.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_levels.h" />
-    <ClInclude Include="..\..\lib\FreeRTOS\utilities\logging\logging_stack.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\mbedtls_error.h" />
     <ClInclude Include="..\..\lib\FreeRTOS\utilities\mbedtls_freertos\threading_alt.h" />
     <ClInclude Include="..\..\lib\ThirdParty\tinycbor\src\cbor.h" />
@@ -140,6 +137,7 @@
     <ClInclude Include="..\..\source\configuration-files\core_mqtt_config.h" />
     <ClInclude Include="..\..\source\configuration-files\defender_config.h" />
     <ClInclude Include="..\..\source\configuration-files\demo_config.h" />
+    <ClInclude Include="..\..\source\configuration-files\logging_config.h" />
     <ClInclude Include="..\..\source\configuration-files\mbedtls_config.h" />
     <ClInclude Include="..\..\source\configuration-files\ota_config.h" />
     <ClInclude Include="..\..\source\configuration-files\shadow_config.h" />

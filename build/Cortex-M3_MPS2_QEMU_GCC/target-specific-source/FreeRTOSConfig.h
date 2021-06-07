@@ -108,15 +108,9 @@ to exclude the API function. */
 See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    191
 
-/* Prototype for the function used to print out.  In this case it prints to the
-|     10 console before the network is connected then a UDP port after the network has
-|      9 connected. */
-extern void vLoggingPrintf( const char *pcFormatString, ... );
-#define configPRINTF( X )    vLoggingPrintf X
-
 void vAssertCalled( const char * pcFile, uint32_t ulLine );
 #define configASSERT( x ) if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )
-#define configQUEUE_REGISTRY_SIZE              20
+#define configQUEUE_REGISTRY_SIZE             0
 
 
 /* Application specific definitions follow. **********************************/
@@ -177,6 +171,8 @@ void vAssertCalled( const char * pcFile, uint32_t ulLine );
 #define configBUILD_SPECIFIC_INITIALISATION() \
 	NVIC_DisableIRQ( ETHERNET_IRQn ); \
 	NVIC_SetPriority( ETHERNET_IRQn, configMAC_INTERRUPT_PRIORITY );
+
+#include "logging_config.h"
 
 #endif /* FREERTOS_CONFIG_H */
 
