@@ -217,7 +217,8 @@ int mbedtls_platform_mutex_unlock( mbedtls_threading_mutex_t * pMutex )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Function to generate a random number.
+ * @brief Function to generate a random number. This function MUST be re-implemented
+ * on other platforms to use the hardware TRNG.
  *
  * @param[in] data Callback context.
  * @param[out] output The address of the buffer that receives the random number.
@@ -241,10 +242,15 @@ int mbedtls_platform_entropy_poll( void * data,
     /* Context is not used by this function. */
     ( void ) data;
 
-    /* TLS requires a secure random number generator; use the RNG provided
-     * by Windows. This function MUST be re-implemented for other platforms. */
-    rngStatus = rand();//_RB_ Replace.
-//_RB_ Windows function        BCryptGenRandom( NULL, output, len, BCRYPT_USE_SYSTEM_PREFERRED_RNG );
+    /* Get entropy from rand(). Replace this with hardware TRNG on your platform */ 
+    for (size_t i = 0; i < len; i++) 
+    {
+        output[i] = (unsigned char) (rand() & 0xFF);
+    }
+
+    /* Assume rand() has not failed; change this flag as a failure mode */ 
+    rngStatus = 0;
+    //_RB_ Windows function        BCryptGenRandom( NULL, output, len, BCRYPT_USE_SYSTEM_PREFERRED_RNG );
 
     if( rngStatus == 0 )
     {
