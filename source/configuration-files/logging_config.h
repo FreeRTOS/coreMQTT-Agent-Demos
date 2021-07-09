@@ -29,20 +29,21 @@
 #define LOGGING_CONFIG_H
 
 /**************************************************/
+
 /* Helpful macros to make changing logging levels
  * easier. */
 /**************************************************/
-#define LOG_NONE    0
-#define LOG_ERROR   1
-#define LOG_WARN    2
-#define LOG_INFO    3
-#define LOG_DEBUG   4
+#define LOG_NONE     0
+#define LOG_ERROR    1
+#define LOG_WARN     2
+#define LOG_INFO     3
+#define LOG_DEBUG    4
 /**************************************************/
 
 /*
  * Change the following macro to set the demo logging level.
  */
-#define LOG_LEVEL   LOG_INFO
+#define LOG_LEVEL    LOG_DEBUG
 
 /*
  * Logging configuration.
