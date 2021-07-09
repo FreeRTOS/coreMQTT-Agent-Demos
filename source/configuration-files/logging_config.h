@@ -28,6 +28,22 @@
 #ifndef LOGGING_CONFIG_H
 #define LOGGING_CONFIG_H
 
+/**************************************************/
+/* Helpful macros to make changing logging levels
+ * easier. */
+/**************************************************/
+#define LOG_NONE    0
+#define LOG_ERROR   1
+#define LOG_WARN    2
+#define LOG_INFO    3
+#define LOG_DEBUG   4
+/**************************************************/
+
+/*
+ * Change the following macro to set the demo logging level.
+ */
+#define LOG_LEVEL   LOG_INFO
+
 /*
  * Logging configuration.
  *
@@ -37,11 +53,6 @@
  * vLoggingPrintf() writes the log message itself before releasing the mutex.
  * These are the prototypes of the functions and the definitions of the macros
  * that call them - there is one macro per severity level.
- *
- * Commenting out the implementation of a macro will omit logging at that level.
- * For example, to remove the most verbose level of logging (DEBUG) simply
- * comment out the implementation of LogDebug() making it an empty macro as
- * shown here:"#define LogDebug( message )"
  *
  * If you want to print out additional metadata then update the
  * xLoggingPrintMetadata() function prototype and implementation so it accepts
@@ -69,9 +80,28 @@ void vLoggingInit( void );
  * of the logging and adding data such as the function that called the logging
  * macro to the logged output.
  */
-#define LogError( message )    do { xLoggingPrintMetadata( "ERROR" ); vLoggingPrintf message; } while( 0 )
-#define LogWarn( message )     do { xLoggingPrintMetadata( "WARN" ); vLoggingPrintf message; } while( 0 )
-#define LogInfo( message )     do { xLoggingPrintMetadata( "INFO" ); vLoggingPrintf message; } while( 0 )
-#define LogDebug( message )    /*do{ xLoggingPrintMetadata( "DEBUG" ); vLoggingPrintf message ;} while( 0 )*//* Uncomment to output debug level logging. */
+#if LOG_LEVEL >= LOG_ERROR
+    #define LogError( message )    do { xLoggingPrintMetadata( "ERROR" ); vLoggingPrintf message; } while( 0 )
+#else
+    #define LogError( message )
+#endif
+
+#if LOG_LEVEL >= LOG_WARN
+    #define LogWarn( message )    do { xLoggingPrintMetadata( "WARN" ); vLoggingPrintf message; } while( 0 )
+#else
+    #define LogWarn( message )
+#endif
+
+#if LOG_LEVEL >= LOG_INFO
+    #define LogInfo( message )    do { xLoggingPrintMetadata( "INFO" ); vLoggingPrintf message; } while( 0 )
+#else
+    #define LogInfo( message )
+#endif
+
+#if LOG_LEVEL >= LOG_DEBUG
+    #define LogDebug( message )    do { xLoggingPrintMetadata( "DEBUG" ); vLoggingPrintf message; } while( 0 )
+#else
+    #define LogDebug( message )
+#endif
 
 #endif /* LOGGING_CONFIG_H */
