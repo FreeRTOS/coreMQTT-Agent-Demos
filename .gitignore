@@ -1,4 +1,4 @@
-# Ignore MacOS file system related.  
+# Ignore macOS file system related.  
 **/*.DS_Store*
 
 # Ignore build results
@@ -17,3 +17,10 @@
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Build artifacts
+*.o
+*.d
+*.a
+*.map
+*.elf
