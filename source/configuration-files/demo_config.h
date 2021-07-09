@@ -27,46 +27,6 @@
 #ifndef DEMO_CONFIG_H
 #define DEMO_CONFIG_H
 
-/**************************************************/
-/******* DO NOT CHANGE the following order ********/
-/**************************************************/
-
-/* Include logging header files and define logging macros in the following order:
- * 1. Include the header file "logging_levels.h".
- * 2. Define the LIBRARY_LOG_NAME and LIBRARY_LOG_LEVEL macros depending on
- * the logging configuration for DEMO.
- * 3. Include the header file "logging_stack.h", if logging is enabled for DEMO.
- */
-
-#include "logging_levels.h"
-
-/* Logging configuration for the Demo. */
-#ifndef LIBRARY_LOG_NAME
-    #define LIBRARY_LOG_NAME    "MQTTDemo"
-#endif
-
-#ifndef LIBRARY_LOG_LEVEL
-    #define LIBRARY_LOG_LEVEL    LOG_DEBUG
-#endif
-
-/* Prototype for the function used to print to console on Windows simulator
- * of FreeRTOS.
- * The function prints to the console before the network is connected;
- * then a UDP port after the network has connected. */
-extern void vLoggingPrintf( const char * pcFormatString,
-                            ... );
-
-/* Map the SdkLog macro to the logging function to enable logging
- * on Windows simulator. */
-#ifndef SdkLog
-    #define SdkLog( message )    vLoggingPrintf message
-#endif
-
-#include "logging_stack.h"
-
-/************ End of logging configuration ****************/
-
-
 
 /* Constants that select which demos to build into the project:
  * Set the following to 1 to include the demo in the build, or 0 to exclude the
