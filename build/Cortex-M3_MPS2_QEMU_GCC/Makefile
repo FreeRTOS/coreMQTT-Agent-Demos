@@ -27,7 +27,6 @@ CFLAGS += $(INCLUDE_DIRS) --specs=picolibc.specs -DPICOLIBC_INTEGER_PRINTF_SCANF
 #must be the first include paths to ensure the correct FreeRTOSConfig.h is used.
 INCLUDE_DIRS += -I./target-specific-source
 INCLUDE_DIRS += -I./target-specific-source/CMSIS
-INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/logging
 INCLUDE_DIRS += -I./../../source/configuration-files
 INCLUDE_DIRS += -I./../../lib/ThirdParty/mbedtls/include
 INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/mbedtls_freertos
