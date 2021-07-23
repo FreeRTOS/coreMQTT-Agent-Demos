@@ -351,7 +351,6 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
     while( ulSetToZeroToStepOut != 0 )
     {
     }
-    
+
     taskEXIT_CRITICAL();
-    
 }
