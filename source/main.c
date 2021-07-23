@@ -347,6 +347,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
     ( void ) pcTaskName; /* Remove compiler warnings if LogDebug() is not defined. */
 
     taskENTER_CRITICAL();
+
     while( ulSetToZeroToStepOut != 0 )
     {
     }
