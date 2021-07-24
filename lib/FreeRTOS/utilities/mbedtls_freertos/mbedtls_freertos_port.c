@@ -25,10 +25,6 @@
  * @brief Implements mbed TLS platform functions for FreeRTOS.
  */
 
-#ifndef _MSC_VER
-    #warning This is a Windows specific implementation - not building.
-#else
-
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "FreeRTOS_Sockets.h"
@@ -234,8 +230,10 @@ int mbedtls_platform_entropy_poll( void * data,
                                    size_t len,
                                    size_t * olen )
 {
+    UBaseType_t uxRand( void );
     int status = 0;
-    NTSTATUS rngStatus = 0;
+    uint32_t rngStatus = 0;
+    size_t bytes;
 
     configASSERT( output != NULL );
     configASSERT( olen != NULL );
@@ -245,8 +243,11 @@ int mbedtls_platform_entropy_poll( void * data,
 
     /* TLS requires a secure random number generator; use the RNG provided
      * by Windows. This function MUST be re-implemented for other platforms. */
-    rngStatus =
-        BCryptGenRandom( NULL, output, len, BCRYPT_USE_SYSTEM_PREFERRED_RNG );
+
+    for( bytes = 0; bytes < len; bytes++ )
+    {
+        output[ bytes ] = ( unsigned char ) ( uxRand() & 0xffUL ); /* Note a secure method - replace _RB_ */
+    }
 
     if( rngStatus == 0 )
     {
@@ -288,5 +289,4 @@ int mbedtls_hardware_poll( void * data,
 }
 
 /*-----------------------------------------------------------*/
-#endif /* _WINDOWS_ */
 

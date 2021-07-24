@@ -49,7 +49,8 @@
 #ifndef MBEDTLS_CONFIG_H
 #define MBEDTLS_CONFIG_H
 
-#include "stdint.h"
+#include <stdint.h>
+#include <stddef.h>
 
 #define MBEDTLS_DEBUG_C
 #define MBEDTLS_DEBUG_THRESHOLD    5 /* 0 to 5. */
@@ -130,6 +131,7 @@
 void * mbedtls_platform_calloc( size_t nmemb,
                                 size_t size );
 void mbedtls_platform_free( void * ptr );
+
 #define MBEDTLS_PLATFORM_MEMORY
 #define MBEDTLS_PLATFORM_CALLOC_MACRO    mbedtls_platform_calloc
 #define MBEDTLS_PLATFORM_FREE_MACRO      mbedtls_platform_free
