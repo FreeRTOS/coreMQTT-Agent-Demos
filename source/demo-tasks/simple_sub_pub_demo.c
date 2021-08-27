@@ -446,6 +446,8 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
     TickType_t xTicksToDelay;
     MQTTAgentCommandInfo_t xCommandParams = { 0UL };
     char * pcTopicBuffer = topicBuf[ ulTaskNumber ];
+    static volatile uint32_t * ulPassCounts[] = { ulQoS0PassCount, ulQoS1PassCount };
+    static volatile uint32_t * ulFailCounts[] = { ulQoS0FailCount, ulQoS1FailCount };
 
     /* Have different tasks use different QoS.  0 and 1.  2 can also be used
      * if supported by the broker. */
@@ -523,41 +525,21 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
          * should match the value set in the context above. */
         if( ulNotification == ulValueToNotify )
         {
-            if( xQoS == 0 )
-            {
-                ( ulQoS0PassCount[ ulTaskNumber / 2 ] )++;
-                LogInfo( ( "Rx'ed QoS0 ack from Tx to %s (P%d:F%d).",
-                           pcTopicBuffer,
-                           ( int ) ulQoS0PassCount[ ulTaskNumber / 2 ],
-                           ( int ) ulQoS0FailCount[ ulTaskNumber / 2 ] ) );
-            }
-            else
-            {
-                ( ulQoS1PassCount[ ulTaskNumber / 2 ] )++;
-                LogInfo( ( "Rx'ed QoS1 ack from Tx to %s (P%d:F%d).",
-                           pcTopicBuffer,
-                           ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
-                           ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
-            }
+            ( ulPassCounts[ xQoS ][ ulTaskNumber >> 1 ] )++;
+            LogInfo( ( "Rx'ed %s from Tx to %s (P%d:F%d).",
+                       ( xQoS == 0 ) ? "completion notification for QoS0 publish" : "ack for QoS1 publish",
+                       pcTopicBuffer,
+                       ulPassCounts[ xQoS ][ ulTaskNumber / 2 ],
+                       ulFailCounts[ xQoS ][ ulTaskNumber / 2 ] ) );
         }
         else
         {
-            if( xQoS == 0 )
-            {
-                ( ulQoS0FailCount[ ulTaskNumber / 2 ] )++;
-                LogError( ( "Timed out Rx'ing QoS0 ack from Tx to %s (P%d:F%d)",
-                            pcTopicBuffer,
-                            ( int ) ulQoS0PassCount[ ulTaskNumber / 2 ],
-                            ( int ) ulQoS0FailCount[ ulTaskNumber / 2 ] ) );
-            }
-            else
-            {
-                ( ulQoS1FailCount[ ulTaskNumber / 2 ] )++;
-                LogError( ( "Timed out Rx'ing QoS1 ack from Tx to %s (P%d:F%d)",
-                            pcTopicBuffer,
-                            ( int ) ulQoS1PassCount[ ulTaskNumber / 2 ],
-                            ( int ) ulQoS1FailCount[ ulTaskNumber / 2 ] ) );
-            }
+            ( ulFailCounts[ xQoS ][ ulTaskNumber >> 1 ] )++;
+            LogError( ( "Timed out Rx'ing %s from Tx to %s (P%d:F%d)",
+                        ( xQoS == 0 ) ? "completion notification for QoS0 publish" : "ack for QoS1 publish",
+                        pcTopicBuffer,
+                        ulPassCounts[ xQoS ][ ulTaskNumber / 2 ],
+                        ulFailCounts[ xQoS ][ ulTaskNumber / 2 ] ) );
         }
 
         /* Add a little randomness into the delay so the tasks don't remain
