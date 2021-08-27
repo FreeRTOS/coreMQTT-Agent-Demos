@@ -529,8 +529,8 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
             LogInfo( ( "Rx'ed %s from Tx to %s (P%d:F%d).",
                        ( xQoS == 0 ) ? "completion notification for QoS0 publish" : "ack for QoS1 publish",
                        pcTopicBuffer,
-                       ulPassCounts[ xQoS ][ ulTaskNumber / 2 ],
-                       ulFailCounts[ xQoS ][ ulTaskNumber / 2 ] ) );
+                       ulPassCounts[ xQoS ][ ulTaskNumber >> 1 ],
+                       ulFailCounts[ xQoS ][ ulTaskNumber >> 1 ] ) );
         }
         else
         {
@@ -538,8 +538,8 @@ static void prvSimpleSubscribePublishTask( void * pvParameters )
             LogError( ( "Timed out Rx'ing %s from Tx to %s (P%d:F%d)",
                         ( xQoS == 0 ) ? "completion notification for QoS0 publish" : "ack for QoS1 publish",
                         pcTopicBuffer,
-                        ulPassCounts[ xQoS ][ ulTaskNumber / 2 ],
-                        ulFailCounts[ xQoS ][ ulTaskNumber / 2 ] ) );
+                        ulPassCounts[ xQoS ][ ulTaskNumber >> 1 ],
+                        ulFailCounts[ xQoS ][ ulTaskNumber >> 1 ] ) );
         }
 
         /* Add a little randomness into the delay so the tasks don't remain
