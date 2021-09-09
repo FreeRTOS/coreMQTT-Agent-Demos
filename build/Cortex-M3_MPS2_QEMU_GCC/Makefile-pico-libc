@@ -20,14 +20,13 @@ MAKE = make
 #mbedTLS is built to an archive to speed up the application build.
 MBED_TLS_LIB = $(OUTPUT_DIR)/mbedTLS/mbedTLS.a
 
-CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
+CFLAGS += $(INCLUDE_DIRS) --specs=picolibc.specs -DPICOLIBC_INTEGER_PRINTF_SCANF --oslib=semihost -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
 		  -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>' -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 
 #must be the first include paths to ensure the correct FreeRTOSConfig.h is used.
 INCLUDE_DIRS += -I./target-specific-source
 INCLUDE_DIRS += -I./target-specific-source/CMSIS
-INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/logging
 INCLUDE_DIRS += -I./../../source/configuration-files
 INCLUDE_DIRS += -I./../../lib/ThirdParty/mbedtls/include
 INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/mbedtls_freertos
@@ -65,8 +64,7 @@ INCLUDE_DIRS += -I$(APPLICATION_DIR)/subscription-manager -I./CMSIS -I$(BUILD_SP
 SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/*.c)
 SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/subscription-manager/*.c)
 SOURCE_FILES += $(wildcard $(APPLICATION_DIR)/demo-tasks/*.c)
-SOURCE_FILES += $(wildcard $(BUILD_SPECIFIC_FILES)/startup.c)
-SOURCE_FILES += $(wildcard $(BUILD_SPECIFIC_FILES)/logging_output_qemu.c)
+SOURCE_FILES += $(wildcard $(BUILD_SPECIFIC_FILES)/*.c)
 
 #Create a list of object files with the desired output directory path.
 OBJS = $(SOURCE_FILES:%.c=%.o)
@@ -89,9 +87,9 @@ $(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile FORCE_MBED_TLS_ARCH
 	@echo ""
 	@echo "--- Final linking ---"
 	@echo ""
-	$(LD) $(OBJS_OUTPUT) $(MBED_TLS_LIB) $(CFLAGS) -Xlinker --gc-sections -Xlinker -T ./mps2_m3.ld \
-		-Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo.map -specs=nano.specs \
-		-specs=nosys.specs -specs=rdimon.specs -o $(OUTPUT_DIR)/$(IMAGE)
+	$(LD) $(OBJS_OUTPUT) $(MBED_TLS_LIB) $(CFLAGS) -Xlinker --gc-sections -T ./mps2_m3.ld \
+		-Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo.map \
+		-o $(OUTPUT_DIR)/$(IMAGE)
 
 $(DEP_OUTPUT):
 include $(wildcard $(DEP_OUTPUT))
