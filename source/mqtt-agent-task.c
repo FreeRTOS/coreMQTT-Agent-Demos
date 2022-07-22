@@ -144,7 +144,6 @@
     #define MQTT_AGENT_NETWORK_BUFFER_SIZE    ( 5000 )
 #endif
 
-
 /**
  * These configuration settings are required to run the demo.
  */
@@ -199,6 +198,23 @@
  * context used by this demo.
  */
 #define mqttexampleMQTT_CONTEXT_HANDLE               ( ( MQTTContextHandle_t ) 0 )
+
+
+/**
+ * @brief ALPN (Application-Layer Protocol Negotiation) protocol name for AWS IoT MQTT.
+ *
+ * This will be used if democonfigMQTT_BROKER_PORT is configured as 443 for the AWS IoT MQTT broker.
+ * Please see more details about the ALPN protocol for AWS IoT MQTT endpoint
+ * in the link below.
+ * https://aws.amazon.com/blogs/iot/mqtt-with-tls-client-authentication-on-port-443-why-it-is-useful-and-how-it-works/
+ */
+#define AWS_IOT_ALPN_MQTT_CA_AUTH        "x-amzn-mqtt-ca"
+
+/**
+ * @brief This is the ALPN (Application-Layer Protocol Negotiation) string
+ * required by AWS IoT for password-based authentication using TCP port 443.
+ */
+#define AWS_IOT_ALPN_MQTT_CUSTOM_AUTH    "mqtt"
 
 /*-----------------------------------------------------------*/
 
@@ -652,14 +668,13 @@ static BaseType_t prvSocketConnect( NetworkContext_t * pxNetworkContext )
             /* ALPN protocols must be a NULL-terminated list of strings. Therefore,
              * the first entry will contain the actual ALPN protocol string while the
              * second entry must remain NULL. */
-            const char * pcAlpnProtocols[] = { NULL, NULL };
+            #ifdef democonfigCLIENT_USERNAME
+                static const char * pcAlpnProtocols[] = { AWS_IOT_ALPN_MQTT_CUSTOM_AUTH, NULL };
+            #else /* !democonfigCLIENT_USERNAME */
+                static const char * pcAlpnProtocols[] = { AWS_IOT_ALPN_MQTT_CA_AUTH, NULL };
+            #endif
 
             /* The ALPN string changes depending on whether username/password authentication is used. */
-            #ifdef democonfigCLIENT_USERNAME
-                pcAlpnProtocols[ 0 ] = AWS_IOT_CUSTOM_AUTH_ALPN;
-            #else
-                pcAlpnProtocols[ 0 ] = AWS_IOT_MQTT_ALPN;
-            #endif
             xNetworkCredentials.pAlpnProtos = pcAlpnProtocols;
         #endif /* ifdef democonfigUSE_AWS_IOT_CORE_BROKER */
 

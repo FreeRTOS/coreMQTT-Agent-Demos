@@ -316,22 +316,6 @@
 #endif /* if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 ) */
 
 /**
- * @brief ALPN (Application-Layer Protocol Negotiation) protocol name for AWS IoT MQTT.
- *
- * This will be used if democonfigMQTT_BROKER_PORT is configured as 443 for the AWS IoT MQTT broker.
- * Please see more details about the ALPN protocol for AWS IoT MQTT endpoint
- * in the link below.
- * https://aws.amazon.com/blogs/iot/mqtt-with-tls-client-authentication-on-port-443-why-it-is-useful-and-how-it-works/
- */
-#define AWS_IOT_MQTT_ALPN           "\x0ex-amzn-mqtt-ca"
-
-/**
- * @brief This is the ALPN (Application-Layer Protocol Negotiation) string
- * required by AWS IoT for password-based authentication using TCP port 443.
- */
-#define AWS_IOT_CUSTOM_AUTH_ALPN    "\x04mqtt"
-
-/**
  * Provide default values for undefined configuration settings.
  */
 #ifndef democonfigOS_NAME
