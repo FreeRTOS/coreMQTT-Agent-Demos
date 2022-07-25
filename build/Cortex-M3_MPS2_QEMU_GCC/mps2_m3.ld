@@ -49,13 +49,17 @@ SECTIONS
     .text :
     {
         *(.text)
-        *(.rodata*)
         *(.constdata*)
         _etext = .;
         _sidata = .;
     } > FLASH
 
-    .data : AT (ADDR(.text) + SIZEOF(.text))
+    .rodata :
+    {
+        *(.rodata*)
+    } > FLASH
+
+    .data :
     {
         _data = .;
         _sdata = .;
@@ -71,7 +75,7 @@ SECTIONS
         *(.bss)
         _ebss = .;
     } > RAM
-    
+
     .heap :
     {
         . = ALIGN(8);
@@ -83,14 +87,14 @@ SECTIONS
         . = . + _Min_Stack_Size;
         . = ALIGN(8);
    } >RAM
-   
+
    /* Set stack top to end of RAM, and stack limit move down by
     * size of stack_dummy section */
    __StackTop = ORIGIN(RAM) + LENGTH(RAM);
    __StackLimit = __StackTop - _Min_Stack_Size;
    PROVIDE(__stack = __StackTop);
-     
+
   /* Check if data + heap + stack exceeds RAM limit */
   ASSERT(__StackLimit >= _heap_top, "region RAM overflowed with stack")
-  
+
 }
