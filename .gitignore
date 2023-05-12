@@ -1,4 +1,4 @@
-# Ignore macOS file system related.  
+# Ignore macOS file system related.
 **/*.DS_Store*
 
 # Ignore build results
@@ -24,3 +24,6 @@ __pycache__/
 *.a
 *.map
 *.elf
+
+# Tool generated file
+lib/AWS/tools/aws_config_offline/demo_config.h
