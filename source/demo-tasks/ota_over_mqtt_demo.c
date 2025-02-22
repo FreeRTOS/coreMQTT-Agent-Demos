@@ -185,9 +185,17 @@
  * download image should be higher than the current version, otherwise the new image is
  * rejected in self test phase.
  */
-#define APP_VERSION_MAJOR                        0
-#define APP_VERSION_MINOR                        9
-#define APP_VERSION_BUILD                        2
+#ifndef APP_VERSION_MAJOR
+    #define APP_VERSION_MAJOR                        0
+#endif
+
+#ifndef APP_VERSION_MINOR
+    #define APP_VERSION_MINOR                        9
+#endif
+
+#ifndef APP_VERSION_BUILD
+    #define APP_VERSION_BUILD                        2
+#endif
 
 /**
  * @brief Defines the structure to use as the command callback context in this
