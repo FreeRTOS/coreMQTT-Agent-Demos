@@ -71,4 +71,9 @@
  */
 #define MQTT_AGENT_NETWORK_BUFFER_SIZE               ( 5000 )
 
+ /**
+  * @brief No custom config is used for the coreMQTT-Agent
+  */
+#define MQTT_AGENT_DO_NOT_USE_CUSTOM_CONFIG
+
 #endif /* ifndef CORE_MQTT_CONFIG_H */
