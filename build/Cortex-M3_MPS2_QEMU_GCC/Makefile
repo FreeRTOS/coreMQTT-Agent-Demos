@@ -31,7 +31,7 @@ INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/logging
 INCLUDE_DIRS += -I./../../source/configuration-files
 INCLUDE_DIRS += -I./../../lib/ThirdParty/mbedtls/include
 INCLUDE_DIRS += -I./../../lib/FreeRTOS/utilities/mbedtls_freertos
-INCLUDE_DIRS += -I/usr/include
+INCLUDE_DIRS += -I/usr/include/newlib
 
 #FreeRTOS specific library includes
 include $(SUB_MAKEFILE_DIR)/freertos-kernel.mk
