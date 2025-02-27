@@ -34,7 +34,8 @@ jobs:
       run: git submodule update --checkout --init --recursive
 
     - name: Install Build Preqrequisites
-      run: sudo apt install build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi
+      run: sudo apt install build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi && find /usr/arm-none-eabi/ -name inttypes.h
+
 
     - name: Build
       working-directory: build/Cortex-M3_MPS2_QEMU_GCC
