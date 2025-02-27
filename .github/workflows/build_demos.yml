@@ -34,10 +34,7 @@ jobs:
       run: git submodule update --checkout --init --recursive
 
     - name: Install Build Preqrequisites
-      run: |
-          sudo apt install build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi
-          arm-none-eabi-gcc --version
-          find /usr -name inttypes.h
+      run: sudo apt install build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi
 
 
     - name: Build
