@@ -32,7 +32,7 @@
  * following operations:
  * 1. Assemble strings for the MQTT topics of device shadow, by using macros defined by the Device Shadow library.
  * 2. Subscribe to those MQTT topics using the MQTT Agent.
- * 3. Register callbacks for incoming shadow topic publishes with the subsciption_manager.
+ * 3. Register callbacks for incoming shadow topic publishes with the subscription_manager.
  * 4. Wait until it is time to publish a requested change.
  * 5. Publish a desired state of powerOn. That will cause a delta message to be sent to device.
  * 6. Wait until either prvIncomingPublishUpdateAcceptedCallback or prvIncomingPublishUpdateRejectedCallback handle
@@ -394,7 +394,7 @@ static void prvIncomingPublishUpdateAcceptedCallback( void * pxSubscriptionConte
 
     if( result != JSONSuccess )
     {
-        LogError( ( "Invalid JSON document recieved!" ) );
+        LogError( ( "Invalid JSON document received!" ) );
     }
     else
     {
@@ -417,7 +417,7 @@ static void prvIncomingPublishUpdateAcceptedCallback( void * pxSubscriptionConte
         ulReceivedToken = ( uint32_t ) strtoul( pcOutValue, NULL, 10 );
 
         /* If we are waiting for a response, ulClientToken will be the token for the response
-         * we are waiting for, else it will be 0. ulRecievedToken may not match if the response is
+         * we are waiting for, else it will be 0. ulReceivedToken may not match if the response is
          * not for us or if it is is a response that arrived after we timed out
          * waiting for it.
          */
@@ -470,7 +470,7 @@ static void prvIncomingPublishUpdateRejectedCallback( void * pxSubscriptionConte
 
     if( result != JSONSuccess )
     {
-        LogError( ( "Invalid JSON document recieved!" ) );
+        LogError( ( "Invalid JSON document received!" ) );
     }
     else
     {
@@ -493,7 +493,7 @@ static void prvIncomingPublishUpdateRejectedCallback( void * pxSubscriptionConte
         ulReceivedToken = ( uint32_t ) strtoul( pcOutValue, NULL, 10 );
 
         /* If we are waiting for a response, ulClientToken will be the token for the response
-         * we are waiting for, else it will be 0. ulRecievedToken may not match if the response is
+         * we are waiting for, else it will be 0. ulReceivedToken may not match if the response is
          * not for us or if it is is a response that arrived after we timed out
          * waiting for it.
          */
