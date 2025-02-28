@@ -95,14 +95,14 @@
  * is used for a client token.
  */
 #define shadowexampleSHADOW_REPORTED_JSON \
-    "{"                                   \
-    "\"state\":{"                         \
-    "\"reported\":{"                      \
-    "\"powerOn\":%1u"                     \
-    "}"                                   \
-    "},"                                  \
-    "\"clientToken\":\"%06lu\""           \
-    "}"
+        "{"                                   \
+        "\"state\":{"                         \
+        "\"reported\":{"                      \
+        "\"powerOn\":%1u"                     \
+        "}"                                   \
+        "},"                                  \
+        "\"clientToken\":\"%06lu\""           \
+        "}"
 
 /**
  * @brief The expected size of #SHADOW_REPORTED_JSON.

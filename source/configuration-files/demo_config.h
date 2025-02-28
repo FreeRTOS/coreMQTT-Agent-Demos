@@ -338,8 +338,8 @@
  * @brief The MQTT metrics string expected by AWS IoT.
  */
 #define AWS_IOT_METRICS_STRING                                 \
-    "?SDK=" democonfigOS_NAME "&Version=" democonfigOS_VERSION \
-    "&Platform=" democonfigHARDWARE_PLATFORM_NAME "&MQTTLib=" democonfigMQTT_LIB
+        "?SDK=" democonfigOS_NAME "&Version=" democonfigOS_VERSION \
+        "&Platform=" democonfigHARDWARE_PLATFORM_NAME "&MQTTLib=" democonfigMQTT_LIB
 
 /**
  * @brief The length of the MQTT metrics string expected by AWS IoT.
@@ -367,14 +367,14 @@
  */
 #define democonfigBROKER_ENDPOINT_LENGTH      ( ( uint16_t ) ( sizeof( democonfigMQTT_BROKER_ENDPOINT ) - 1 ) )
 
- /**
-  * @brief The version for the firmware which is running. OTA agent uses this
-  * version number to perform anti-rollback validation. The firmware version for the
-  * download image should be higher than the current version, otherwise the new image is
-  * rejected in self test phase.
-  */
-#define APP_VERSION_MAJOR                        0
-#define APP_VERSION_MINOR                        9
-#define APP_VERSION_BUILD                        1
+/**
+ * @brief The version for the firmware which is running. OTA agent uses this
+ * version number to perform anti-rollback validation. The firmware version for the
+ * download image should be higher than the current version, otherwise the new image is
+ * rejected in self test phase.
+ */
+#define APP_VERSION_MAJOR                     0
+#define APP_VERSION_MINOR                     9
+#define APP_VERSION_BUILD                     2
 
 #endif /* DEMO_CONFIG_H */

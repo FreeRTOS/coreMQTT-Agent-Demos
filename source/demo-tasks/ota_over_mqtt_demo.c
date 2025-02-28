@@ -186,15 +186,15 @@
  * rejected in self test phase.
  */
 #ifndef APP_VERSION_MAJOR
-    #define APP_VERSION_MAJOR                        0
+    #define APP_VERSION_MAJOR    0
 #endif
 
 #ifndef APP_VERSION_MINOR
-    #define APP_VERSION_MINOR                        9
+    #define APP_VERSION_MINOR    9
 #endif
 
 #ifndef APP_VERSION_BUILD
-    #define APP_VERSION_BUILD                        2
+    #define APP_VERSION_BUILD    2
 #endif
 
 /**
