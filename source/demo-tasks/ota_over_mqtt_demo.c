@@ -180,24 +180,6 @@
 #define otaexampleAGENT_TASK_STACK_SIZE          ( 4096 )
 
 /**
- * @brief The version for the firmware which is running. OTA agent uses this
- * version number to perform anti-rollback validation. The firmware version for the
- * download image should be higher than the current version, otherwise the new image is
- * rejected in self test phase.
- */
-#ifndef APP_VERSION_MAJOR
-    #define APP_VERSION_MAJOR    0
-#endif
-
-#ifndef APP_VERSION_MINOR
-    #define APP_VERSION_MINOR    9
-#endif
-
-#ifndef APP_VERSION_BUILD
-    #define APP_VERSION_BUILD    2
-#endif
-
-/**
  * @brief Defines the structure to use as the command callback context in this
  * demo.
  */
