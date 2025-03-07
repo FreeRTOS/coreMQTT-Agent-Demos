@@ -455,9 +455,11 @@ static MQTTStatus_t prvMQTTInit( void )
     #if defined( democonfigUSE_TLS ) && ( democonfigUSE_TLS == 1 )
         xTransport.send = TLS_FreeRTOS_send;
         xTransport.recv = TLS_FreeRTOS_recv;
+        xTransport.writev = NULL;
     #else
         xTransport.send = Plaintext_FreeRTOS_send;
         xTransport.recv = Plaintext_FreeRTOS_recv;
+        xTransport.writev = NULL;
     #endif
 
     /* Initialize MQTT library. */

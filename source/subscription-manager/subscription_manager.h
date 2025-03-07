@@ -37,7 +37,7 @@
 
 /* core MQTT include. */
 #include "core_mqtt.h"
-
+#include "core_mqtt_config_defaults.h"
 
 /**
  * @brief Maximum number of subscriptions maintained by the subscription manager

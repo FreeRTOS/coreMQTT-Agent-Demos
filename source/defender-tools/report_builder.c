@@ -52,68 +52,68 @@
 
 /* Formats used to generate the JSON report. */
 #define reportbuilderJSON_PORT_OBJECT_FORMAT \
-    "{"                                      \
-    "\"%s\": %u"                             \
-    "},"
+        "{"                                      \
+        "\"%s\": %u"                             \
+        "},"
 
 #define reportbuilderJSON_CONNECTION_OBJECT_FORMAT \
-    "{"                                            \
-    "\"%s\": %hu,"                                 \
-    "\"%s\": \"%lu.%lu.%lu.%lu:%hu\""              \
-    "},"
+        "{"                                            \
+        "\"%s\": %hu,"                                 \
+        "\"%s\": \"%lu.%lu.%lu.%lu:%hu\""              \
+        "},"
 
 #define reportbuilderJSON_REPORT_FORMAT_PART1 \
-    "{"                                       \
-    "\"%s\": {"                               \
-    "\"%s\": %lu,"                            \
-    "\"%s\": \"%lu.%lu\""                     \
-    "},"                                      \
-    "\"%s\": {"                               \
-    "\"%s\": {"                               \
-    "\"%s\": "
+        "{"                                       \
+        "\"%s\": {"                               \
+        "\"%s\": %lu,"                            \
+        "\"%s\": \"%lu.%lu\""                     \
+        "},"                                      \
+        "\"%s\": {"                               \
+        "\"%s\": {"                               \
+        "\"%s\": "
 
 #define reportbuilderJSON_REPORT_FORMAT_PART2 \
-    ","                                       \
-    "\"%s\": %lu"                             \
-    "},"                                      \
-    "\"%s\": {"                               \
-    "\"%s\": "
+        ","                                       \
+        "\"%s\": %lu"                             \
+        "},"                                      \
+        "\"%s\": {"                               \
+        "\"%s\": "
 
 #define reportbuilderJSON_REPORT_FORMAT_PART3 \
-    ","                                       \
-    "\"%s\": %lu"                             \
-    "},"                                      \
-    "\"%s\": {"                               \
-    "\"%s\": %lu,"                            \
-    "\"%s\": %lu,"                            \
-    "\"%s\": %lu,"                            \
-    "\"%s\": %lu"                             \
-    "},"                                      \
-    "\"%s\": {"                               \
-    "\"%s\": {"                               \
-    "\"%s\": "
+        ","                                       \
+        "\"%s\": %lu"                             \
+        "},"                                      \
+        "\"%s\": {"                               \
+        "\"%s\": %lu,"                            \
+        "\"%s\": %lu,"                            \
+        "\"%s\": %lu,"                            \
+        "\"%s\": %lu"                             \
+        "},"                                      \
+        "\"%s\": {"                               \
+        "\"%s\": {"                               \
+        "\"%s\": "
 
 #define reportbuilderJSON_REPORT_FORMAT_PART4 \
-    ","                                       \
-    "\"%s\": %lu"                             \
-    "}"                                       \
-    "}"                                       \
-    "},"                                      \
-    "\"%s\": {"                               \
-    "\"stack_high_water_mark\": ["            \
-    "{"                                       \
-    "\"%s\": %lu"                             \
-    "}"                                       \
-    "],"                                      \
-    "\"task_numbers\": ["                     \
-    "{"                                       \
-    "\"%s\": "
+        ","                                       \
+        "\"%s\": %lu"                             \
+        "}"                                       \
+        "}"                                       \
+        "},"                                      \
+        "\"%s\": {"                               \
+        "\"stack_high_water_mark\": ["            \
+        "{"                                       \
+        "\"%s\": %lu"                             \
+        "}"                                       \
+        "],"                                      \
+        "\"task_numbers\": ["                     \
+        "{"                                       \
+        "\"%s\": "
 
 #define reportbuilderJSON_REPORT_FORMAT_PART5 \
-    "}"                                       \
-    "]"                                       \
-    "}"                                       \
-    "}"
+        "}"                                       \
+        "]"                                       \
+        "}"                                       \
+        "}"
 
 /*-----------------------------------------------------------*/
 

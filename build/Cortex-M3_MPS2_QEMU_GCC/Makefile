@@ -20,8 +20,11 @@ MAKE = make
 #mbedTLS is built to an archive to speed up the application build.
 MBED_TLS_LIB = $(OUTPUT_DIR)/mbedTLS/mbedTLS.a
 
+# -D__int64_t_defined=1 hack is needed to address the following
+# bug - https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953844.
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
+		  -D__int64_t_defined=1 \
 		  -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>' -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 
 #must be the first include paths to ensure the correct FreeRTOSConfig.h is used.

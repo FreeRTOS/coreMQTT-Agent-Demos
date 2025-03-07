@@ -253,3 +253,8 @@ xtaskcreate
 xtaskgettickcount
 xtasknotify
 xtasktonotify
+optim
+drbg
+ecdh
+mqttexample
+otaexample
